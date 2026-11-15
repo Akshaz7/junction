@@ -1,0 +1,120 @@
+{
+  "method": "Manual-label integration only. No automatic symbol recognition, precision, recall, or whole-sheet completeness claimed.",
+  "source_files_modified": false,
+  "live_model_calls": 0,
+  "sheets": [
+    {
+      "doc_id": "manual-ventilation-check",
+      "reserved_final_only": false,
+      "page": 1,
+      "manual_label": "TP",
+      "selected_box": [
+        1568,
+        1745,
+        1591,
+        1755
+      ],
+      "before_count": 0,
+      "after_count": 1,
+      "marked_items": 1,
+      "new_items": 1,
+      "evidence_ids": [
+        "taught-manual-evaluation"
+      ],
+      "checks": [
+        "selected box retained",
+        "standard kind count",
+        "no auto matches",
+        "idempotent same mark",
+        "knowledge graph user_label confidence 1",
+        "marked-by-you reasoning",
+        "removal restores original items"
+      ]
+    },
+    {
+      "doc_id": "wikimedia__100075564",
+      "reserved_final_only": false,
+      "page": 1,
+      "manual_label": "ovi",
+      "selected_box": [
+        95,
+        233,
+        196,
+        408
+      ],
+      "before_count": 0,
+      "after_count": 1,
+      "marked_items": 1,
+      "new_items": 1,
+      "evidence_ids": [
+        "taught-manual-evaluation"
+      ],
+      "checks": [
+        "selected box retained",
+        "standard kind count",
+        "no auto matches",
+        "idempotent same mark",
+        "knowledge graph user_label confidence 1",
+        "marked-by-you reasoning",
+        "removal restores original items"
+      ]
+    },
+    {
+      "doc_id": "habs__ak0003-sheet-00019",
+      "reserved_final_only": false,
+      "page": 1,
+      "manual_label": "ovi",
+      "selected_box": [
+        210,
+        28,
+        1126,
+        68
+      ],
+      "before_count": 0,
+      "after_count": 1,
+      "marked_items": 1,
+      "new_items": 1,
+      "evidence_ids": [
+        "taught-manual-evaluation"
+      ],
+      "checks": [
+        "selected box retained",
+        "standard kind count",
+        "no auto matches",
+        "idempotent same mark",
+        "knowledge graph user_label confidence 1",
+        "marked-by-you reasoning",
+        "removal restores original items"
+      ]
+    },
+    {
+      "doc_id": "finna__hka-139878174949000-149562251259600",
+      "reserved_final_only": true,
+      "page": 1,
+      "manual_label": "Tür",
+      "selected_box": [
+        281,
+        246,
+        2754,
+        1898
+      ],
+      "before_count": 0,
+      "after_count": 1,
+      "marked_items": 1,
+      "new_items": 1,
+      "evidence_ids": [
+        "taught-manual-evaluation"
+      ],
+      "checks": [
+        "selected box retained",
+        "standard kind count",
+        "no auto matches",
+        "idempotent same mark",
+        "knowledge graph user_label confidence 1",
+        "marked-by-you reasoning",
+        "removal restores original items"
+      ]
+    }
+  ],
+  "status": "PASS"
+}

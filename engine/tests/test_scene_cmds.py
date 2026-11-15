@@ -94,7 +94,7 @@ def test_show_measure_is_not_a_command():
 
 def test_hide_sentence_and_labels():
     a = answer("remove window W7", [DOC])
-    t = a["answer"]["text_md"]
+    t = a["answer"]["text_md"].replace("**", "")  # the opening sentence is bold
     assert t.startswith("Window (W7)") and "is hidden. 12 of 13 windows remain visible." in t
     cmd = a["evidence"]["scene"]["commands"][0]
     assert list(cmd["labels"].values()) == ["W7"]
@@ -161,14 +161,14 @@ def test_compliance_followup_checks_current_hidden_items(monkeypatch, question):
 
 def test_can_we_remove_is_a_preview_without_commands():
     a = answer("Can we remove window W7?", [DOC])
-    t = a["answer"]["text_md"]
+    t = a["answer"]["text_md"].replace("**", "")  # the opening sentence is bold
     assert t.startswith("Window (W7)") and "what-if" in t and "Preview only" in t
     assert a["evidence"]["scene"]["commands"] == []
     assert a["advisor_cards"]
 
 
 def test_highlight_wording_plain():
-    t = answer("highlight all the windows", [DOC])["answer"]["text_md"]
+    t = answer("highlight all the windows", [DOC])["answer"]["text_md"].replace("**", "")
     assert t.startswith("Highlighted 13 windows on the drawing.")
 
 

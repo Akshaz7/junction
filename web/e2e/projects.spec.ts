@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, test, type Page, type Route } from '@playwright/test'
 import type { Project, ProjectOverview } from '../src/lib/projects-api'
+import { mockCluster, mockGraph, mockNode } from '../src/lib/kg-mock'
 
 // Projects UI against fixtures served from the page (the backend is built in parallel).
 // Set PROJ_SHOTS=<dir> to write the review screenshots.
@@ -53,6 +54,12 @@ async function backend(page: Page, state: { projects: Project[]; fail?: boolean;
     const project = state.projects.find((row) => row.id === rest[0])
     if (!project) return json(route, { detail: 'Project not found.' }, 404)
     if (rest[1] === 'overview') return json(route, overview)
+    if (rest[1] === 'graph') {
+      const full = mockGraph(project.id)
+      if (rest[2] === 'node') return json(route, mockNode(full, decodeURIComponent(rest[3])))
+      if (rest[2] === 'stats') return json(route, full.stats)
+      return json(route, url.searchParams.get('depth') === 'full' ? full : mockCluster(full))
+    }
     if (rest[1] === 'docs' && method === 'POST') { for (const id of (route.request().postDataJSON() as { doc_ids: string[] }).doc_ids) project.docs.push(doc(id, library.find((l) => l.doc_id === id)!.title, 'raster', 'png', 'other', null)); return json(route, project) }
     if (rest[1] === 'docs' && method === 'PATCH') { Object.assign(project.docs.find((d) => d.doc_id === rest[2])!, route.request().postDataJSON(), { role_source: 'user' }); return json(route, project) }
     if (rest[1] === 'docs' && method === 'DELETE') { project.docs = project.docs.filter((d) => d.doc_id !== rest[2]); return json(route, project) }
@@ -189,4 +196,22 @@ test.describe('phone', () => {
       await shoot(page, `phone-${name}`)
     })
   }
+})
+
+test('graph tab: stats, search, details with plain-words methods, check these list', async ({ page }) => {
+  await backend(page, { projects: [baseProject()] })
+  await page.goto('/#/projects?id=p1&tab=graph')
+  await expect(page.getByTestId('graph-tab')).toBeVisible()
+  await expect(page.getByLabel('Graph totals')).toContainText('Items')
+  await page.getByRole('searchbox', { name: 'Search the graph' }).fill('kitchen')
+  await page.getByRole('listbox').getByRole('button').first().click()
+  const panel = page.getByRole('complementary', { name: 'Item details' })
+  await expect(panel).toContainText('Kitchen')
+  await expect(panel.getByText(/matched by position/).first()).toBeVisible()
+  await expect(panel.getByRole('button', { name: 'Ask about this' })).toBeVisible()
+  await panel.getByRole('button', { name: 'Ask about this' }).click()
+  await expect(page.locator('#project-question')).toHaveValue(/Kitchen/)
+  await page.locator('button.kg-check').click()
+  await expect(page.getByRole('complementary', { name: 'Check these' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })

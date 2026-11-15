@@ -149,10 +149,10 @@ def test_baseboard_slab_and_piping_on_a_plan_image():
     doors = [Item(item_id="door-1", kind="door", bbox_px=[95, 30, 105, 50])]
     d = Doc(doc_id="uploads__t", mode="planmap", items=rooms + doors, title="t", storeys=[], scale={"m_per_px": 0.05, "method": "door-prior", "confidence": 0.3}, pages=1, meta={})
     b = analytics.run("how many linear metres of baseboard per room and in total", d, time.perf_counter(), None)["answer"]
-    assert "Baseboard" in b["text_md"] and "balcony" not in b["text_md"] and "estimated from door sizes" in b["text_md"] and b["confidence"] <= 0.4 and b["value"] > 0
+    assert "Baseboard" in b["text_md"] and b["abstained"] and b["value"] is None
     s = analytics.run("what is the slab area by type and reinforcement", d, time.perf_counter(), None)["answer"]
-    assert s["value"] == 32.0 and "do not show slab types" not in s["text_md"] and "does not show slab types, thicknesses or reinforcement" in s["text_md"]
+    assert s["value"] is None and s["abstained"] and "not recorded" in s["text_md"]
     p = analytics.run("how many metres of piping and what pipe sizes", d, time.perf_counter(), None)["answer"]
-    assert "No piping is drawn" in p["text_md"] and "MEP models" in p["text_md"]
+    assert "No piping is drawn" not in p["text_md"] and "cannot be measured" in p["text_md"] and p["value"] is None
     d.scale = {}
     assert "no scale" in analytics.run("baseboard in metres", d, time.perf_counter(), None)["answer"]["text_md"]

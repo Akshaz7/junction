@@ -1,0 +1,5 @@
+{
+  "round": 2,
+  "random_unseen_path": "data/full/junction-dataset/data/ifc_models/resbim-146_model.ifc",
+  "note": "Selected by path only before round 2 development. Open only after fixes and demo evaluation."
+}

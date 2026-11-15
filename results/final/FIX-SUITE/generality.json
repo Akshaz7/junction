@@ -1,0 +1,111 @@
+{
+  "passed": 4,
+  "of": 4,
+  "rows": [
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "mode": "ifc",
+      "question": "How many windows are 0.9 m wide and 2.0 m high?",
+      "expected_item_count": 3,
+      "answer": {
+        "text_md": "**3 windows** have **width 0.9 m and height 2 m**. [1]",
+        "value": 3,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cited_items": 3,
+      "schema": "IFC4",
+      "applications": [
+        "ARCHICAD-64 20.0.0"
+      ],
+      "pass": true,
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "ifc_bench__digital-hub-arc",
+      "mode": "ifc",
+      "question": "Give a door schedule by width",
+      "expected_item_count": 64,
+      "answer": {
+        "text_md": "**64 doors**, grouped by width. [1][2][3]\n\n| Size | Count |\n|---|---|\n| 0.87 m | 8 |\n| 0.985 m | 2 |\n| 1.01 m | 8 |\n| 1.09 m | 44 |\n| 1.635 m | 2 |",
+        "value": 64,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "cited_items": 64,
+      "schema": "IFC4",
+      "applications": [
+        "Autodesk Revit 2019 (DEU)"
+      ],
+      "pass": true,
+      "cost_usd": 0.0
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "mode": "planmap",
+      "question": "How big is the makuuhuone?",
+      "expected_item_count": 3,
+      "answer": {
+        "text_md": "There are **3 bedrooms** on this floor plan, with areas from **4.09 to 12.49 m²**. bedroom: 8.02 m²; bedroom: 4.09 m²; MH: 12.49 m². Which one do you mean? [1]\n\nAreas are estimated from door sizes because no printed scale was found, so treat them as approximate.",
+        "value": null,
+        "unit": "m2",
+        "confidence": 0.4,
+        "abstained": false
+      },
+      "cited_items": 3,
+      "schema": null,
+      "applications": null,
+      "pass": true,
+      "cost_usd": 0.0
+    },
+    {
+      "reserved_source": "data/full/junction-dataset/data/swiss_dwellings/site3656_bldg5636_floor24301.dxf",
+      "first_opened_at_final_validation": true,
+      "origin": "Swiss Dwellings DXF",
+      "dxf_version": "AC1027",
+      "source_unit_code": 6,
+      "question": "How many rooms labelled 'Bad' are there?",
+      "oracle": "Exact ROOM_TEXT source label occurrences, independent of polygon attribution",
+      "expected": 4,
+      "answer": {
+        "text_md": "There are **4 rooms** on this floor plan. [1]",
+        "value": 4,
+        "unit": "count",
+        "confidence": 0.95,
+        "abstained": false
+      },
+      "cited_items": 4,
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "found",
+            "title": "Found",
+            "text": "4 rooms in the CAD drawing (DXF), each one numbered, including Bad 0.11, Bad 0.18, Bad 0.06",
+            "cite": 1,
+            "ok": null
+          }
+        ],
+        "confidence": {
+          "label": "Verified",
+          "pct": 95,
+          "reason": "The objects were counted directly in the CAD drawing.",
+          "improve": null
+        }
+      },
+      "conversion_counts": {
+        "room": 43,
+        "other": 68,
+        "wall": 58,
+        "window": 20,
+        "door": 32,
+        "text": 64
+      },
+      "elapsed_s": 0.124,
+      "pass": true,
+      "cost_usd": 0
+    }
+  ],
+  "limitations": "Exercises answer/filter/schedule paths; does not claim support for every authoring tool or IFC schema."
+}

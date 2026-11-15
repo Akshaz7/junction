@@ -204,8 +204,8 @@ button.pj-panel-title:hover .pj-panel-h { text-decoration: underline; text-under
 .route-projects .pagebar { height: 0; min-height: 0; padding: 0; overflow: hidden; }
 
 /* Files tab: the Data screen's explorer inside the project page. */
-.pj-columns[data-tab="files"] { grid-template-columns: minmax(0, 1fr); }
-.pj-columns[data-tab="files"] .pj-side { display: none; }
+.pj-columns[data-tab="files"], .pj-columns[data-tab="graph"] { grid-template-columns: minmax(0, 1fr); }
+.pj-columns[data-tab="files"] .pj-side, .pj-columns[data-tab="graph"] .pj-side { display: none; }
 .pj-explorer { margin-top: 8px; }
 .pj-explorer .data-browser { height: min(640px, 70vh); min-height: 360px; }
 .pj-explorer .data-browser::after { display: none; }

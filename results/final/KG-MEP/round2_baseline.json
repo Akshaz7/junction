@@ -1,0 +1,2534 @@
+{
+  "sources": [
+    "ARK-103-03_floor_plan_3rd_floor.pdf",
+    "L30301_ventilation_3rd_floor_block_U.pdf"
+  ],
+  "pdf_reader_commit": "ad2cbd9",
+  "extraction_seconds": 13.61770424999122,
+  "graph_build_seconds": 2.474354415986454,
+  "alignment": {
+    "s": 0.5000318923582131,
+    "R": [
+      [
+        0.9999999996135134,
+        2.780239313642187e-05
+      ],
+      [
+        -2.7802393136418164e-05,
+        0.9999999996135133
+      ]
+    ],
+    "t": [
+      1510.1183674499282,
+      224.5039050182736
+    ],
+    "rot_deg": -0.0015929597872854678,
+    "n_words": 116,
+    "n_inliers": 115,
+    "rms_pt": 0.5939695337414035,
+    "method": "shared-text",
+    "residual": 0.5939695337414035,
+    "matches": 115,
+    "T": [
+      [
+        0.5000318921649575,
+        1.3902083252092023e-05,
+        1510.1183674499282
+      ],
+      [
+        -1.390208325209017e-05,
+        0.5000318921649574,
+        224.5039050182736
+      ],
+      [
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "residual_m": 0.020953925218099512
+  },
+  "alignment_validation": {
+    "method": "leave one shared-text inlier out of the similarity refit",
+    "scope": "Registration consistency only; not service-detection or room-boundary accuracy. Inlier selection uses the full fit.",
+    "count": 115,
+    "rms_m": 0.02123453291460748,
+    "max_m": 0.15023513508580982,
+    "checks": [
+      {
+        "text": "+10.828",
+        "residual_m": 0.01589468446699175
+      },
+      {
+        "text": "+12.780",
+        "residual_m": 0.012763420378917315
+      },
+      {
+        "text": "+13.343",
+        "residual_m": 0.01559117576379781
+      },
+      {
+        "text": "+13.450",
+        "residual_m": 0.01397371243899129
+      },
+      {
+        "text": "+13.570",
+        "residual_m": 0.01268535718621945
+      },
+      {
+        "text": "12.0",
+        "residual_m": 0.03390344323973026
+      },
+      {
+        "text": "1237-07-U",
+        "residual_m": 0.02787268839557515
+      },
+      {
+        "text": "13.0",
+        "residual_m": 0.010401198531198532
+      },
+      {
+        "text": "13.5",
+        "residual_m": 0.005823009117513385
+      },
+      {
+        "text": "1331-07-U",
+        "residual_m": 0.005882372061299217
+      },
+      {
+        "text": "140",
+        "residual_m": 0.009327544889293105
+      },
+      {
+        "text": "142.5",
+        "residual_m": 0.006613954180276749
+      },
+      {
+        "text": "162",
+        "residual_m": 0.003658540174722632
+      },
+      {
+        "text": "167.5",
+        "residual_m": 0.019095390507614246
+      },
+      {
+        "text": "18.5",
+        "residual_m": 0.010350473232724222
+      },
+      {
+        "text": "180",
+        "residual_m": 0.00474308649416483
+      },
+      {
+        "text": "2.5",
+        "residual_m": 0.008279344610187298
+      },
+      {
+        "text": "22.0",
+        "residual_m": 0.0061493035304235
+      },
+      {
+        "text": "25.5",
+        "residual_m": 0.0066858558453559746
+      },
+      {
+        "text": "26",
+        "residual_m": 0.08997086872326775
+      },
+      {
+        "text": "36.5",
+        "residual_m": 0.005937031553654174
+      },
+      {
+        "text": "3H3",
+        "residual_m": 0.005214056605631323
+      },
+      {
+        "text": "44",
+        "residual_m": 0.005812182261310399
+      },
+      {
+        "text": "44.5",
+        "residual_m": 0.007791360961103186
+      },
+      {
+        "text": "45",
+        "residual_m": 0.007118299093038572
+      },
+      {
+        "text": "46",
+        "residual_m": 0.007293695494736673
+      },
+      {
+        "text": "47",
+        "residual_m": 0.006996227570145492
+      },
+      {
+        "text": "48",
+        "residual_m": 0.007499124845163986
+      },
+      {
+        "text": "49",
+        "residual_m": 0.009841589844571612
+      },
+      {
+        "text": "51",
+        "residual_m": 0.01187197133171303
+      },
+      {
+        "text": "52",
+        "residual_m": 0.008941047049142913
+      },
+      {
+        "text": "53",
+        "residual_m": 0.012291917796694541
+      },
+      {
+        "text": "54",
+        "residual_m": 0.01054715291102272
+      },
+      {
+        "text": "55",
+        "residual_m": 0.01218155998951681
+      },
+      {
+        "text": "56",
+        "residual_m": 0.01116515668500173
+      },
+      {
+        "text": "63.5",
+        "residual_m": 0.00344947177831207
+      },
+      {
+        "text": "9.0",
+        "residual_m": 0.00789925248701849
+      },
+      {
+        "text": "9.5",
+        "residual_m": 0.0067545900002047715
+      },
+      {
+        "text": "98.5",
+        "residual_m": 0.010119122334134424
+      },
+      {
+        "text": "ARK-1312-03-U",
+        "residual_m": 0.020769074763213827
+      },
+      {
+        "text": "ARK-1341-07-U",
+        "residual_m": 0.0003161788345493496
+      },
+      {
+        "text": "ARK-1341-08-U",
+        "residual_m": 0.012578423541077202
+      },
+      {
+        "text": "ARK-2511-01-U",
+        "residual_m": 0.015513608449022253
+      },
+      {
+        "text": "B302/1",
+        "residual_m": 0.005644547652127866
+      },
+      {
+        "text": "B302/2",
+        "residual_m": 0.005994909971346553
+      },
+      {
+        "text": "B302/3",
+        "residual_m": 0.006381695174521989
+      },
+      {
+        "text": "B302/4",
+        "residual_m": 0.004389069716724003
+      },
+      {
+        "text": "B313/1",
+        "residual_m": 0.006174802055462734
+      },
+      {
+        "text": "B313/2",
+        "residual_m": 0.009982448348581629
+      },
+      {
+        "text": "B329",
+        "residual_m": 0.005909236970562056
+      },
+      {
+        "text": "B329/1",
+        "residual_m": 0.010205743321207744
+      },
+      {
+        "text": "B329/2",
+        "residual_m": 0.01187604737740753
+      },
+      {
+        "text": "B331",
+        "residual_m": 0.0007833099658741199
+      },
+      {
+        "text": "B331/1",
+        "residual_m": 0.0008926382952754853
+      },
+      {
+        "text": "B331/2",
+        "residual_m": 0.014065956395109675
+      },
+      {
+        "text": "B332",
+        "residual_m": 0.004027095071423656
+      },
+      {
+        "text": "F11",
+        "residual_m": 0.021373342824756912
+      },
+      {
+        "text": "F12",
+        "residual_m": 0.025987752538976477
+      },
+      {
+        "text": "F13",
+        "residual_m": 0.02469790566841261
+      },
+      {
+        "text": "F14",
+        "residual_m": 0.02436327831379833
+      },
+      {
+        "text": "F1B",
+        "residual_m": 0.02231626633872376
+      },
+      {
+        "text": "F2A",
+        "residual_m": 0.019846808242713652
+      },
+      {
+        "text": "F2B",
+        "residual_m": 0.022290371288038312
+      },
+      {
+        "text": "F8",
+        "residual_m": 0.020771584021953497
+      },
+      {
+        "text": "F9",
+        "residual_m": 0.025912982101624942
+      },
+      {
+        "text": "H=1510",
+        "residual_m": 0.012434528136218377
+      },
+      {
+        "text": "H=2115",
+        "residual_m": 0.021536887765972186
+      },
+      {
+        "text": "H=2200",
+        "residual_m": 0.006166207311829514
+      },
+      {
+        "text": "H=3195",
+        "residual_m": 0.0085945878524448
+      },
+      {
+        "text": "KG",
+        "residual_m": 0.012363075942395177
+      },
+      {
+        "text": "KR",
+        "residual_m": 0.011210919191741565
+      },
+      {
+        "text": "LAO10BN",
+        "residual_m": 0.0006750573204803432
+      },
+      {
+        "text": "LAO10PV",
+        "residual_m": 0.0019593264695602288
+      },
+      {
+        "text": "LAO10UW",
+        "residual_m": 0.002402709483318484
+      },
+      {
+        "text": "LAO15BM",
+        "residual_m": 0.0038229637508084328
+      },
+      {
+        "text": "LAO8BZ",
+        "residual_m": 0.0026076374721437675
+      },
+      {
+        "text": "LAO9DV",
+        "residual_m": 0.0019878141187766826
+      },
+      {
+        "text": "LOGO",
+        "residual_m": 0.009173576589152826
+      },
+      {
+        "text": "MI16.1",
+        "residual_m": 0.012686532535808641
+      },
+      {
+        "text": "MI18.3",
+        "residual_m": 0.020709275856039683
+      },
+      {
+        "text": "P1",
+        "residual_m": 0.032012848114124144
+      },
+      {
+        "text": "P2",
+        "residual_m": 0.04890240660412519
+      },
+      {
+        "text": "PR202",
+        "residual_m": 0.005308452836965736
+      },
+      {
+        "text": "SPO13DM",
+        "residual_m": 0.0030456519418827904
+      },
+      {
+        "text": "SPO15EW",
+        "residual_m": 0.0036264243647568957
+      },
+      {
+        "text": "SV",
+        "residual_m": 0.007487848375122234
+      },
+      {
+        "text": "TEO31HZ",
+        "residual_m": 0.0036877412820203576
+      },
+      {
+        "text": "TLU10EX",
+        "residual_m": 0.003458398334570319
+      },
+      {
+        "text": "TPO15VZ",
+        "residual_m": 0.019273458877429407
+      },
+      {
+        "text": "TUO10HP",
+        "residual_m": 0.005552839049591611
+      },
+      {
+        "text": "TUO25NP",
+        "residual_m": 0.004189763835133474
+      },
+      {
+        "text": "TUO9HP",
+        "residual_m": 0.009377090243861786
+      },
+      {
+        "text": "U1",
+        "residual_m": 0.006877591259005124
+      },
+      {
+        "text": "U10",
+        "residual_m": 0.015491894834083215
+      },
+      {
+        "text": "U11",
+        "residual_m": 0.01250993801393259
+      },
+      {
+        "text": "U12",
+        "residual_m": 0.018542858297868427
+      },
+      {
+        "text": "U2",
+        "residual_m": 0.012321025134935035
+      },
+      {
+        "text": "U3",
+        "residual_m": 0.01032386166824072
+      },
+      {
+        "text": "U4",
+        "residual_m": 0.013075762417489457
+      },
+      {
+        "text": "U5",
+        "residual_m": 0.011480479011777083
+      },
+      {
+        "text": "U6",
+        "residual_m": 0.013520660478316598
+      },
+      {
+        "text": "U7",
+        "residual_m": 0.013682551622356914
+      },
+      {
+        "text": "U8",
+        "residual_m": 0.013071537405711887
+      },
+      {
+        "text": "U9",
+        "residual_m": 0.013944517152016217
+      },
+      {
+        "text": "UA",
+        "residual_m": 0.010034581931857522
+      },
+      {
+        "text": "UB",
+        "residual_m": 0.011872723438739746
+      },
+      {
+        "text": "UC",
+        "residual_m": 0.010493682410239373
+      },
+      {
+        "text": "UD",
+        "residual_m": 0.011563732999505404
+      },
+      {
+        "text": "UE",
+        "residual_m": 0.014362533043945195
+      },
+      {
+        "text": "UF",
+        "residual_m": 0.01784044301625219
+      },
+      {
+        "text": "US203",
+        "residual_m": 0.011098998161467553
+      },
+      {
+        "text": "VP/YP",
+        "residual_m": 0.15023513508580982
+      },
+      {
+        "text": "VS209",
+        "residual_m": 0.011761461825701529
+      },
+      {
+        "text": "YL-57",
+        "residual_m": 0.011212287221892733
+      },
+      {
+        "text": "YL-58",
+        "residual_m": 0.012848809515972783
+      }
+    ]
+  },
+  "split": {
+    "method": "geometric",
+    "stats": {
+      "paths": 93839,
+      "mep_paths": 28731,
+      "underlay_paths": 65108,
+      "mep_length_pt": 372025,
+      "underlay_length_pt": 814862
+    },
+    "source_m_per_pt": 0.01764001398041474
+  },
+  "detected": {
+    "duct_runs": 42,
+    "terminals": 3
+  },
+  "linked": {
+    "terminals": 2,
+    "duct_runs": 27,
+    "duct_room_edges": 27,
+    "room_same_as": 0
+  },
+  "rooms": [
+    {
+      "id": "room:architect:room-001",
+      "label": "ROOF / SPL / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / KA / CORRIDOR / BA / BULKHEAD / ELECTRICAL / BULKHEAD / VP/YP / OFFICE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-001",
+        "bbox": [
+          1718.2,
+          637.4,
+          2879.0,
+          1232.2
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1,
+        "duct": 16
+      },
+      "length_m_by_kind": {
+        "duct": 34.34336124022182
+      }
+    },
+    {
+      "id": "room:architect:room-002",
+      "label": "STAIR / STAIR / ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-002",
+        "bbox": [
+          1619.9,
+          755.4,
+          1977.0,
+          1217.2
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1,
+        "duct": 8
+      },
+      "length_m_by_kind": {
+        "duct": 21.117213064227602
+      }
+    },
+    {
+      "id": "room:architect:room-003",
+      "label": "TO",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-003",
+        "bbox": [
+          1519.2,
+          810.7,
+          1613.6,
+          1102.0
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-004",
+      "label": "STAIR / ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-004",
+        "bbox": [
+          2908.8,
+          771.7,
+          2962.9,
+          851.0
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1,
+        "duct": 1
+      },
+      "length_m_by_kind": {
+        "duct": 1.056952653490225
+      }
+    },
+    {
+      "id": "room:architect:room-005",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-005",
+        "bbox": [
+          2855.6,
+          785.2,
+          2907.9,
+          842.9
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-006",
+      "label": "ACCESSIBLE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-006",
+        "bbox": [
+          3083.7,
+          871.8,
+          3141.5,
+          918.7
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-007",
+      "label": "WC 1.5 / ARK / ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-007",
+        "bbox": [
+          2830.3,
+          881.7,
+          2999.0,
+          1238.0
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1,
+        "duct": 1,
+        "terminal": 2
+      },
+      "length_m_by_kind": {
+        "duct": 1.9135886738233443
+      }
+    },
+    {
+      "id": "room:architect:room-008",
+      "label": "CORRIDOR",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-008",
+        "bbox": [
+          3018.8,
+          919.6,
+          3127.9,
+          991.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-009",
+      "label": "ROOM",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-009",
+        "bbox": [
+          3018.8,
+          986.3,
+          3063.9,
+          1037.8
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-010",
+      "label": "WC / ACCESSIBLE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-010",
+        "bbox": [
+          3304.7,
+          986.3,
+          3355.2,
+          1045.9
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-011",
+      "label": "ROOM / CORRIDOR",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-011",
+        "bbox": [
+          3300.8,
+          1045.8,
+          3409.4,
+          1143.3
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-012",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-012",
+        "bbox": [
+          3001.7,
+          1057.6,
+          3086.4,
+          1100.0
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-013",
+      "label": "STAIR",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-013",
+        "bbox": [
+          1978.0,
+          1054.9,
+          2065.5,
+          1107.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-014",
+      "label": "WC 18.5",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-014",
+        "bbox": [
+          2127.7,
+          1088.3,
+          2189.9,
+          1148.7
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-015",
+      "label": "AKA1 WC",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-015",
+        "bbox": [
+          2067.2,
+          1151.4,
+          2138.2,
+          1217.2
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1,
+        "duct": 1
+      },
+      "length_m_by_kind": {
+        "duct": 2.3212777786749186
+      }
+    },
+    {
+      "id": "room:architect:room-016",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-016",
+        "bbox": [
+          2133.9,
+          1151.4,
+          2193.7,
+          1220.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-017",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-017",
+        "bbox": [
+          3260.4,
+          1157.7,
+          3303.8,
+          1224.5
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-018",
+      "label": "KP",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-018",
+        "bbox": [
+          2399.2,
+          1227.2,
+          2750.9,
+          1436.4
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-019",
+      "label": "ARK",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-019",
+        "bbox": [
+          3091.0,
+          788.8,
+          3141.5,
+          847.4
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-020",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-020",
+        "bbox": [
+          2845.1,
+          828.8,
+          2888.6,
+          930.2
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-021",
+      "label": "RISER",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-021",
+        "bbox": [
+          2981.8,
+          871.7,
+          3016.1,
+          918.7
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-022",
+      "label": "STORAGE",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-022",
+        "bbox": [
+          3024.2,
+          871.8,
+          3067.5,
+          918.7
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-023",
+      "label": "WC",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-023",
+        "bbox": [
+          3072.0,
+          871.8,
+          3098.8,
+          901.2
+        ]
+      },
+      "count_by_kind": {
+        "fixture": 1
+      },
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-024",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-024",
+        "bbox": [
+          2977.9,
+          923.2,
+          3016.1,
+          981.8
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-025",
+      "label": "ARK",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-025",
+        "bbox": [
+          2070.9,
+          978.8,
+          2116.7,
+          1097.3
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-026",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-026",
+        "bbox": [
+          2980.0,
+          986.3,
+          3016.1,
+          1040.1
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-027",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-027",
+        "bbox": [
+          1983.4,
+          1010.7,
+          2048.3,
+          1041.4
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-028",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-028",
+        "bbox": [
+          2179.3,
+          1081.9,
+          2235.9,
+          1148.7
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    },
+    {
+      "id": "room:architect:room-029",
+      "label": "Room",
+      "source": {
+        "doc_id": "architect",
+        "page": 1,
+        "item_id": "room-029",
+        "bbox": [
+          2179.4,
+          1181.2,
+          2253.7,
+          1223.6
+        ]
+      },
+      "count_by_kind": {},
+      "length_m_by_kind": {}
+    }
+  ],
+  "sample_selection": "All first three linked terminals; seven evenly spaced duct-room edges in extraction order.",
+  "manual_checks": [
+    {
+      "sample": 1,
+      "edge": {
+        "id": "mep:f982bb619dff2b1a90f2",
+        "kind": "in_room",
+        "from": "terminal:services:mep-1-terminal-1",
+        "to": "room:architect:room-007",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-terminal-1",
+              "bbox": [
+                2675.0,
+                1637.0,
+                2705.0,
+                1667.0
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-007",
+              "bbox": [
+                2830.3,
+                881.7,
+                2999.0,
+                1238.0
+              ]
+            }
+          ],
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Terminal",
+      "room_label": "WC 1.5 / ARK / ROOM",
+      "source_detection": {
+        "center_pt": [
+          2690.0,
+          1652.0
+        ],
+        "size_pt": 29.999999999999996,
+        "size_m": 0.529,
+        "shape": "square",
+        "airflow_ls": null,
+        "label": null
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-01-architect.png",
+        "/tmp/kg-mep-round2/sample-01-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "plausible_terminal",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Square terminal symbol visible; target region merges WC/ARK/ROOM, so no single-room assignment is verified."
+    },
+    {
+      "sample": 2,
+      "edge": {
+        "id": "mep:81b5c92bcd470839064b",
+        "kind": "in_room",
+        "from": "terminal:services:mep-1-terminal-2",
+        "to": "room:architect:room-007",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-terminal-2",
+              "bbox": [
+                2675.0,
+                1693.0,
+                2705.0,
+                1723.0
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-007",
+              "bbox": [
+                2830.3,
+                881.7,
+                2999.0,
+                1238.0
+              ]
+            }
+          ],
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "+115 l/s",
+      "room_label": "WC 1.5 / ARK / ROOM",
+      "source_detection": {
+        "center_pt": [
+          2690.0,
+          1708.0
+        ],
+        "size_pt": 29.999999999999996,
+        "size_m": 0.529,
+        "shape": "square",
+        "airflow_ls": 115.0,
+        "label": "+115 l/s"
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-02-architect.png",
+        "/tmp/kg-mep-round2/sample-02-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "plausible_terminal",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Square terminal with nearby +115 l/s visible; target region merges several named spaces."
+    },
+    {
+      "sample": 3,
+      "edge": {
+        "id": "mep:cc2254c8ecebd41b2279",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-1",
+        "to": "room:architect:room-001",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-1",
+              "bbox": [
+                2276.8793638829334,
+                1660.0794341299877,
+                2288.1605340804713,
+                1866.7205999608889
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-001",
+              "bbox": [
+                1718.2,
+                637.4,
+                2879.0,
+                1232.2
+              ]
+            }
+          ],
+          "length_in_room_m": 3.4461530541862913,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "ROOF / SPL / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / KA / CORRIDOR / BA / BULKHEAD / ELECTRICAL / BULKHEAD / VP/YP / OFFICE",
+      "source_detection": {
+        "start_pt": [
+          2282.5199489817023,
+          1665.7200192287564
+        ],
+        "end_pt": [
+          2282.5199489817023,
+          1861.0800148621202
+        ],
+        "width_pt": 11.279999747872353,
+        "width_m": 0.199,
+        "length_m": 3.446,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            2288.1599488556385,
+            1665.7200192287564
+          ],
+          [
+            2288.1599488556385,
+            1861.0800148621202
+          ],
+          [
+            2276.879949107766,
+            1861.0800148621202
+          ],
+          [
+            2276.879949107766,
+            1665.7200192287564
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-03-architect.png",
+        "/tmp/kg-mep-round2/sample-03-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "wrong_kind_linear_terminal",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Long narrow symbol labelled SP-200 and +60 l/s; it is not independently confirmed as a duct. Architectural polygon merges offices and corridor."
+    },
+    {
+      "sample": 4,
+      "edge": {
+        "id": "mep:d70220c3c1c75355221c",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-4",
+        "to": "room:architect:room-001",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-4",
+              "bbox": [
+                1596.5993790883765,
+                1660.0794341299877,
+                1607.8805492859142,
+                1866.7205999608889
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-001",
+              "bbox": [
+                1718.2,
+                637.4,
+                2879.0,
+                1232.2
+              ]
+            }
+          ],
+          "length_in_room_m": 3.4461530541862992,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "ROOF / SPL / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / KA / CORRIDOR / BA / BULKHEAD / ELECTRICAL / BULKHEAD / VP/YP / OFFICE",
+      "source_detection": {
+        "start_pt": [
+          1602.2399641871452,
+          1665.7200192287564
+        ],
+        "end_pt": [
+          1602.2399641871455,
+          1861.0800148621202
+        ],
+        "width_pt": 11.279999747872353,
+        "width_m": 0.199,
+        "length_m": 3.446,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            1607.8799640610814,
+            1665.7200192287564
+          ],
+          [
+            1607.8799640610816,
+            1861.0800148621202
+          ],
+          [
+            1596.5999643132093,
+            1861.0800148621202
+          ],
+          [
+            1596.599964313209,
+            1665.7200192287564
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-04-architect.png",
+        "/tmp/kg-mep-round2/sample-04-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "wrong_kind_linear_terminal",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Same long narrow SP-200 symbol pattern; architectural polygon merges several named spaces."
+    },
+    {
+      "sample": 5,
+      "edge": {
+        "id": "mep:51b29887de94d35f6e56",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-9",
+        "to": "room:architect:room-002",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-9",
+              "bbox": [
+                541.0134181872776,
+                1140.7134612434377,
+                777.1865523486564,
+                1156.9266003213058
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-002",
+              "bbox": [
+                1619.9,
+                755.4,
+                1977.0,
+                1217.2
+              ]
+            }
+          ],
+          "length_in_room_m": 3.8800973884050936,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "STAIR / STAIR / ROOM",
+      "source_detection": {
+        "start_pt": [
+          549.1199877262115,
+          1148.8200307823718
+        ],
+        "end_pt": [
+          769.0799828097224,
+          1148.8200307823718
+        ],
+        "width_pt": 16.199999637901783,
+        "width_m": 0.286,
+        "length_m": 3.88,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            549.1199877262115,
+            1140.7200309634209
+          ],
+          [
+            769.0799828097224,
+            1140.7200309634209
+          ],
+          [
+            769.0799828097224,
+            1156.9200306013227
+          ],
+          [
+            549.1199877262115,
+            1156.9200306013227
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-05-architect.png",
+        "/tmp/kg-mep-round2/sample-05-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "plausible_duct",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Centreline lies between two duct outlines around a bend; assigned STAIR/STAIR/ROOM region is composite."
+    },
+    {
+      "sample": 6,
+      "edge": {
+        "id": "mep:76a42a902cc21c980549",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-18",
+        "to": "room:architect:room-001",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-18",
+              "bbox": [
+                1477.444781022128,
+                1569.064835434761,
+                1495.0751525368726,
+                1636.1352058444356
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-001",
+              "bbox": [
+                1718.2,
+                637.4,
+                2879.0,
+                1232.2
+              ]
+            }
+          ],
+          "length_in_room_m": 0.8721222716982504,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "ROOF / SPL / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / OFFICE / KA / CORRIDOR / BA / BULKHEAD / ELECTRICAL / BULKHEAD / VP/YP / OFFICE",
+      "source_detection": {
+        "start_pt": [
+          1486.2599667795002,
+          1577.8800211921334
+        ],
+        "end_pt": [
+          1486.2599667795002,
+          1627.3200200870633
+        ],
+        "width_pt": 17.639999605715275,
+        "width_m": 0.311,
+        "length_m": 0.872,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            1495.0799665823579,
+            1577.8800211921334
+          ],
+          [
+            1495.0799665823579,
+            1627.3200200870633
+          ],
+          [
+            1477.4399669766426,
+            1627.3200200870633
+          ],
+          [
+            1477.4399669766426,
+            1577.8800211921334
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-06-architect.png",
+        "/tmp/kg-mep-round2/sample-06-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "annotation_false_positive",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Detected short line passes through the SP-160 +30 l/s callout table, not a visible duct run."
+    },
+    {
+      "sample": 7,
+      "edge": {
+        "id": "mep:89aeaf4e39b9bb0e5cae",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-22",
+        "to": "room:architect:room-015",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-22",
+              "bbox": [
+                1202.5825465903033,
+                1828.4125890624125,
+                1231.4373990051104,
+                2035.8274374860923
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-015",
+              "bbox": [
+                2067.2,
+                1151.4,
+                2138.2,
+                1217.2
+              ]
+            }
+          ],
+          "length_in_room_m": 2.3212777786749186,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "AKA1 WC",
+      "source_detection": {
+        "start_pt": [
+          1217.0099727977067,
+          1842.840015269816
+        ],
+        "end_pt": [
+          1217.009972797707,
+          2021.400011278689
+        ],
+        "width_pt": 28.859999354928732,
+        "width_m": 0.509,
+        "length_m": 3.15,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            1231.439972475171,
+            1842.840015269816
+          ],
+          [
+            1231.4399724751713,
+            2021.400011278689
+          ],
+          [
+            1202.5799731202426,
+            2021.400011278689
+          ],
+          [
+            1202.5799731202424,
+            1842.840015269816
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-07-architect.png",
+        "/tmp/kg-mep-round2/sample-07-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "annotation_false_positive",
+      "room_link_verdict": "incorrect_extent",
+      "inspection_note": "Candidate crosses walls and continues into leaders/notes beyond the WC; the whole run is not a verifiable duct."
+    },
+    {
+      "sample": 8,
+      "edge": {
+        "id": "mep:1518355da311a86df1f9",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-27",
+        "to": "room:architect:room-002",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-27",
+              "bbox": [
+                742.3078882524559,
+                1339.667931360919,
+                895.6920751353911,
+                1375.2121208777837
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-002",
+              "bbox": [
+                1619.9,
+                755.4,
+                1977.0,
+                1217.2
+              ]
+            }
+          ],
+          "length_in_room_m": 2.0786992009895267,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "STAIR / STAIR / ROOM",
+      "source_detection": {
+        "start_pt": [
+          760.0799830108881,
+          1357.4400261193514
+        ],
+        "end_pt": [
+          877.9199803769588,
+          1357.4400261193514
+        ],
+        "width_pt": 35.51999920606613,
+        "width_m": 0.627,
+        "length_m": 2.079,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            760.0799830108881,
+            1339.6800265163183
+          ],
+          [
+            877.9199803769588,
+            1339.6800265163183
+          ],
+          [
+            877.9199803769588,
+            1375.2000257223845
+          ],
+          [
+            760.0799830108881,
+            1375.2000257223845
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-08-architect.png",
+        "/tmp/kg-mep-round2/sample-08-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "plausible_duct",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Candidate runs within a duct and fitting; target region combines STAIR/STAIR/ROOM."
+    },
+    {
+      "sample": 9,
+      "edge": {
+        "id": "mep:8d994dedca1e6250f349",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-35",
+        "to": "room:architect:room-002",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-35",
+              "bbox": [
+                227.40369019541862,
+                1356.7237214136494,
+                284.0362983730065,
+                1515.4763273086774
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-002",
+              "bbox": [
+                1619.9,
+                755.4,
+                1977.0,
+                1217.2
+              ]
+            }
+          ],
+          "length_in_room_m": 1.8013981874155671,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "STAIR / STAIR / ROOM",
+      "source_detection": {
+        "start_pt": [
+          255.71999428421256,
+          1385.0400255024433
+        ],
+        "end_pt": [
+          255.71999428421256,
+          1487.1600232198834
+        ],
+        "width_pt": 56.63999873399732,
+        "width_m": 0.999,
+        "length_m": 1.801,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            284.0399936512112,
+            1385.0400255024433
+          ],
+          [
+            284.0399936512112,
+            1487.1600232198834
+          ],
+          [
+            227.39999491721392,
+            1487.1600232198834
+          ],
+          [
+            227.39999491721392,
+            1385.0400255024433
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-09-architect.png",
+        "/tmp/kg-mep-round2/sample-09-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "equipment_false_positive",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Candidate cuts across the face of the rectangular IV-KONE equipment symbol, not a duct centreline."
+    },
+    {
+      "sample": 10,
+      "edge": {
+        "id": "mep:2fbda2cea67b8804e09e",
+        "kind": "in_room",
+        "from": "duct:services:mep-1-duct-42",
+        "to": "room:architect:room-002",
+        "method": "containment_geom",
+        "confidence": 0.5,
+        "evidence": {
+          "rule": "aligned vector service intersects room polygon",
+          "alignment": {
+            "T": {
+              "s": 0.5000318923582131,
+              "R": [
+                [
+                  0.9999999996135134,
+                  2.780239313642187e-05
+                ],
+                [
+                  -2.7802393136418164e-05,
+                  0.9999999996135133
+                ]
+              ],
+              "t": [
+                1510.1183674499282,
+                224.5039050182736
+              ],
+              "rot_deg": -0.0015929597872854678,
+              "n_words": 116,
+              "n_inliers": 115,
+              "rms_pt": 0.5939695337414035,
+              "method": "shared-text",
+              "residual": 0.5939695337414035,
+              "matches": 115,
+              "T": [
+                [
+                  0.5000318921649575,
+                  1.3902083252092023e-05,
+                  1510.1183674499282
+                ],
+                [
+                  -1.390208325209017e-05,
+                  0.5000318921649574,
+                  224.5039050182736
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            },
+            "residual": 0.020953925218099512,
+            "matches": 115
+          },
+          "residual_m": 0.020953925218099512,
+          "sources": [
+            {
+              "doc_id": "services",
+              "page": 1,
+              "item_id": "mep-1-duct-42",
+              "bbox": [
+                233.66691664661516,
+                1831.5516432739616,
+                428.7330685475911,
+                1905.4177978839687
+              ]
+            },
+            {
+              "doc_id": "architect",
+              "page": 1,
+              "item_id": "room-002",
+              "bbox": [
+                1619.9,
+                755.4,
+                1977.0,
+                1217.2
+              ]
+            }
+          ],
+          "length_in_room_m": 2.1379696466389233,
+          "length_method": "aligned vector centreline clipped to room polygon",
+          "calibration": "Uncalibrated services inference; estimate."
+        },
+        "doc_ids": [
+          "architect",
+          "services"
+        ]
+      },
+      "service_label": "Duct",
+      "room_label": "STAIR / STAIR / ROOM",
+      "source_detection": {
+        "start_pt": [
+          270.59999395161867,
+          1868.4847205789652
+        ],
+        "end_pt": [
+          391.79999124258757,
+          1868.4847205789652
+        ],
+        "width_pt": 73.84941011404294,
+        "width_m": 1.303,
+        "length_m": 2.138,
+        "shape": "rect",
+        "height_m": null,
+        "label": null,
+        "outline_pt": [
+          [
+            270.59999395161867,
+            1831.5600155219436
+          ],
+          [
+            391.79999124258757,
+            1831.5600155219436
+          ],
+          [
+            391.79999124258757,
+            1905.4094256359867
+          ],
+          [
+            270.59999395161867,
+            1905.4094256359867
+          ]
+        ]
+      },
+      "crops": [
+        "/tmp/kg-mep-round2/sample-10-architect.png",
+        "/tmp/kg-mep-round2/sample-10-services.png"
+      ],
+      "manual_verdict": "checked",
+      "service_detection_verdict": "uncertain_duct",
+      "room_link_verdict": "unverifiable_composite_room",
+      "inspection_note": "Candidate overlaps a dense equipment/duct junction; crop is insufficient to establish a complete duct and single target room."
+    }
+  ],
+  "mep": {
+    "documents": {
+      "services": {
+        "pdf_pages": {
+          "1": {
+            "ducts": 42,
+            "terminals": 3,
+            "alignment": {
+              "T": {
+                "s": 0.5000318923582131,
+                "R": [
+                  [
+                    0.9999999996135134,
+                    2.780239313642187e-05
+                  ],
+                  [
+                    -2.7802393136418164e-05,
+                    0.9999999996135133
+                  ]
+                ],
+                "t": [
+                  1510.1183674499282,
+                  224.5039050182736
+                ],
+                "rot_deg": -0.0015929597872854678,
+                "n_words": 116,
+                "n_inliers": 115,
+                "rms_pt": 0.5939695337414035,
+                "method": "shared-text",
+                "residual": 0.5939695337414035,
+                "matches": 115,
+                "T": [
+                  [
+                    0.5000318921649575,
+                    1.3902083252092023e-05,
+                    1510.1183674499282
+                  ],
+                  [
+                    -1.390208325209017e-05,
+                    0.5000318921649574,
+                    224.5039050182736
+                  ],
+                  [
+                    0.0,
+                    0.0,
+                    1.0
+                  ]
+                ]
+              },
+              "residual": 0.020953925218099512,
+              "matches": 115
+            }
+          }
+        }
+      }
+    },
+    "notes": []
+  },
+  "stats": {
+    "nodes": 1252,
+    "edges": 1487,
+    "by_kind": {
+      "project": 1,
+      "doc": 2,
+      "room": 54,
+      "wall": 1108,
+      "fixture": 42,
+      "duct": 42,
+      "terminal": 3
+    },
+    "edges_by_kind": {
+      "contains": 1251,
+      "in_room": 52,
+      "bounds": 182,
+      "serves": 2
+    },
+    "linked_pct": null,
+    "agree_pct": null,
+    "unlinked": [
+      "room:architect:room-001",
+      "room:architect:room-002",
+      "room:architect:room-003",
+      "room:architect:room-004",
+      "room:architect:room-005",
+      "room:architect:room-006",
+      "room:architect:room-007",
+      "room:architect:room-008",
+      "room:architect:room-009",
+      "room:architect:room-010",
+      "room:architect:room-011",
+      "room:architect:room-012",
+      "room:architect:room-013",
+      "room:architect:room-014",
+      "room:architect:room-015",
+      "room:architect:room-016",
+      "room:architect:room-017",
+      "room:architect:room-018",
+      "room:architect:room-019",
+      "room:architect:room-020",
+      "room:architect:room-021",
+      "room:architect:room-022",
+      "room:architect:room-023",
+      "room:architect:room-024",
+      "room:architect:room-025",
+      "room:architect:room-026",
+      "room:architect:room-027",
+      "room:architect:room-028",
+      "room:architect:room-029",
+      "wall:architect:wall-001",
+      "wall:architect:wall-002",
+      "wall:architect:wall-003",
+      "wall:architect:wall-004",
+      "wall:architect:wall-005",
+      "wall:architect:wall-006",
+      "wall:architect:wall-007",
+      "wall:architect:wall-008",
+      "wall:architect:wall-009",
+      "wall:architect:wall-010",
+      "wall:architect:wall-011",
+      "wall:architect:wall-012",
+      "wall:architect:wall-013",
+      "wall:architect:wall-014",
+      "wall:architect:wall-015",
+      "wall:architect:wall-016",
+      "wall:architect:wall-017",
+      "wall:architect:wall-018",
+      "wall:architect:wall-019",
+      "wall:architect:wall-020",
+      "wall:architect:wall-021"
+    ],
+    "issues": 0,
+    "counterpart_items": 0,
+    "linked_items": 0
+  },
+  "limitations": [
+    "Detected candidates are incomplete; counts are not total installed quantities.",
+    "Crops contain local source drawings and are deliberately not committed.",
+    "Judges' sheets are evaluation only; no confidence table is fit on these files."
+  ],
+  "manual_summary": {
+    "samples_checked": 10,
+    "full_room_links_confirmed": 0,
+    "plausible_service_detections": 4,
+    "wrong_kind_or_false_service_detections": 5,
+    "uncertain_service_detections": 1,
+    "scope": "Purposive diagnostic sample, not a population precision estimate; no table fit from judges data."
+  }
+}

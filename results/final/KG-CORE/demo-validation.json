@@ -1,0 +1,396 @@
+[
+  {
+    "name": "AC20 Institute (demo project)",
+    "doc_ids": [
+      "ifc_bench__ac20-arc",
+      "ifc_models__kit-institute-ac20-institute-var-2",
+      "ifc_models__kit-institute-ac20-institute-var-2-elevation-east",
+      "ifc_models__kit-institute-ac20-institute-var-2-elevation-north",
+      "ifc_models__kit-institute-ac20-institute-var-2-elevation-south",
+      "ifc_models__kit-institute-ac20-institute-var-2-elevation-west",
+      "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller",
+      "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss",
+      "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss",
+      "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss",
+      "ifc_models__kit-institute-ac20-institute-var-2-plan-05-dachgeschoss",
+      "ifc_models__kit-institute-ac20-institute-var-2-section-east-west",
+      "ifc_models__kit-institute-ac20-institute-var-2-section-north-south"
+    ],
+    "elapsed_s": 13.6651,
+    "under_30_s": true,
+    "stats": {
+      "nodes": 2637,
+      "edges": 15594,
+      "by_kind": {
+        "project": 1,
+        "doc": 13,
+        "level": 15,
+        "column": 6,
+        "type": 80,
+        "material": 44,
+        "door": 231,
+        "fixture": 797,
+        "slab": 78,
+        "stair": 12,
+        "wall": 363,
+        "window": 618,
+        "room": 376,
+        "sheet_ref": 3
+      },
+      "edges_by_kind": {
+        "contains": 2882,
+        "on_level": 2349,
+        "has_type": 2337,
+        "made_of": 3235,
+        "bounds": 1762,
+        "hosted_by": 566,
+        "same_as": 2350,
+        "agrees": 102,
+        "references": 11
+      },
+      "linked_pct": 94.76,
+      "agree_pct": 100.0,
+      "unlinked": [
+        "room:ifc_bench__ac20-arc:3EN96kdYDB2OOGjNLp8e86:p1",
+        "room:ifc_bench__ac20-arc:1_Evy7T$DCiwLgTMLHCRoe:p1",
+        "room:ifc_bench__ac20-arc:3eQ_MQ5er5UeRXq4xxAoKl:p1",
+        "room:ifc_bench__ac20-arc:3KaloR8018sAKZVwuYVbSu:p1",
+        "room:ifc_bench__ac20-arc:03hhkFXKT4RPFNu5rDrZPL:p1",
+        "room:ifc_bench__ac20-arc:1oKaKV7Wz8IOJ10cA1PGWP:p1",
+        "room:ifc_bench__ac20-arc:3j5r$vfHT3JfqUfpdRoXnP:p1",
+        "room:ifc_bench__ac20-arc:3t8qjHTuTAigDlC1x7D16b:p1",
+        "room:ifc_bench__ac20-arc:1DxredyET5bf_85HZe8$FO:p1",
+        "room:ifc_bench__ac20-arc:2ED0MLfrf17BXIsuJYCs7R:p1",
+        "room:ifc_bench__ac20-arc:1loQAAB191MA5YmsaMJHkI:p1",
+        "room:ifc_bench__ac20-arc:3Xu6SpY4vC89stuKlMWE2n:p1",
+        "room:ifc_bench__ac20-arc:3yAAZZ86j388XApaG$h1X6:p1",
+        "room:ifc_bench__ac20-arc:3$FatfHY1Cg9apAMwbKPN8:p1",
+        "room:ifc_bench__ac20-arc:0_TtqXcOrDbeTXyb5q0Uxb:p1",
+        "room:ifc_bench__ac20-arc:25QUQJ9jHAFengkpc9N7GR:p1",
+        "room:ifc_bench__ac20-arc:0jhU4VZ6XCxee3pjfx5VMh:p1",
+        "room:ifc_bench__ac20-arc:1RP4kkhTDFJuLugWfrM_1s:p1",
+        "room:ifc_bench__ac20-arc:25CC32yK130ALlKsnej9JW:p1",
+        "room:ifc_bench__ac20-arc:37pP75EaP1axQNg3rWc_WT:p1",
+        "room:ifc_bench__ac20-arc:0f6kjO4cnBngLgZgtaoBTE:p1",
+        "room:ifc_bench__ac20-arc:3XJSZHVdLFTQTPYNfhA6a2:p1",
+        "room:ifc_bench__ac20-arc:1AW8GAtUnEYB9XPWOUYKK5:p1",
+        "room:ifc_bench__ac20-arc:0uPiF9LkPAqeB8f54Uy3_C:p1",
+        "room:ifc_bench__ac20-arc:24vVAUYDH2SetutQQsZBMv:p1",
+        "room:ifc_bench__ac20-arc:2goaA6RR92B9xducYbaQVU:p1",
+        "room:ifc_bench__ac20-arc:0i4GPkF$j1$P1_N4yoKfHm:p1",
+        "room:ifc_bench__ac20-arc:2Yd3UbuHLF0P7Q5pq$wqrF:p1",
+        "room:ifc_bench__ac20-arc:1GtYUXG753_h6i4vKAf46v:p1",
+        "room:ifc_bench__ac20-arc:0VWZeARNT8IAUcPL5OoYiA:p1",
+        "room:ifc_bench__ac20-arc:3kV3mGMIX3BvUw5dL_lJVg:p1",
+        "room:ifc_bench__ac20-arc:1yZQvqj15Ab8eMXDuz85Dy:p1",
+        "room:ifc_bench__ac20-arc:0uC7OD3$5F7v$zL3aaoEig:p1",
+        "room:ifc_bench__ac20-arc:2E2TaOnqD0chpbuH8tXCpW:p1",
+        "room:ifc_bench__ac20-arc:3shuyF_Yb7yu2P$QLB2s8G:p1",
+        "room:ifc_bench__ac20-arc:0UiHARbFzF1RT4g_GKem_B:p1",
+        "room:ifc_bench__ac20-arc:1LVv$xQpj6k8KE6pcNlDDU:p1",
+        "room:ifc_bench__ac20-arc:1a3ixYyUn0QO4HWUYKN$4p:p1",
+        "room:ifc_bench__ac20-arc:3iSzpa9d93jhTDB7hG0QBW:p1",
+        "room:ifc_bench__ac20-arc:0K6ICBa1zCjvUnsy8qMIRC:p1",
+        "room:ifc_bench__ac20-arc:3M3dydUxH2hR7Uvg9QNhS$:p1",
+        "room:ifc_bench__ac20-arc:2lebmw3XD9w9PIIn4HKbwh:p1",
+        "room:ifc_bench__ac20-arc:09m2tgyfr9UfikvrKFMkeD:p1",
+        "room:ifc_bench__ac20-arc:0dc6ovxJLDww6sjSpu_cfN:p1",
+        "room:ifc_bench__ac20-arc:0U5AcnRYX7aw$OIZXqMUaR:p1",
+        "room:ifc_bench__ac20-arc:1jJ7opRcX6uevup8Hnq0$2:p1",
+        "room:ifc_bench__ac20-arc:30oDtenHrAwuYDgWTayiN$:p1",
+        "room:ifc_bench__ac20-arc:3$PC9MkEH1Ex24UD3VHyzP:p1",
+        "room:ifc_bench__ac20-arc:0Veunyhgf7QxfJXezc1Ydu:p1",
+        "room:ifc_bench__ac20-arc:1vWhxAiTL1RR3r4R3eC2Vv:p1"
+      ],
+      "issues": 0,
+      "counterpart_items": 2481,
+      "linked_items": 2351
+    },
+    "methods": {
+      "rule": 2699,
+      "ifc_relation": 10539,
+      "guid": 2350,
+      "label_text": 6
+    },
+    "warnings": [
+      {
+        "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-east",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-north",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-south",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-elevation-west",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-section-east-west",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-institute-ac20-institute-var-2-section-north-south",
+        "note": "No readable item index; document retained as a reference."
+      }
+    ],
+    "mep": {
+      "documents": {
+        "ifc_bench__ac20-arc": {
+          "schema": "IFC4",
+          "services": 0,
+          "rooms": 82
+        },
+        "ifc_models__kit-institute-ac20-institute-var-2": {
+          "schema": "IFC4",
+          "services": 0,
+          "rooms": 82
+        }
+      },
+      "notes": [
+        "Vector-PDF services skipped: optional pipeline.pdf_mep is not installed; no services or alignment inferred."
+      ],
+      "frames": {
+        "ifc_bench__ac20-arc": [
+          {
+            "building_guid": "2yeSWdixz5hBpMywNJnu8J",
+            "project_guid": "1dzyWEOh99jRUBVYP$exmF",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ],
+        "ifc_models__kit-institute-ac20-institute-var-2": [
+          {
+            "building_guid": "2yeSWdixz5hBpMywNJnu8J",
+            "project_guid": "1dzyWEOh99jRUBVYP$exmF",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  },
+  {
+    "name": "FZK-Haus (demo project)",
+    "doc_ids": [
+      "ifc_bench__fzk-house-arc",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-east",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-north",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-south",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-west",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-section-east-west",
+      "ifc_models__kit-fzk-haus-ac20-fzk-haus-section-north-south"
+    ],
+    "elapsed_s": 0.2538,
+    "under_30_s": true,
+    "stats": {
+      "nodes": 362,
+      "edges": 1568,
+      "by_kind": {
+        "project": 1,
+        "doc": 10,
+        "level": 6,
+        "fixture": 152,
+        "type": 42,
+        "material": 19,
+        "door": 15,
+        "slab": 12,
+        "stair": 3,
+        "wall": 39,
+        "window": 33,
+        "room": 23,
+        "sheet_ref": 7
+      },
+      "edges_by_kind": {
+        "contains": 382,
+        "on_level": 267,
+        "has_type": 219,
+        "made_of": 234,
+        "bounds": 132,
+        "hosted_by": 32,
+        "same_as": 271,
+        "agrees": 15,
+        "references": 16
+      },
+      "linked_pct": 99.28,
+      "agree_pct": 100.0,
+      "unlinked": [
+        "room:ifc_bench__fzk-house-arc:2dQFggKBb1fOc1CqZDIDlx:p1",
+        "room:ifc_models__kit-fzk-haus-ac20-fzk-haus:2dQFggKBb1fOc1CqZDIDlx:p1"
+      ],
+      "issues": 0,
+      "counterpart_items": 277,
+      "linked_items": 275
+    },
+    "methods": {
+      "rule": 338,
+      "ifc_relation": 945,
+      "guid": 271,
+      "label_text": 14
+    },
+    "warnings": [
+      {
+        "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-east",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-north",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-south",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-elevation-west",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-section-east-west",
+        "note": "No readable item index; document retained as a reference."
+      },
+      {
+        "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus-section-north-south",
+        "note": "No readable item index; document retained as a reference."
+      }
+    ],
+    "mep": {
+      "documents": {
+        "ifc_bench__fzk-house-arc": {
+          "schema": "IFC4",
+          "services": 0,
+          "rooms": 7
+        },
+        "ifc_models__kit-fzk-haus-ac20-fzk-haus": {
+          "schema": "IFC4",
+          "services": 0,
+          "rooms": 7
+        }
+      },
+      "notes": [
+        "Vector-PDF services skipped: optional pipeline.pdf_mep is not installed; no services or alignment inferred."
+      ],
+      "frames": {
+        "ifc_bench__fzk-house-arc": [
+          {
+            "building_guid": "2hQBAVPOr5VxhS3Jl0O47h",
+            "project_guid": "0lY6P5Ur90TAQnnnI6wtnb",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ],
+        "ifc_models__kit-fzk-haus-ac20-fzk-haus": [
+          {
+            "building_guid": "2hQBAVPOr5VxhS3Jl0O47h",
+            "project_guid": "0lY6P5Ur90TAQnnnI6wtnb",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      }
+    }
+  }
+]

@@ -1,0 +1,22 @@
+{
+  "before": {
+    "fixture": "generated for demo",
+    "size_bytes": 78639309,
+    "status": "ready",
+    "metrics": {
+      "peak_worker_rss_mib": 283.3,
+      "memory_budget_mib": 320.0,
+      "worker_exit_code": 0
+    }
+  },
+  "after": {
+    "fixture": "generated for demo",
+    "size_bytes": 78639309,
+    "status": "ready",
+    "metrics": {
+      "peak_worker_rss_mib": 64.3,
+      "memory_budget_mib": 320.0,
+      "worker_exit_code": 0
+    }
+  }
+}

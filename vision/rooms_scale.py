@@ -99,22 +99,35 @@ def estimate_scale(room_list, texts, door_items):
         cx, cy = _centre(t["bbox"])
         own = [r for r in indoor if r["polygon_px"] and cv2.pointPolygonTest(np.array(r["polygon_px"], np.int32), (float(cx), float(cy)), False) >= 0]
         if own:
-            cands.append((a, own[0]["props"]["area_px"], "room"))
+            cands.append((a, own[0]["props"]["area_px"], "room", t, [own[0]]))
         if total_px:
-            cands.append((a, total_px, "total"))
+            cands.append((a, total_px, "total", t, indoor))
     if cands and prior:
-        good = [(np.sqrt(a / px), kind) for a, px, kind in cands if px and 0.55 < np.sqrt(a / px) / prior < 1.8]
+        good = [(np.sqrt(a / px), a, px, kind, text, owners) for a, px, kind, text, owners in cands if px and 0.55 < np.sqrt(a / px) / prior < 1.8]
         if good:
-            s = min((g for g, _ in good), key=lambda g: abs(np.log(g / prior)))  # interpretation closest to the door prior
+            s, a, px, kind, text, owners = min(good, key=lambda g: abs(np.log(g[0] / prior)))
             ratio = s / prior
             conf = 0.75 if 0.8 < ratio < 1.25 else 0.55
-            return {"m_per_px": s, "method": "dimension", "confidence": conf, "evidence": f"{len(good)} stated area text(s)"}
+            return {"m_per_px": float(s), "method": "dimension", "confidence": conf, "evidence": f"{len(good)} stated area text(s)",
+                    "derivation": _area_derivation(a, px, kind, text, owners),
+                    "selection_rule": "Choose the room/total-area interpretation closest to the door prior in log scale, among ratios 0.55–1.8 of that prior; this is a heuristic association, not independent verification."}
     if cands and not prior:
-        a, px, _ = cands[0]
-        return {"m_per_px": float(np.sqrt(a / px)), "method": "dimension", "confidence": 0.4, "evidence": "area text, no door check"}
+        a, px, kind, text, owners = cands[0]
+        return {"m_per_px": float(np.sqrt(a / px)), "method": "dimension", "confidence": 0.4, "evidence": "area text, no door check",
+                "derivation": _area_derivation(a, px, kind, text, owners),
+                "selection_rule": "Use the first stated-area interpretation; without a door or independent dimension check the association is unverified."}
     if prior:
         return {"m_per_px": prior, "method": "door-prior", "confidence": 0.3, "evidence": f"median door icon {np.median(door_px):.0f}px = {DOOR_WIDTH_M} m"}
     return {"m_per_px": None, "method": "none", "confidence": 0.0}
+
+
+def _area_derivation(area, pixels, kind, text, rooms):
+    return {"formula": "scale = sqrt(printed area in square metres / segmented area in pixels squared)",
+            "inputs": [{"name": "printed area", "value": area, "unit": "m2", "source": {"bbox": text["bbox"], "text": text["text"], "reader": "OCR"}},
+                       {"name": "segmented area", "value": pixels, "unit": "px2", "source": {
+                           "regions": [{"bbox": r["bbox_px"], "polygon_px": r.get("polygon_px"), "area_px": r["props"]["area_px"]} for r in rooms],
+                           "reader": "room segmentation", "association": kind}}],
+            "note": "The label-to-room/total association was inferred; it is not a measured dimension line or an independent check."}
 
 
 def apply_scale(room_list, scale):

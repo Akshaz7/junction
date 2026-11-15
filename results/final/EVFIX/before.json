@@ -1,0 +1,1746 @@
+[
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-3710",
+    "question": "How many kitchens (including kitchenettes, open kitchens and utility kitchens) are on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 kitchen** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "One room on the scanned drawing",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 80,
+        "reason": "Detected on a scanned image.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0.0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-1524",
+    "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 bathroom** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "One room on the scanned drawing",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 80,
+        "reason": "Detected on a scanned image.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-392",
+    "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 sinks** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 sinks on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 79,
+        "reason": "Detected on a scanned image; lowered because detector confidence 75%.",
+        "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-11384",
+    "question": "How many kitchens (including kitchenettes, open kitchens and utility kitchens) are on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 kitchen** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "Room “K” on the scanned drawing",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "cite": 1,
+          "ok": true,
+          "text": "The printed word \"K\" and the model's own reading both say kitchen"
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 88,
+        "reason": "Detected on a scanned image; raised because an independent second look agrees.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0.0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-11459",
+    "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+    "type": "count",
+    "format": "raster",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "I found **no showers** on this floor plan. I searched 63 modelled elements (door, room, sink, text, toilet, wall, window); a zero here means none of those is a shower, not that the building has none, since it may not be modelled or drawn.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-9833",
+    "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+    "type": "count",
+    "format": "raster",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "I found **no showers** on this floor plan. I searched 119 modelled elements (door, room, sink, text, toilet, wall, window); a zero here means none of those is a shower, not that the building has none, since it may not be modelled or drawn.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-10142",
+    "question": "How many windows are shown on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 8,
+    "unit": "count",
+    "boxes": 8,
+    "cited_items": 8,
+    "citation_groups": 1,
+    "headline": "There are **8 windows** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "8 windows on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 81,
+        "reason": "Detected on a scanned image; raised because detector confidence 85%.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-10498",
+    "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+    "type": "count",
+    "format": "raster",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 bathrooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 rooms on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 80,
+        "reason": "Detected on a scanned image.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-7688",
+    "question": "How many floors (storeys) does this floor plan show?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "This drawing shows **1 floor** (one per plan page).",
+    "card": null,
+    "issues": [
+      "count has no evidence card",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-247",
+    "question": "How many toilet bowls (WC seats) are drawn on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 toilet** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "One toilet on the scanned drawing",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 82,
+        "reason": "Detected on a scanned image; raised because detector confidence 92%.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-3819",
+    "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+    "type": "count",
+    "format": "raster",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "I found **no showers** on this floor plan. I searched 191 modelled elements (door, room, sink, text, toilet, wall, window); a zero here means none of those is a shower, not that the building has none, since it may not be modelled or drawn.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-8029",
+    "question": "How many doors are shown on this floor plan? Count doorways fitted with a door; open doorways without a door leaf do not count.",
+    "type": "count",
+    "format": "raster",
+    "value": 6,
+    "unit": "count",
+    "boxes": 6,
+    "cited_items": 6,
+    "citation_groups": 1,
+    "headline": "There are **6 doors** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "6 doors on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 77,
+        "reason": "Detected on a scanned image; lowered because detector confidence 67%.",
+        "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__colorful-13685",
+    "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 4,
+    "unit": "count",
+    "boxes": 4,
+    "cited_items": 4,
+    "citation_groups": 1,
+    "headline": "There are **4 sinks** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "4 sinks on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 80,
+        "reason": "Detected on a scanned image.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-4845",
+    "question": "How many floors (storeys) does this floor plan show?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "This drawing shows **1 floor** (one per plan page).",
+    "card": null,
+    "issues": [
+      "count has no evidence card",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-10571",
+    "question": "How many saunas are on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0.0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-1000",
+    "question": "How many floors (storeys) does this floor plan show?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "This drawing shows **1 floor** (one per plan page).",
+    "card": null,
+    "issues": [
+      "count has no evidence card",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-20147",
+    "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 sinks** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 sinks on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 80,
+        "reason": "Detected on a scanned image.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-architectural-13767",
+    "question": "How many sinks and wash basins (kitchen and bathroom combined; a double-bowl sink counts as one) are drawn on this floor plan?",
+    "type": "count",
+    "format": "raster",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 sinks** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 sinks on the scanned drawing, each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Estimate",
+        "pct": 78,
+        "reason": "Detected on a scanned image; lowered because detector confidence 72%.",
+        "improve": "Check box 1, or upload a CAD file or vector PDF to make the count exact."
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__high-quality-1391",
+    "question": "How many bathrooms or washrooms (e.g. KH, KPH, PH, PESUH, SH) are on this floor plan, not counting separate WC rooms?",
+    "type": "count",
+    "format": "raster",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 bathroom** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "One room on the scanned drawing",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Cross-checked",
+        "pct": 80,
+        "reason": "Detected on a scanned image.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "cubicasa5k__colorful-11400",
+    "question": "How many showers and bathtubs are drawn on this floor plan in total?",
+    "type": "count",
+    "format": "raster",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "I found **no showers** on this floor plan. I searched 97 modelled elements (door, room, sink, text, toilet, wall, window); a zero here means none of those is a shower, not that the building has none, since it may not be modelled or drawn.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+    "question": "How many rooms labelled 'Couloir' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 rooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 rooms in the CAD drawing (DXF), each one numbered, including Couloir 2.05, Couloir 2.15",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+    "question": "How many rooms labelled 'Corridoio' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 rooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 rooms in the CAD drawing (DXF), each one numbered, including Corridoio 5.08, Corridoio 5.02",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site719-bldg1540-floor6678",
+    "question": "How many rooms labelled 'Vano scala' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 room** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "Room “Vano scala 2.16” in the CAD drawing (DXF)",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+    "question": "How many doors (interior doors and entrance doors together) are drawn on this floor plan?",
+    "type": "count",
+    "format": "dxf",
+    "value": 25,
+    "unit": "count",
+    "boxes": 25,
+    "cited_items": 25,
+    "citation_groups": 1,
+    "headline": "There are **25 doors** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "25 doors in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site52-bldg298-floor1183",
+    "question": "How many toilets (WC) are drawn on this floor plan?",
+    "type": "count",
+    "format": "dxf",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0.0
+  },
+  {
+    "doc_id": "swiss_dwellings__site424-bldg1074-floor4711",
+    "question": "How many windows are drawn on this floor plan?",
+    "type": "count",
+    "format": "dxf",
+    "value": 7,
+    "unit": "count",
+    "boxes": 7,
+    "cited_items": 7,
+    "citation_groups": 1,
+    "headline": "There are **7 windows** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "7 windows in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3238-bldg4922-floor22515",
+    "question": "How many rooms labelled 'Bagno' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 2,
+    "unit": "count",
+    "boxes": 2,
+    "cited_items": 2,
+    "citation_groups": 1,
+    "headline": "There are **2 rooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "2 rooms in the CAD drawing (DXF), each one numbered, including Bagno 1.01, Bagno 1.05",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "question": "How many rooms labelled 'Pièce' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 22,
+    "unit": "count",
+    "boxes": 22,
+    "cited_items": 22,
+    "citation_groups": 1,
+    "headline": "There are **22 rooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "22 rooms in the CAD drawing (DXF), each one numbered, including Pièce 1.02, Pièce 1.03, Pièce 1.04",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+    "question": "How many bathtubs are drawn on this floor plan?",
+    "type": "count",
+    "format": "dxf",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0.0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "question": "How many windows are drawn on this floor plan?",
+    "type": "count",
+    "format": "dxf",
+    "value": 13,
+    "unit": "count",
+    "boxes": 13,
+    "cited_items": 13,
+    "citation_groups": 1,
+    "headline": "There are **13 windows** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "13 windows in the CAD drawing (DXF), each one numbered",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site3421-bldg5295-floor23605",
+    "question": "What is the total net area in m² of all rooms labelled 'Schlafzimmer' on this floor?",
+    "type": "area",
+    "format": "dxf",
+    "value": 87.61,
+    "unit": "m²",
+    "boxes": 4,
+    "cited_items": 4,
+    "citation_groups": 1,
+    "headline": "The total area of the **4 rooms** on this floor plan is **87.6 m²**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "4 rooms in the CAD drawing (DXF), each one numbered, including Whg. A 3.05, Whg. B 3.11, Schlafzimmer 3.06",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Added 4 room outlines: 87.6 m²; largest Whg. B 3.11 25.3, Whg. A 3.05 25.1, Schlafzimmer 3.06 18.6",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site421-bldg1097-floor4796",
+    "question": "What is the total net floor area in m² of all numbered indoor rooms on this floor (excluding balconies, loggias, terraces and other outdoor spaces, shafts and voids)?",
+    "type": "area",
+    "format": "dxf",
+    "value": 315.79,
+    "unit": "m²",
+    "boxes": 25,
+    "cited_items": 25,
+    "citation_groups": 1,
+    "headline": "The total area of the **25 rooms** on this floor plan is **315.8 m²**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "25 rooms in the CAD drawing (DXF), each one numbered, including Zimmer 0.02, Küche 0.03, Whg. A 0.05",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Added 25 room outlines: 315.8 m²; largest Whg. C 0.23 33.3, Whg. B 0.16 32.6, Korridor 0.28 31.6",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+    "question": "What is the net floor area of apartment A in m², summing all its rooms except balconies, loggias, terraces and other outdoor spaces?",
+    "type": "area",
+    "format": "dxf",
+    "value": 66.51,
+    "unit": "m²",
+    "boxes": 7,
+    "cited_items": 7,
+    "citation_groups": 1,
+    "headline": "The net floor area of **App. A** is **66.5 m²** across 7 indoor rooms. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "7 rooms in the CAD drawing (DXF), each one numbered, including Stanza 2.01, Cucina 2.02, Bagno 2.03",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Added 7 room outlines: 66.5 m²; largest Stanza 2.05 22.4, Stanza 2.06 15.5, Stanza 2.01 10.2",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "question": "What is the net floor area of room 5.03 ('Stanza') in m²?",
+    "type": "area",
+    "format": "dxf",
+    "value": 10.15,
+    "unit": "m²",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "The area of “Stanza” is **10.2 m²**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "Room “Stanza 5.03” in the CAD drawing (DXF)",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "measured",
+          "title": "Measured",
+          "text": "Outline 35,408 px² × (0.016933 m/px)² = 10.2 m²; scale from the CAD file's own units",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "text": "Printed label says 10.15 m²; matches within 0.1%",
+          "cite": 1,
+          "ok": true
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site418-bldg1080-floor4724",
+    "question": "What is the net floor area of room 0.22 ('Balkon') in m²?",
+    "type": "area",
+    "format": "dxf",
+    "value": 8.2,
+    "unit": "m²",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "The area of “Balkon” is **8.20 m²**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "Room “Balkon 0.22” in the CAD drawing (DXF)",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "measured",
+          "title": "Measured",
+          "text": "Outline 28,598 px² × (0.016933 m/px)² = 8.2 m²; scale from the CAD file's own units",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site294-bldg554-floor2233",
+    "question": "What is the total net area in m² of all rooms labelled 'Stanza' on this floor?",
+    "type": "area",
+    "format": "dxf",
+    "value": 176.96,
+    "unit": "m²",
+    "boxes": 13,
+    "cited_items": 13,
+    "citation_groups": 1,
+    "headline": "The total area of the **13 rooms** on this floor plan is **177.0 m²**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "13 rooms in the CAD drawing (DXF), each one numbered, including Stanza 1.01, Stanza 1.02, Stanza 1.06",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Added 13 room outlines: 177.0 m²; largest Stanza 1.23 16.9, Stanza 1.05 16.7, Stanza 1.15 16.4",
+          "cite": null,
+          "ok": null
+        },
+        {
+          "kind": "checked",
+          "title": "Checked",
+          "cite": null,
+          "ok": true,
+          "text": "Printed areas on 12 of 12 rooms match their measured outlines within 1%"
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "question": "How many rooms labelled 'Cucina' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 10,
+    "unit": "count",
+    "boxes": 10,
+    "cited_items": 10,
+    "citation_groups": 1,
+    "headline": "There are **10 rooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "10 rooms in the CAD drawing (DXF), each one numbered, including Cucina 3.15, Cucina 3.22, Cucina 3.07",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site4038-bldg6362-floor26166",
+    "question": "How many rooms labelled 'Cucina' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 3,
+    "unit": "count",
+    "boxes": 3,
+    "cited_items": 3,
+    "citation_groups": 1,
+    "headline": "There are **3 rooms** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "3 rooms in the CAD drawing (DXF), each one numbered, including Cucina 1.02, Cucina 1.10, Cucina 1.22",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site2294-bldg3383-floor15064",
+    "question": "How many toilets (WC) are drawn on this floor plan?",
+    "type": "count",
+    "format": "dxf",
+    "value": 0,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "**I could not find any** on this drawing. That is what a model could read from the objects found on the drawing and the printed text and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "card": null,
+    "issues": [
+      "count has no evidence card"
+    ],
+    "abstained": false,
+    "cost_usd": 0.0
+  },
+  {
+    "doc_id": "swiss_dwellings__site279-bldg514-floor2041",
+    "question": "How many rooms labelled 'Cage d'escalier' are there on this floor?",
+    "type": "count",
+    "format": "dxf",
+    "value": 1,
+    "unit": "count",
+    "boxes": 1,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 room** on this floor plan. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "Room “Cage d'escalier 0.20” in the CAD drawing (DXF)",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 95,
+        "reason": "Measured from the CAD file's exact geometry and units.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many windows are shown on the floor plan of '2. Sal'?",
+    "type": "count",
+    "format": "ifc",
+    "value": 20,
+    "unit": "count",
+    "boxes": 20,
+    "cited_items": 20,
+    "citation_groups": 1,
+    "headline": "There are **20 windows** on **2. Sal**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "20 windows on 2. Sal in the building model (IFC), each one numbered, including [L]QQA",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many walls are shown on the floor plan of '3. Sal'?",
+    "type": "count",
+    "format": "ifc",
+    "value": 26,
+    "unit": "count",
+    "boxes": 11,
+    "cited_items": 26,
+    "citation_groups": 2,
+    "headline": "There are **26 walls** on **3. Sal**. [1][2]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "26 walls on 3. Sal in the building model (IFC), each one numbered, including [L]AD",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [
+      "Found claims every item is numbered but boxes differ",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many stairs are shown on the floor plan of '2.korrus'?",
+    "type": "count",
+    "format": "ifc",
+    "value": 1,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 1,
+    "citation_groups": 1,
+    "headline": "There is **1 staircase** on **2.korrus**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "Stairs “Sisetrepp” on 2.korrus in the building model (IFC)",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many doors are shown on the floor plan of '3.korrus'?",
+    "type": "count",
+    "format": "ifc",
+    "value": 42,
+    "unit": "count",
+    "boxes": 42,
+    "cited_items": 42,
+    "citation_groups": 1,
+    "headline": "There are **42 doors** on **3.korrus**. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "42 doors on 3.korrus in the building model (IFC), each one numbered, including ARSU, ARUKS - 012",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many doors are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 211,
+    "unit": "count",
+    "boxes": 211,
+    "cited_items": 211,
+    "citation_groups": 5,
+    "headline": "There are **211 doors** in this model. [1][2][3][4][5]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "211 doors on 5 storeys in the building model (IFC), each one numbered, including ARVU, ARSU, ARUKS - 012",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many doors are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 119,
+    "unit": "count",
+    "boxes": 119,
+    "cited_items": 119,
+    "citation_groups": 8,
+    "headline": "There are **119 doors** in this model. [1][2][3][4][5][6][7][8]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "119 doors on 8 storeys in the building model (IFC), each one numbered, including [L]QQC",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many windows are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 297,
+    "unit": "count",
+    "boxes": 297,
+    "cited_items": 297,
+    "citation_groups": 6,
+    "headline": "There are **297 windows** in this model. [1][2][3][4][5][6]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "297 windows on 6 storeys in the building model (IFC), each one numbered, including ARA, ARSA, ARVR",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many windows are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 119,
+    "unit": "count",
+    "boxes": 119,
+    "cited_items": 119,
+    "citation_groups": 6,
+    "headline": "There are **119 windows** in this model. [1][2][3][4][5][6]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "119 windows on 6 storeys in the building model (IFC), each one numbered, including [L]QQA",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many walls are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 846,
+    "unit": "count",
+    "boxes": 300,
+    "cited_items": 846,
+    "citation_groups": 7,
+    "headline": "There are **846 walls** in this model. [1][2][3][4][5][6][7]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "846 walls on 7 storeys in the building model (IFC), each one numbered, including AR, ARSEIN - 018",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [
+      "Found claims every item is numbered but boxes differ",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many walls are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 189,
+    "unit": "count",
+    "boxes": 98,
+    "cited_items": 189,
+    "citation_groups": 9,
+    "headline": "There are **189 walls** in this model. [1][2][3][4][5][6][7][8][9]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "189 walls on 8 storeys in the building model (IFC), each one numbered, including [L]AD, [L]%AD",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [
+      "Found claims every item is numbered but boxes differ",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many rooms are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 285,
+    "unit": "count",
+    "boxes": 285,
+    "cited_items": 285,
+    "citation_groups": 5,
+    "headline": "There are **285 rooms** in this model. [1][2][3][4][5]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "285 rooms on 5 storeys in the building model (IFC), each one numbered, including 6-1, 6-2, 6-3",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many rooms are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 117,
+    "unit": "count",
+    "boxes": 117,
+    "cited_items": 117,
+    "citation_groups": 8,
+    "headline": "There are **117 rooms** in this model. [1][2][3][4][5][6][7][8]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "117 rooms on 8 storeys in the building model (IFC), each one numbered, including Rum nr. K01, Rum nr. K13",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "How many slabs are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 15,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 15,
+    "citation_groups": 1,
+    "headline": "There are **15 slabs** in this model. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "15 slabs on 6 storeys in the building model (IFC), each one numbered, including ARPÕRAND - 001, ARPÕRAND - 013",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [
+      "Found claims every item is numbered but boxes differ",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "How many slabs are there?",
+    "type": "count",
+    "format": "ifc",
+    "value": 53,
+    "unit": "count",
+    "boxes": 0,
+    "cited_items": 53,
+    "citation_groups": 1,
+    "headline": "There are **53 slabs** in this model. [1]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "53 slabs on 8 storeys in the building model (IFC), each one numbered, including [L]BG, [L]AC",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [
+      "Found claims every item is numbered but boxes differ",
+      "headline and boxes differ without a coverage explanation"
+    ],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "What is the total area of the rooms?",
+    "type": "area",
+    "format": "ifc",
+    "value": 4303.6757,
+    "unit": "m²",
+    "boxes": 285,
+    "cited_items": 285,
+    "citation_groups": 5,
+    "headline": "The total area of the **285 rooms** in this model is **4,303.7 m²**. [1][2][3][4][5]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "285 rooms on 5 storeys in the building model (IFC), each one numbered, including 6-1, 6-2, 6-3",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-molio-molio-with-uris",
+    "question": "What is the total area of the rooms?",
+    "type": "area",
+    "format": "ifc",
+    "value": 3679.1938,
+    "unit": "m²",
+    "boxes": 117,
+    "cited_items": 117,
+    "citation_groups": 8,
+    "headline": "The total area of the **117 rooms** in this model is **3,679.2 m²**. [1][2][3][4][5][6][7][8]",
+    "card": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "117 rooms on 8 storeys in the building model (IFC), each one numbered, including Rum nr. K01, Rum nr. K13",
+          "cite": 1,
+          "ok": null
+        },
+        {
+          "kind": "calculated",
+          "title": "Calculated",
+          "text": "Added the floor areas stored in the model for 117 rooms: 3,679.2 m²",
+          "cite": null,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "Read directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0
+  },
+  {
+    "doc_id": "ifc_models__bsc-esplanades-1807-ep-ar-v18",
+    "question": "What is the total wall volume?",
+    "type": "volume",
+    "format": "ifc",
+    "value": 0.0,
+    "unit": "m³",
+    "boxes": 0,
+    "cited_items": 0,
+    "citation_groups": 0,
+    "headline": "**I could not find any** on this drawing. That is what a model could read from the model's data and the drawing image, so it is not a verified zero: the drawing may be sparse or unclear. Upload a clearer plan or an IFC model to be sure. Or try: how many rooms are there, where is the kitchen, area of the living room.",
+    "card": null,
+    "issues": [],
+    "abstained": false,
+    "cost_usd": 0.0
+  }
+]

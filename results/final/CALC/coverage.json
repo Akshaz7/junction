@@ -1,0 +1,2594 @@
+{
+  "generated_at": "2026-11-14T22:34:08.651511+00:00",
+  "models": "fake; recount/reader/explain disabled; no live calls",
+  "blind_run": true,
+  "scope": "Observed numeric code routes in the listed real-file cases; not a claim that unseen route variants are covered.",
+  "totals": {
+    "answers": 80,
+    "numeric_or_table_answers": 78,
+    "complete": 78
+  },
+  "routes": {
+    "ifc/count": {
+      "answers": 3,
+      "numeric_answers": 3,
+      "numeric_or_table_answers": 3,
+      "with_complete_calc": 3,
+      "complete_pct": 100.0
+    },
+    "ifc/storey-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/storey-filter": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/type-filter": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/size-filter": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/exact-size": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/multi-kind": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/room-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/room-area": {
+      "answers": 2,
+      "numeric_answers": 2,
+      "numeric_or_table_answers": 2,
+      "with_complete_calc": 2,
+      "complete_pct": 100.0
+    },
+    "ifc/filtered-area": {
+      "answers": 1,
+      "numeric_answers": 0,
+      "numeric_or_table_answers": 0,
+      "with_complete_calc": 0,
+      "complete_pct": null
+    },
+    "ifc/opening-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/wall-length": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/wall-volume": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/slab-volume": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/slab-area-by-type": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/storey-most": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/storey-total": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/storey-difference": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/kind-difference": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/percentage": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/area-ratio": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/baseboard": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/tile-order": {
+      "answers": 2,
+      "numeric_answers": 2,
+      "numeric_or_table_answers": 2,
+      "with_complete_calc": 2,
+      "complete_pct": 100.0
+    },
+    "ifc/takeoff": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/quantity-table": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/unit-conversion": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/unit-price": {
+      "answers": 2,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/complex-order": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/wall-face": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/types": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/sizes": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/length": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/length-by-system": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/length-by-storey": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/duct-length": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/duct-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/light-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/structure-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/structure-types": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "mep/structure-volume": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc4x3/count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/storey-schedule": {
+      "answers": 1,
+      "numeric_answers": 0,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/filtered-room-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/zero-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/locate": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "ifc/rule-findings": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "cad/count": {
+      "answers": 2,
+      "numeric_answers": 2,
+      "numeric_or_table_answers": 2,
+      "with_complete_calc": 2,
+      "complete_pct": 100.0
+    },
+    "cad/multi-kind": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "cad/room-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "cad/room-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "cad/filtered-area": {
+      "answers": 1,
+      "numeric_answers": 0,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "cad/storey-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "cad/baseboard": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/count": {
+      "answers": 3,
+      "numeric_answers": 3,
+      "numeric_or_table_answers": 3,
+      "with_complete_calc": 3,
+      "complete_pct": 100.0
+    },
+    "raster/multi-kind": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/room-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/filtered-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/baseboard": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/total-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/superlative-area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "raster/takeoff": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "multi-document/count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "revision/change-count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "blind/cad/count": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "blind/cad/area": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "blind/cad/baseboard": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "wallarea/case-1": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "wallarea/case-2": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "wallarea/case-3": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "wallarea/case-4": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    },
+    "wallarea/case-5": {
+      "answers": 1,
+      "numeric_answers": 1,
+      "numeric_or_table_answers": 1,
+      "with_complete_calc": 1,
+      "complete_pct": 100.0
+    }
+  },
+  "answers": [
+    {
+      "route": "ifc/count",
+      "question": "How many doors are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 77,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 77,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "77 door elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "77 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/count",
+      "question": "How many windows are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 206,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 206,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "206 window elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "206 window"
+        }
+      ]
+    },
+    {
+      "route": "ifc/count",
+      "question": "How many walls are there?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 13,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 13,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "13 wall elements of 93 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "13 wall"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-count",
+      "question": "How many storeys are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 5,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 5,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / storey / unscoped (rules)"
+        },
+        {
+          "step": "count",
+          "detail": "5 storey(s) declared in the model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-filter",
+      "question": "How many doors are on the first floor?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 22,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 22,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / storey (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "77 door elements of 784 in the model"
+        },
+        {
+          "step": "scope",
+          "detail": "storey = 1. Obergeschoss: 22 left"
+        },
+        {
+          "step": "count",
+          "detail": "22 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/type-filter",
+      "question": "How many external doors are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 1,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "77 door elements of 784 in the model"
+        },
+        {
+          "step": "scope",
+          "detail": "exterior doors: 1 left"
+        },
+        {
+          "step": "count",
+          "detail": "1 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/size-filter",
+      "question": "How many doors are wider than 1 m?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 10,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 10,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / condition wider than 1m -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "10 of 77 doors wider than 1 m"
+        }
+      ]
+    },
+    {
+      "route": "ifc/exact-size",
+      "question": "How many doors are 1.8 m wide?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 9,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 9,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / exactly 1.8m wide -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "9 of 77"
+        }
+      ]
+    },
+    {
+      "route": "ifc/multi-kind",
+      "question": "How many windows and doors are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": {
+        "window": 206,
+        "door": 77
+      },
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 283,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "[window] 206 window elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "[window] 206 window"
+        },
+        {
+          "step": "load",
+          "detail": "[door] 77 door elements of 784 in the model"
+        },
+        {
+          "step": "count",
+          "detail": "[door] 77 door"
+        }
+      ]
+    },
+    {
+      "route": "ifc/room-count",
+      "question": "How many office rooms are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 45,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 45,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "office; all storeys; no area bound: 45 matches"
+        }
+      ]
+    },
+    {
+      "route": "ifc/room-area",
+      "question": "What is the total area of all rooms?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 1939.38,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 82,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "82 rooms"
+        }
+      ]
+    },
+    {
+      "route": "ifc/room-area",
+      "question": "What is the total area of all rooms?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 173.34,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 7,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "7 rooms"
+        }
+      ]
+    },
+    {
+      "route": "ifc/filtered-area",
+      "question": "What is the total area of all office rooms?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "has_calc": false,
+      "complete": false,
+      "eligible": false,
+      "rows": 0,
+      "issues": [
+        "no calculation"
+      ],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/opening-area",
+      "question": "What is the total area of all windows?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 23.1702,
+      "unit": "m²",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 11,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "area / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "11 window elements of 93 in the model"
+        },
+        {
+          "step": "area",
+          "detail": "sum over 11 window = 23.1702 m²"
+        }
+      ]
+    },
+    {
+      "route": "ifc/wall-length",
+      "question": "What is the total length of all walls?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 1166.0,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 121,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "length / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "121 wall elements of 784 in the model"
+        },
+        {
+          "step": "length",
+          "detail": "sum over 121 wall = 1166.0000 m"
+        }
+      ]
+    },
+    {
+      "route": "ifc/wall-volume",
+      "question": "What is the total volume of all walls?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 662.4846,
+      "unit": "m³",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 121,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "volume / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "121 wall elements of 784 in the model"
+        },
+        {
+          "step": "volume",
+          "detail": "sum over 121 wall = 662.4846 m³"
+        }
+      ]
+    },
+    {
+      "route": "ifc/slab-volume",
+      "question": "What is the total volume of all slabs?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 76.9916,
+      "unit": "m³",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 4,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "volume / slab / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "4 slab elements of 93 in the model"
+        },
+        {
+          "step": "volume",
+          "detail": "sum over 4 slab = 76.9916 m³"
+        }
+      ]
+    },
+    {
+      "route": "ifc/slab-area-by-type",
+      "question": "What is the slab area by type and thickness?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 384.96,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 4,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "4 slabs, 4 with thickness and area; thickness from the model's thickness quantity"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-most",
+      "question": "Which floor has the most doors?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 22,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 77,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "storey comparison / door / count -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "Keller 16, Erdgeschoss 18, 1. Obergeschoss 22, 2. Obergeschoss 21, Dachgeschoss 0"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-total",
+      "question": "How many windows are there in total on the building and how many on the 2nd floor?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 206,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 206,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / total + storey -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "206 total, 54 on 2. Obergeschoss"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-difference",
+      "question": "Compare the doors on the ground floor and first floor",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 4,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 40,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "storey pair / door / count -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "**Erdgeschoss**: 18; **1. Obergeschoss**: 22"
+        }
+      ]
+    },
+    {
+      "route": "ifc/kind-difference",
+      "question": "Are there more windows or doors?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 129,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 283,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "kind comparison / window vs door -> code, no model"
+        },
+        {
+          "step": "count",
+          "detail": "206 windows, 77 doors"
+        }
+      ]
+    },
+    {
+      "route": "ifc/percentage",
+      "question": "What percentage of doors are on the first floor?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 28.6,
+      "unit": "%",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 99,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "arithmetic -> independent solver results, no model"
+        },
+        {
+          "step": "calculate",
+          "detail": "How many doors are there on 1. Obergeschoss: 22; How many doors are there: 77"
+        }
+      ]
+    },
+    {
+      "route": "ifc/area-ratio",
+      "question": "What is the window-to-floor area ratio?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 16.0,
+      "unit": "%",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 288,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "arithmetic -> independent solver results, no model"
+        },
+        {
+          "step": "calculate",
+          "detail": "What is the total area of all windows: 309.5; What is the total area of all rooms: 1939.3839"
+        }
+      ]
+    },
+    {
+      "route": "ifc/baseboard",
+      "question": "How many linear metres of baseboard per room?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 136.2,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 7,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "7 rooms, 5 doors considered"
+        }
+      ]
+    },
+    {
+      "route": "ifc/tile-order",
+      "question": "How many square metres of floor tiles should I order for the bathrooms?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 108.9,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 8,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "takeoff",
+          "detail": "tile for bathroom rooms across 1 document(s)"
+        }
+      ]
+    },
+    {
+      "route": "ifc/tile-order",
+      "question": "How many m2 of tiles for the bathrooms including 15% waste?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 113.9,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 8,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "takeoff",
+          "detail": "tile for bathroom rooms across 1 document(s)"
+        }
+      ]
+    },
+    {
+      "route": "ifc/takeoff",
+      "question": "How many m2 of floor tiles do I need for all the WCs including 10% waste?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 108.92,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 8,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "area / toilet / unscoped -> code, no model"
+        },
+        {
+          "step": "load",
+          "detail": "8 toilet elements of 784 in the model"
+        },
+        {
+          "step": "area",
+          "detail": "sum over 8 toilet = 99.0176 m²"
+        },
+        {
+          "step": "compute",
+          "detail": "99.02 m2 x (1 + 10%) = 108.92 m2"
+        }
+      ]
+    },
+    {
+      "route": "ifc/quantity-table",
+      "question": "Give me the full quantity take-off",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 7,
+      "unit": "rooms",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 34,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "quantity take-off -> existing solvers (rooms, baseboard, doors, windows, slabs, piping), code, no model"
+        },
+        {
+          "step": "rooms",
+          "detail": "7 rooms"
+        },
+        {
+          "step": "slab",
+          "detail": "2 rows"
+        },
+        {
+          "step": "piping",
+          "detail": "not in this file"
+        }
+      ]
+    },
+    {
+      "route": "ifc/unit-conversion",
+      "question": "What is the total length of all walls in feet?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 1166.0,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 121,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "length / wall / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "121 wall elements of 784 in the model"
+        },
+        {
+          "step": "length",
+          "detail": "sum over 121 wall = 1166.0000 m"
+        }
+      ]
+    },
+    {
+      "route": "ifc/unit-price",
+      "question": "What is the total area of all rooms at 35 EUR per m2?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "has_calc": false,
+      "complete": false,
+      "eligible": false,
+      "rows": 0,
+      "issues": [
+        "no calculation"
+      ],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/unit-price",
+      "question": "What is the total area of all rooms at a price of 35 EUR per m2?",
+      "docs": [
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 173.34,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 7,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "7 rooms"
+        }
+      ]
+    },
+    {
+      "route": "ifc/complex-order",
+      "question": "How much floor tiling should I order for all WC rooms, allowing 10% waste, if each box covers 1.44 m² and costs €32?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 76,
+      "unit": null,
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 8,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "complex_q",
+          "detail": "h_tiling: applied 5, left 0"
+        }
+      ]
+    },
+    {
+      "route": "ifc/wall-face",
+      "question": "What is the net area of one face of all external walls?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 940.81,
+      "unit": null,
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 44,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "complex_q",
+          "detail": "h_external_face: applied 4, left 0"
+        }
+      ]
+    },
+    {
+      "route": "mep/count",
+      "question": "How many pipes are there?",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "value": 504,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 504,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/types",
+      "question": "What types of pipes are used?",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "value": 3,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 504,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "3 types over 504 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/sizes",
+      "question": "What sizes of pipe are used?",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "value": 11,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 504,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "11 sizes over 504 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/length",
+      "question": "What is the total length of piping?",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "value": 301.11,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 504,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/length-by-system",
+      "question": "List the piping systems by length",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "value": 301.11,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 504,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/length-by-storey",
+      "question": "What is the total pipe length by level?",
+      "docs": [
+        "ifc_bench__digital-hub-plumbing"
+      ],
+      "value": 301.11,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 504,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "504 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/duct-length",
+      "question": "What is the total duct length by system?",
+      "docs": [
+        "ifc_bench__digital-hub-ventilation"
+      ],
+      "value": 838.39,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 595,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "595 runs summed"
+        }
+      ]
+    },
+    {
+      "route": "mep/duct-count",
+      "question": "How many ducts are there?",
+      "docs": [
+        "ifc_bench__digital-hub-ventilation"
+      ],
+      "value": 595,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 595,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "595 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/light-count",
+      "question": "How many light fixtures are there?",
+      "docs": [
+        "ifc_models__bsc-clinic-clinic-electrical"
+      ],
+      "value": 1120,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1120,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1120 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/structure-count",
+      "question": "How many columns are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 2,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 2,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "2 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/structure-types",
+      "question": "What types of columns are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 1,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 2,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1 types over 2 elements"
+        }
+      ]
+    },
+    {
+      "route": "mep/structure-volume",
+      "question": "What is the total concrete volume?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 0.0,
+      "unit": "m³",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 0,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "volume / None / unscoped (rules)"
+        },
+        {
+          "step": "abstain",
+          "detail": "I could not tell which elements the question is about, so I would rather not guess."
+        }
+      ]
+    },
+    {
+      "route": "ifc4x3/count",
+      "question": "How many columns are there?",
+      "docs": [
+        "ifc_models__bsc-chesapeake-bay-bridge-tunnel-chesapeake-bay-bridge-tunnel-4x3"
+      ],
+      "value": 1195,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1195,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1195 elements"
+        }
+      ]
+    },
+    {
+      "route": "ifc/storey-schedule",
+      "question": "Compare the ground floor and the first floor",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": null,
+      "unit": null,
+      "numeric": false,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 228,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "storey table / rooms, area, doors, windows -> code, no model"
+        }
+      ]
+    },
+    {
+      "route": "ifc/filtered-room-area",
+      "question": "What is the total area of rooms between 12 and 25 m2?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 602.2148,
+      "unit": "m²",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 29,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "explicit filters -> code over IFC quantities, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "room; all storeys; between 12 and 25 m²: 29 matches"
+        }
+      ]
+    },
+    {
+      "route": "ifc/zero-count",
+      "question": "How many sprinklers are there?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 0,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 0,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "building services / structure -> element index read from the IFC, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "0 distribution elements in the IFC"
+        }
+      ]
+    },
+    {
+      "route": "ifc/locate",
+      "question": "Where are the stairs?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 4,
+      "unit": null,
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 4,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "exits",
+          "detail": "stairs: 4 items"
+        }
+      ]
+    },
+    {
+      "route": "ifc/rule-findings",
+      "question": "Do all doors meet the accessibility clear width requirement?",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "value": 0,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 0,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "rule check / accessibility (241/2017) -> code over the model, no model"
+        },
+        {
+          "step": "findings",
+          "detail": "0 findings from 3 checks"
+        }
+      ]
+    },
+    {
+      "route": "cad/count",
+      "question": "How many windows are there?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": 28,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 28,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 28 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "28 window"
+        }
+      ]
+    },
+    {
+      "route": "cad/count",
+      "question": "How many doors are there?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": 36,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 36,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 36 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "36 door"
+        }
+      ]
+    },
+    {
+      "route": "cad/multi-kind",
+      "question": "How many windows and doors are there?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": {
+        "window": 28,
+        "door": 36
+      },
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 64,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "[window] plan map: 28 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[window] 28 window"
+        },
+        {
+          "step": "load",
+          "detail": "[door] plan map: 36 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[door] 36 door"
+        }
+      ]
+    },
+    {
+      "route": "cad/room-count",
+      "question": "How many rooms are there?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": 47,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 47,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / room / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 47 room items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "47 room"
+        }
+      ]
+    },
+    {
+      "route": "cad/room-area",
+      "question": "What is the total area of all rooms?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": 343.27,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 47,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "47 rooms"
+        }
+      ]
+    },
+    {
+      "route": "cad/filtered-area",
+      "question": "What is the total area of the Zimmer rooms?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": null,
+      "unit": "m2",
+      "numeric": false,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 9,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / room / named 'Zimmer' -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "9 rooms match Zimmer"
+        }
+      ]
+    },
+    {
+      "route": "cad/storey-count",
+      "question": "How many storeys are there?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": 1,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / storey / unscoped (rules)"
+        },
+        {
+          "step": "count",
+          "detail": "1 storey(s): 1 plan page(s); 1 by separate floor plans on the sheet"
+        }
+      ]
+    },
+    {
+      "route": "cad/baseboard",
+      "question": "How many linear metres of baseboard per room?",
+      "docs": [
+        "swiss_dwellings__site1000-bldg2082-floor9385"
+      ],
+      "value": 393.5,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 47,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "47 rooms, 36 doors considered"
+        }
+      ]
+    },
+    {
+      "route": "raster/count",
+      "question": "How many windows are there?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 11,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 11,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 11 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "11 window"
+        }
+      ]
+    },
+    {
+      "route": "raster/count",
+      "question": "How many doors are there?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 11,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 11,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 11 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "11 door"
+        }
+      ]
+    },
+    {
+      "route": "raster/count",
+      "question": "How many toilets are there?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 2,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 2,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / toilet / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 2 toilet items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "2 toilet"
+        }
+      ]
+    },
+    {
+      "route": "raster/multi-kind",
+      "question": "How many windows and doors are there?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": {
+        "window": 11,
+        "door": 11
+      },
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 22,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / window / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "[window] plan map: 11 window items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[window] 11 window"
+        },
+        {
+          "step": "load",
+          "detail": "[door] plan map: 11 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "[door] 11 door"
+        }
+      ]
+    },
+    {
+      "route": "raster/room-area",
+      "question": "What is the total area of all rooms?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 93.71,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 10,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "10 rooms"
+        }
+      ]
+    },
+    {
+      "route": "raster/filtered-area",
+      "question": "What is the area of the kitchen?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 13.75,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / room / named 'kitchen' -> code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "1 rooms match kitchen"
+        }
+      ]
+    },
+    {
+      "route": "raster/baseboard",
+      "question": "How many linear metres of baseboard per room?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 92.5,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 8,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "8 rooms, 11 doors considered"
+        }
+      ]
+    },
+    {
+      "route": "raster/total-area",
+      "question": "How big is this flat?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 62.33,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 8,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "plan total -> sum of room areas, no model"
+        },
+        {
+          "step": "sum",
+          "detail": "8 indoor rooms = 62.33 m2"
+        }
+      ]
+    },
+    {
+      "route": "raster/superlative-area",
+      "question": "What is the biggest room in this plan?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 21.55,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "largest room / plan map -> code, no model"
+        },
+        {
+          "step": "compare",
+          "detail": "8 rooms ranked by area"
+        }
+      ]
+    },
+    {
+      "route": "raster/takeoff",
+      "question": "How many m2 of flooring for the living room and kitchen with 10% extra?",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "value": 38.83,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 2,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "area / room / unscoped -> code, no model"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 10 room items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "filter",
+          "detail": "room type ['living']: 1 matched"
+        },
+        {
+          "step": "area",
+          "detail": "sum over 1 room = 21.5500 m²"
+        },
+        {
+          "step": "route",
+          "detail": "area / room / unscoped -> code, no model"
+        }
+      ]
+    },
+    {
+      "route": "multi-document/count",
+      "question": "How many doors are there across both models?",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_bench__fzk-house-arc"
+      ],
+      "value": 82,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 82,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "multi-document total / door / count -> combine, no model"
+        }
+      ]
+    },
+    {
+      "route": "revision/change-count",
+      "question": "Compare these two versions",
+      "docs": [
+        "ifc_models__rwth-digitalhub-fm-hzg-digitalhub-v1",
+        "ifc_models__rwth-digitalhub-digitalhub-fm-hzg-v2"
+      ],
+      "value": 1235,
+      "unit": "changes",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 1235,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "revision_compare",
+          "detail": "Compared stable item identities, source positions, outer dimensions and recorded properties. Movement threshold: more than 5 cm. Rotation or a changed model coordinate system can also change outer dimensions."
+        }
+      ]
+    },
+    {
+      "route": "blind/cad/count",
+      "question": "How many doors are there?",
+      "docs": [
+        "swiss_dwellings__site4237-bldg7396-floor29509"
+      ],
+      "value": 25,
+      "unit": "count",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 25,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "count / door / unscoped (rules)"
+        },
+        {
+          "step": "load",
+          "detail": "plan map: 25 door items (conf >= 0.5; 0 below ignored)"
+        },
+        {
+          "step": "count",
+          "detail": "25 door"
+        }
+      ]
+    },
+    {
+      "route": "blind/cad/area",
+      "question": "What is the total area of all rooms?",
+      "docs": [
+        "swiss_dwellings__site4237-bldg7396-floor29509"
+      ],
+      "value": 242.68,
+      "unit": "m2",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 27,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "list rooms with areas -> room items sorted by area, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "27 rooms"
+        }
+      ]
+    },
+    {
+      "route": "blind/cad/baseboard",
+      "question": "How many linear metres of baseboard per room?",
+      "docs": [
+        "swiss_dwellings__site4237-bldg7396-floor29509"
+      ],
+      "value": 300.2,
+      "unit": "m",
+      "numeric": true,
+      "has_calc": true,
+      "complete": true,
+      "eligible": true,
+      "rows": 27,
+      "issues": [],
+      "answer_trace": [
+        {
+          "step": "route",
+          "detail": "baseboard -> room outline minus door openings, code, no model"
+        },
+        {
+          "step": "filter",
+          "detail": "27 rooms, 25 doors considered"
+        }
+      ]
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "What is the net wall area per floor?",
+      "routed": true,
+      "value": 4880.455604,
+      "rows": 121,
+      "complete": true,
+      "issues": [],
+      "route": "wallarea/case-1",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "numeric": true,
+      "eligible": true,
+      "has_calc": true,
+      "upstream_commit": "dd2d7f0f391b5957282d2a8339c16a7f65bf31fe"
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "What is the facade area of the ground floor?",
+      "routed": true,
+      "value": 228.52,
+      "rows": 12,
+      "complete": true,
+      "issues": [],
+      "route": "wallarea/case-2",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "numeric": true,
+      "eligible": true,
+      "has_calc": true,
+      "upstream_commit": "dd2d7f0f391b5957282d2a8339c16a7f65bf31fe"
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "How many plasterboard sheets 1200 x 2400 mm with 10% waste?",
+      "routed": true,
+      "value": 1492,
+      "rows": 121,
+      "complete": true,
+      "issues": [],
+      "route": "wallarea/case-3",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "numeric": true,
+      "eligible": true,
+      "has_calc": true,
+      "upstream_commit": "dd2d7f0f391b5957282d2a8339c16a7f65bf31fe"
+    },
+    {
+      "doc_id": "ifc_bench__ac20-arc",
+      "question": "What is the gross wall surface area?",
+      "routed": true,
+      "value": 5857.295604,
+      "rows": 121,
+      "complete": true,
+      "issues": [],
+      "route": "wallarea/case-4",
+      "docs": [
+        "ifc_bench__ac20-arc"
+      ],
+      "numeric": true,
+      "eligible": true,
+      "has_calc": true,
+      "upstream_commit": "dd2d7f0f391b5957282d2a8339c16a7f65bf31fe"
+    },
+    {
+      "doc_id": "cubicasa5k__colorful-11397",
+      "question": "What is the net wall surface area?",
+      "routed": true,
+      "value": 553.935484,
+      "rows": 40,
+      "complete": true,
+      "issues": [],
+      "route": "wallarea/case-5",
+      "docs": [
+        "cubicasa5k__colorful-11397"
+      ],
+      "numeric": true,
+      "eligible": true,
+      "has_calc": true,
+      "upstream_commit": "dd2d7f0f391b5957282d2a8339c16a7f65bf31fe"
+    }
+  ]
+}

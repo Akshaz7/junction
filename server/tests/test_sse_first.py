@@ -41,7 +41,9 @@ def stream_setup(monkeypatch):
             await stage("history")
             return []
 
-        async def fetchval(self, sql, cid, content):
+        async def fetchval(self, sql, cid, content=None):
+            if "project_id" in sql:
+                return None
             assert sql.startswith("insert into messages")
             role = "user" if "'user'" in sql else "assistant"
             await stage(f"create {role} message")

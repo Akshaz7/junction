@@ -1,0 +1,90 @@
+{
+  "calibration_docs": [
+    "ifc_bench__city-house-munich-arc",
+    "ifc_bench__fantasy-hotel-2-arc",
+    "ifc_models__resbim-0-model",
+    "ifc_models__resbim-1-model",
+    "ifc_models__resbim-2-model"
+  ],
+  "evaluation_docs": [
+    "ifc_bench__ac20-arc",
+    "ifc_models__kit-fzk-haus-ac20-fzk-haus"
+  ],
+  "sheet_pairs": [
+    {
+      "model": "ifc_models__kit-institute-ac20-institute-var-2",
+      "sheet": "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller"
+    },
+    {
+      "model": "ifc_models__kit-institute-ac20-institute-var-2",
+      "sheet": "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss"
+    },
+    {
+      "model": "ifc_models__kit-institute-ac20-institute-var-2",
+      "sheet": "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss"
+    },
+    {
+      "model": "ifc_models__kit-institute-ac20-institute-var-2",
+      "sheet": "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss"
+    },
+    {
+      "model": "ifc_models__kit-institute-ac20-institute-var-2",
+      "sheet": "ifc_models__kit-institute-ac20-institute-var-2-plan-05-dachgeschoss"
+    },
+    {
+      "model": "ifc_models__kit-fzk-haus-ac20-fzk-haus",
+      "sheet": "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss"
+    },
+    {
+      "model": "ifc_models__kit-fzk-haus-ac20-fzk-haus",
+      "sheet": "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss"
+    }
+  ],
+  "revision_pairs": [
+    {
+      "doc_a": "ifc_models__rwth-digitalhub-fm-hzg-digitalhub-v1",
+      "doc_b": "ifc_models__rwth-digitalhub-digitalhub-fm-hzg-v2"
+    },
+    {
+      "doc_a": "ifc_models__rwth-digitalhub-fm-lft-digitalhub-v1",
+      "doc_b": "ifc_models__rwth-digitalhub-digitalhub-fm-lft-v2"
+    }
+  ],
+  "swiss_docs": [
+    "swiss_dwellings__site3468-bldg5347-floor23670",
+    "swiss_dwellings__site299-bldg569-floor2304",
+    "swiss_dwellings__site2137-bldg2980-floor13588"
+  ],
+  "projects": [
+    {
+      "id": "kg-eval-institute",
+      "name": "Institute evaluation",
+      "docs": [
+        "ifc_bench__ac20-arc",
+        "ifc_models__kit-institute-ac20-institute-var-2",
+        "ifc_models__kit-institute-ac20-institute-var-2-plan-01-keller",
+        "ifc_models__kit-institute-ac20-institute-var-2-plan-02-erdgeschoss",
+        "ifc_models__kit-institute-ac20-institute-var-2-plan-03-1-obergeschoss",
+        "ifc_models__kit-institute-ac20-institute-var-2-plan-04-2-obergeschoss",
+        "ifc_models__kit-institute-ac20-institute-var-2-plan-05-dachgeschoss"
+      ]
+    },
+    {
+      "id": "kg-eval-haus",
+      "name": "House evaluation",
+      "docs": [
+        "ifc_models__kit-fzk-haus-ac20-fzk-haus",
+        "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-01-erdgeschoss",
+        "ifc_models__kit-fzk-haus-ac20-fzk-haus-plan-02-dachgeschoss"
+      ]
+    },
+    {
+      "id": "kg-eval-services",
+      "name": "Building services relation audit",
+      "docs": [
+        "ifc_models__bsc-clinic-clinic-architectural",
+        "ifc_models__bsc-clinic-clinic-hvac"
+      ]
+    }
+  ]
+}

@@ -903,6 +903,12 @@ def answer(question: str, doc_ids: list[str], root=None, t0: float | None = None
                 "printed against drawn areas, duplicates, openings outside walls, missing storeys, missing values and clashes, wherever the file has the data. "
                 "That does not prove the file is error free.")
         conf, label, pct, reason = 0.85, "Cross-checked", 84, "Only checks the file's data allows were run; a clean result is not a guarantee."
+        # A clean check still has a source population; cite the inspected data
+        # without inventing an issue, location or affected element.
+        cites = [{"n": k, "doc_id": did, "page": 1, "kind": "element", "bbox_px": None, "item_ids": [],
+                  "quote": "Consistency checks over the stored drawing/model data found no supported issue.",
+                  "inventory_check": True} for k, did in enumerate(doc_ids, 1)]
+        text += " " + " ".join(f"[{c['n']}]" for c in cites)
     steps = [{"kind": "checked", "title": "Checked", "ok": n == 0,
               "text": (f"Ran the file's own consistency checks; {_plural(n, 'possible mistake')} found" if n else "Ran the file's own consistency checks; nothing found"), "cite": 1 if cites else None}]
     scene = {"doc_id": first_doc, "highlight_item_ids": list(dict.fromkeys(hl)), "camera_target_item_id": hl[0] if hl else None}

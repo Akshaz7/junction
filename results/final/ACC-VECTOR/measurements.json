@@ -1,0 +1,4568 @@
+[
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "108",
+    "size_m": [
+      0.4900000000000024,
+      2.1999999999999957
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3265306122448964
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3265306122448964
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3265306122448964
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3265306122448964
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "109",
+    "size_m": [
+      0.5500000000000029,
+      2.4699999999999984
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.29090909090908934
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.29090909090908934
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.29090909090908934
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.29090909090908934
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "10A",
+    "size_m": [
+      0.5499999999999998,
+      2.469999999999997
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.290909090909091
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.290909090909091
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.290909090909091
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.290909090909091
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "10B",
+    "size_m": [
+      0.5099999999999949,
+      2.209999999999999
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3137254901960816
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3137254901960816
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3137254901960816
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.3137254901960816
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "10C",
+    "size_m": [
+      0.9800000000000021,
+      1.940000000000003
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "10D",
+    "size_m": [
+      1.3100000000000005,
+      2.019999999999996
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "10E",
+    "size_m": [
+      0.9400000000000015,
+      1.94
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+    "handle": "10F",
+    "size_m": [
+      1.5100000000000007,
+      1.6200000000000019
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "13C",
+    "size_m": [
+      0.4900000000000023,
+      0.7200000000000011
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783269917,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.6521380951459284
+      },
+      {
+        "circle_radius": 0.029400000000000124,
+        "drain_ratio": 0.11999999999999994
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "13D",
+    "size_m": [
+      0.6499999999999982,
+      1.6800000000000084
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 4.107825191113079e-15,
+        "ellipse_error": 0.3542107055913035,
+        "extent_ratio": 2.9433962264151012
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07692307692307714
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "13E",
+    "size_m": [
+      0.4799999999999963,
+      0.5300000000000004
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783468,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 1.006851570611368
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "13F",
+    "size_m": [
+      0.6499999999999927,
+      5.179999999999992
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384892
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384892
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384892
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384892
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "140",
+    "size_m": [
+      0.3999999999999991,
+      0.6899999999999974
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "141",
+    "size_m": [
+      0.460000000000003,
+      4.420000000000003
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695651945
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695651945
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695651945
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695651945
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "142",
+    "size_m": [
+      0.4999999999999997,
+      0.5399999999999983
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184782857,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.0293814282871
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "143",
+    "size_m": [
+      0.5300000000000017,
+      0.74
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783358735,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.5698775505762876
+      },
+      {
+        "circle_radius": 0.0318000000000001,
+        "drain_ratio": 0.12
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "144",
+    "size_m": [
+      0.6400000000000005,
+      1.6099999999999963
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.1102230246251565e-16,
+        "ellipse_error": 0.3516890635548573,
+        "extent_ratio": 2.8653846153846034
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07812499999999994
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "145",
+    "size_m": [
+      0.5299999999999999,
+      0.7399999999999951
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783214406,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.5698775505762885
+      },
+      {
+        "circle_radius": 0.031799999999999995,
+        "drain_ratio": 0.12
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "146",
+    "size_m": [
+      0.4999999999999996,
+      0.549999999999992
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783007,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.0106654023182498
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "147",
+    "size_m": [
+      0.6499999999999988,
+      1.6800000000000088
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 2.9976021664879227e-15,
+        "ellipse_error": 0.3542107055913033,
+        "extent_ratio": 2.943396226415101
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07692307692307707
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "148",
+    "size_m": [
+      0.34999999999999476,
+      0.6700000000000018
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "149",
+    "size_m": [
+      0.6200000000000091,
+      4.519999999999994
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290285
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290285
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290285
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290285
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "14A",
+    "size_m": [
+      0.6099999999999969,
+      3.1100000000000034
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721446
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721446
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721446
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721446
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "14B",
+    "size_m": [
+      0.620000000000004,
+      2.480000000000003
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290306
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290306
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290306
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290306
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "14C",
+    "size_m": [
+      0.2199999999999979,
+      0.41999999999999743
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "14D",
+    "size_m": [
+      0.15000000000000047,
+      0.7499999999999968
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "14E",
+    "size_m": [
+      2.2499999999999982,
+      3.0700000000000025
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "14F",
+    "size_m": [
+      0.39999999999999664,
+      1.2700000000000011
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "150",
+    "size_m": [
+      1.2299999999999993,
+      1.3300000000000007
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "151",
+    "size_m": [
+      0.5499999999999929,
+      0.7900000000000069
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 5.551115123125783e-17,
+        "offset": 0.10040196184783501,
+        "ellipse_error": 0.00223063351390973,
+        "extent_ratio": 1.2920053669313283
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "152",
+    "size_m": [
+      0.5499999999999956,
+      0.779999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 5.551115123125783e-17,
+        "offset": 0.10040196184783595,
+        "ellipse_error": 0.002230633513909508,
+        "extent_ratio": 1.275650868615718
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "153",
+    "size_m": [
+      1.110000000000003,
+      1.2699999999999967
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "154",
+    "size_m": [
+      0.40000000000000435,
+      0.519999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783858335,
+        "ellipse_error": 0.0022306335139115063,
+        "extent_ratio": 1.4616832869554848
+      },
+      {
+        "circle_radius": 0.024000000000000264,
+        "drain_ratio": 0.12000000000000001
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "155",
+    "size_m": [
+      0.3799999999999954,
+      0.5199999999999972
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478358078,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 1.538613986268974
+      },
+      {
+        "circle_radius": 0.022799999999999508,
+        "drain_ratio": 0.11999999999999887
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "156",
+    "size_m": [
+      0.39999999999999974,
+      1.329999999999998
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+    "handle": "157",
+    "size_m": [
+      2.22,
+      3.0100000000000047
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1EF",
+    "size_m": [
+      1.0100000000000025,
+      1.099999999999998
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F0",
+    "size_m": [
+      0.5799999999999935,
+      0.7000000000000016
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783812,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.0856003192242332
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F1",
+    "size_m": [
+      0.549999999999997,
+      1.5499999999999967
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478304232,
+        "ellipse_error": 0.00223063351390973,
+        "extent_ratio": 3.1686840486447925
+      },
+      {
+        "circle_radius": 0.03299999999999992,
+        "drain_ratio": 0.12000000000000034
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F2",
+    "size_m": [
+      0.639999999999998,
+      1.7000000000000026
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 5.88418203051333e-15,
+        "ellipse_error": 0.3546596456844531,
+        "extent_ratio": 3.038461538461491
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07812500000000025
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F3",
+    "size_m": [
+      1.0099999999999965,
+      1.1000000000000036
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F4",
+    "size_m": [
+      0.6400000000000025,
+      1.6399999999999983
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.7763568394002505e-15,
+        "ellipse_error": 0.35271750547594305,
+        "extent_ratio": 2.923076923076886
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07812499999999971
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F5",
+    "size_m": [
+      0.579999999999999,
+      0.7000000000000043
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.1004019618478399,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.08560031922425
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F6",
+    "size_m": [
+      0.5500000000000003,
+      1.549999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478323661,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 3.1686840486447836
+      },
+      {
+        "circle_radius": 0.03300000000000007,
+        "drain_ratio": 0.1200000000000002
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F7",
+    "size_m": [
+      0.6499999999999986,
+      1.650000000000014
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 3.9745984281580604e-14,
+        "ellipse_error": 0.35323386676754454,
+        "extent_ratio": 2.8867924528300057
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.0769230769230771
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F8",
+    "size_m": [
+      0.49999999999999983,
+      1.1500000000000148
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783414246,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 2.586055046152065
+      },
+      {
+        "circle_radius": 0.030000000000000044,
+        "drain_ratio": 0.12000000000000022
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1F9",
+    "size_m": [
+      0.37999999999999684,
+      0.5000000000000054
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184784002664,
+        "ellipse_error": 0.0022306335139115063,
+        "extent_ratio": 1.4794365252586184
+      },
+      {
+        "circle_radius": 0.0228000000000005,
+        "drain_ratio": 0.12000000000000363
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1FA",
+    "size_m": [
+      0.4800000000000044,
+      0.6499999999999945
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783468,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 1.2180694057962256
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1FB",
+    "size_m": [
+      0.5999999999999905,
+      2.2000000000000073
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666709
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666709
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666709
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666709
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1FC",
+    "size_m": [
+      0.5900000000000019,
+      1.3499999999999939
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 5.551115123125783e-15,
+        "ellipse_error": 0.33969376428354603,
+        "extent_ratio": 2.6170212765956777
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.08474576271186414
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1FD",
+    "size_m": [
+      0.5099999999999979,
+      0.6200000000000069
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478233733,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.3668833151016824
+      },
+      {
+        "circle_radius": 0.0306000000000003,
+        "drain_ratio": 0.12000000000000167
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1FE",
+    "size_m": [
+      0.5100000000000041,
+      0.6200000000000035
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478347531,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.3668833151016753
+      },
+      {
+        "circle_radius": 0.030600000000000245,
+        "drain_ratio": 0.12
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "1FF",
+    "size_m": [
+      0.5099999999999969,
+      0.6200000000000018
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.1004019618478249,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.0935066520813665
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "200",
+    "size_m": [
+      0.9999999999999984,
+      1.2199999999999969
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "201",
+    "size_m": [
+      0.560000000000001,
+      1.1100000000000083
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "202",
+    "size_m": [
+      0.7000000000000104,
+      1.9000000000000068
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.1213252548714081e-14,
+        "ellipse_error": 0.3611996647543805,
+        "extent_ratio": 3.06896551724131
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857037
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "203",
+    "size_m": [
+      0.4699999999999956,
+      0.630000000000003
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.1004019618478234,
+        "ellipse_error": 0.002230633513909064,
+        "extent_ratio": 1.2057092907128972
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "204",
+    "size_m": [
+      0.6000000000000005,
+      1.899999999999986
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478283693,
+        "ellipse_error": 0.002230633513909508,
+        "extent_ratio": 3.560510570789046
+      },
+      {
+        "circle_radius": 0.03599999999999982,
+        "drain_ratio": 0.11999999999999929
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "205",
+    "size_m": [
+      0.5799999999999953,
+      0.6999999999999986
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783068,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 1.0856003192242405
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "206",
+    "size_m": [
+      0.7000000000000044,
+      1.9500000000000055
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.7763568394002505e-15,
+        "ellipse_error": 0.3623990678622211,
+        "extent_ratio": 3.155172413793102
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857098
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "207",
+    "size_m": [
+      0.5299999999999978,
+      1.7499999999999962
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478314779,
+        "ellipse_error": 0.0022306335139130606,
+        "extent_ratio": 3.71254826149796
+      },
+      {
+        "circle_radius": 0.03180000000000036,
+        "drain_ratio": 0.12000000000000187
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "208",
+    "size_m": [
+      0.5999999999999851,
+      3.649999999999991
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666667327
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666667327
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666667327
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666667327
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "209",
+    "size_m": [
+      0.8999999999999935,
+      1.499999999999998
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "20A",
+    "size_m": [
+      0.5299999999999973,
+      0.5499999999999958
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184782959055,
+        "ellipse_error": 0.0022306335139110622,
+        "extent_ratio": 1.1668008821850697
+      },
+      {
+        "circle_radius": 0.031800000000000134,
+        "drain_ratio": 0.12000000000000113
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "20B",
+    "size_m": [
+      0.5799999999999969,
+      0.7000000000000031
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783501,
+        "ellipse_error": 0.002230633513909508,
+        "extent_ratio": 1.0856003192242587
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "20C",
+    "size_m": [
+      1.0599999999999985,
+      1.1800000000000013
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "20D",
+    "size_m": [
+      1.6599999999999948,
+      1.9200000000000033
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "20E",
+    "size_m": [
+      1.6599999999999968,
+      1.9299999999999995
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "20F",
+    "size_m": [
+      1.510000000000011,
+      2.6099999999999937
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+    "handle": "210",
+    "size_m": [
+      1.0600000000000018,
+      1.1800000000000086
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "123",
+    "size_m": [
+      0.500000000000001,
+      4.0200000000000005
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.31999999999999934
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.31999999999999934
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.31999999999999934
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.31999999999999934
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "124",
+    "size_m": [
+      0.6900000000000008,
+      1.6600000000000001
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.7763568394002505e-15,
+        "ellipse_error": 0.3542289421893423,
+        "extent_ratio": 2.7017543859648967
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07246376811594195
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "125",
+    "size_m": [
+      0.5600000000000002,
+      0.7800000000000005
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783257,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.2528713888189982
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "126",
+    "size_m": [
+      0.6199999999999986,
+      0.840000000000001
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783219957,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.5233423834275717
+      },
+      {
+        "circle_radius": 0.03719999999999991,
+        "drain_ratio": 0.11999999999999998
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "127",
+    "size_m": [
+      0.469999999999998,
+      0.6499999999999986
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.000401961847831922,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.5549822201654226
+      },
+      {
+        "circle_radius": 0.02819999999999993,
+        "drain_ratio": 0.12000000000000022
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "128",
+    "size_m": [
+      0.5000000000000009,
+      0.719999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783312,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.2952762665944055
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "129",
+    "size_m": [
+      0.8399999999999992,
+      1.8799999999999981
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.2212453270876722e-15,
+        "ellipse_error": 0.36285173958664885,
+        "extent_ratio": 2.444444444444442
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.05952380952380958
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "12A",
+    "size_m": [
+      0.5900000000000007,
+      2.9799999999999995
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27118644067796577
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27118644067796577
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27118644067796577
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27118644067796577
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "12B",
+    "size_m": [
+      0.6700000000000041,
+      1.4399999999999997
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.23880597014925226
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.23880597014925226
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.23880597014925226
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.23880597014925226
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "12C",
+    "size_m": [
+      0.4599999999999984,
+      2.860000000000002
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695652295
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695652295
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695652295
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.34782608695652295
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "12D",
+    "size_m": [
+      0.5600000000000017,
+      0.7800000000000041
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783134,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.2528713888190004
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "12E",
+    "size_m": [
+      0.6099999999999975,
+      0.8000000000000025
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478342535,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.4745859137003925
+      },
+      {
+        "circle_radius": 0.03659999999999985,
+        "drain_ratio": 0.11999999999999998
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+    "handle": "12F",
+    "size_m": [
+      3.7199999999999975,
+      3.7800000000000047
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "101",
+    "size_m": [
+      0.69,
+      1.689999999999999
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 8.881784197001252e-16,
+        "ellipse_error": 0.35519304434708165,
+        "extent_ratio": 2.7543859649122684
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07246376811594205
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "102",
+    "size_m": [
+      0.38000000000000167,
+      0.5000000000000018
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 5.551115123125783e-17,
+        "offset": 0.00040196184782970157,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.4794365252586001
+      },
+      {
+        "circle_radius": 0.02280000000000011,
+        "drain_ratio": 0.12000000000000004
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "103",
+    "size_m": [
+      0.48999999999999894,
+      0.6400000000000013
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783368,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.174853756548224
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "104",
+    "size_m": [
+      0.6000000000000025,
+      1.1999999999999997
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666555
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666555
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666555
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666555
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "105",
+    "size_m": [
+      0.5799999999999986,
+      2.4
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655179
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655179
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655179
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655179
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "106",
+    "size_m": [
+      0.5799999999999982,
+      0.5799999999999984
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "107",
+    "size_m": [
+      0.5700000000000003,
+      0.5799999999999977
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "108",
+    "size_m": [
+      0.6000000000000003,
+      1.1000000000000003
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666655
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666655
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666655
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666655
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "109",
+    "size_m": [
+      0.5799999999999991,
+      2.89
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655177
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655177
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655177
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655177
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "10A",
+    "size_m": [
+      0.39000000000000007,
+      0.5
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783514166,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.4415022553801742
+      },
+      {
+        "circle_radius": 0.023400000000000025,
+        "drain_ratio": 0.1200000000000001
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "10B",
+    "size_m": [
+      0.6699999999999969,
+      1.579999999999998
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.3322676295501878e-15,
+        "ellipse_error": 0.35114737837094,
+        "extent_ratio": 2.6545454545454588
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07462686567164213
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+    "handle": "10C",
+    "size_m": [
+      0.48999999999999894,
+      0.6400000000000013
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783134,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.174853756548217
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "D7",
+    "size_m": [
+      0.5799999999999981,
+      3.3000000000000056
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655182
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655182
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655182
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2758620689655182
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "D8",
+    "size_m": [
+      0.5499999999999978,
+      0.570000000000001
+    ],
+    "children": []
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "D9",
+    "size_m": [
+      0.3599999999999999,
+      0.5299999999999985
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 2.7755575615628914e-17,
+        "offset": 0.10040196184782985,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.3242600719425857
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "DA",
+    "size_m": [
+      0.35999999999999854,
+      0.5300000000000009
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783469757,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 1.65532508992824
+      },
+      {
+        "circle_radius": 0.021599999999999966,
+        "drain_ratio": 0.1200000000000003
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "DB",
+    "size_m": [
+      0.7299999999999995,
+      1.6400000000000006
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 7.771561172376096e-16,
+        "ellipse_error": 0.3545212073614048,
+        "extent_ratio": 2.491803278688533
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06849315068493156
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "DC",
+    "size_m": [
+      0.5800000000000001,
+      3.210000000000003
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27586206896551724
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27586206896551724
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27586206896551724
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.27586206896551724
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "DD",
+    "size_m": [
+      0.4099999999999975,
+      0.49999999999999867
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783345,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.0969480577527235
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "DE",
+    "size_m": [
+      0.8299999999999983,
+      1.469999999999998
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 7.771561172376096e-16,
+        "ellipse_error": 0.3513385400534843,
+        "extent_ratio": 1.901408450704226
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06024096385542181
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "DF",
+    "size_m": [
+      0.3599999999999992,
+      0.5300000000000038
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478329212,
+        "ellipse_error": 0.0022306335139112843,
+        "extent_ratio": 1.65532508992825
+      },
+      {
+        "circle_radius": 0.021599999999999966,
+        "drain_ratio": 0.12000000000000008
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "E0",
+    "size_m": [
+      1.0600000000000032,
+      2.0899999999999985
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+    "handle": "E1",
+    "size_m": [
+      1.0900000000000034,
+      2.1099999999999994
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "D4",
+    "size_m": [
+      0.42000000000000104,
+      0.5500000000000003
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.1004019618478319,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.177913271539227
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "D5",
+    "size_m": [
+      0.35000000000000187,
+      0.5800000000000018
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478317555,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.8632446295256886
+      },
+      {
+        "circle_radius": 0.021000000000000085,
+        "drain_ratio": 0.11999999999999984
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "D6",
+    "size_m": [
+      0.520000000000004,
+      0.5799999999999965
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783157,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.0032855697445875
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "D7",
+    "size_m": [
+      0.8100000000000018,
+      1.7599999999999953
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 7.771561172376096e-16,
+        "ellipse_error": 0.3594794867968294,
+        "extent_ratio": 2.3768115942028762
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06172839506172826
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "D8",
+    "size_m": [
+      0.4499999999999993,
+      0.7100000000000004
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783358735,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.7740087756212009
+      },
+      {
+        "circle_radius": 0.027000000000000062,
+        "drain_ratio": 0.12000000000000047
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "D9",
+    "size_m": [
+      0.6200000000000001,
+      3.7199999999999998
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "DA",
+    "size_m": [
+      1.5799999999999965,
+      1.9699999999999975
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "DB",
+    "size_m": [
+      0.8800000000000003,
+      1.1400000000000001
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "DC",
+    "size_m": [
+      1.1399999999999988,
+      1.140000000000001
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "DD",
+    "size_m": [
+      1.069999999999999,
+      1.100000000000004
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+    "handle": "DE",
+    "size_m": [
+      2.469999999999998,
+      3.149999999999994
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "167",
+    "size_m": [
+      0.46999999999999886,
+      0.7199999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783134,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.3779534751004194
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "168",
+    "size_m": [
+      0.46000000000000085,
+      0.6599999999999993
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478303677,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 1.6132290458037357
+      },
+      {
+        "circle_radius": 0.027599999999999836,
+        "drain_ratio": 0.11999999999999907
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "169",
+    "size_m": [
+      0.6199999999999974,
+      2.059999999999998
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290333
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290333
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290333
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290333
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "16A",
+    "size_m": [
+      0.6200000000000001,
+      2.7399999999999984
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2580645161290322
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "16B",
+    "size_m": [
+      0.5599999999999987,
+      1.3299999999999983
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 4.163336342344337e-17,
+        "offset": 0.0004019618478328657,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 2.670382928091776
+      },
+      {
+        "circle_radius": 0.03359999999999992,
+        "drain_ratio": 0.12
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "16C",
+    "size_m": [
+      0.7000000000000002,
+      1.6700000000000017
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 9.992007221626409e-16,
+        "ellipse_error": 0.3547063648707942,
+        "extent_ratio": 2.6724137931034577
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857141
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "16D",
+    "size_m": [
+      0.4699999999999971,
+      0.7999999999999976
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783212,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.5310594167782692
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "16E",
+    "size_m": [
+      0.7500000000000018,
+      0.8400000000000016
+    ],
+    "children": [
+      {
+        "vertices": 5,
+        "closed_gap": 0.0,
+        "offset": 1.2212453270876722e-15,
+        "ellipse_error": 0.41421356237309515,
+        "extent_ratio": 1.1384615384615375
+      },
+      {
+        "circle_radius": 0.045,
+        "drain_ratio": 0.11999999999999972
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "16F",
+    "size_m": [
+      0.5899999999999981,
+      3.3900000000000006
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.271186440677967
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.271186440677967
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.271186440677967
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.271186440677967
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "170",
+    "size_m": [
+      0.6999999999999966,
+      1.6700000000000053
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.887379141862766e-15,
+        "ellipse_error": 0.3547063648707942,
+        "extent_ratio": 2.6724137931034666
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857177
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "171",
+    "size_m": [
+      0.5699999999999972,
+      1.3299999999999983
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783219957,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 2.6235341047919336
+      },
+      {
+        "circle_radius": 0.03419999999999978,
+        "drain_ratio": 0.11999999999999982
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "172",
+    "size_m": [
+      0.46999999999999886,
+      0.7899999999999991
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783418,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.5119211740685408
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "173",
+    "size_m": [
+      0.699999999999998,
+      1.6700000000000053
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 6.5503158452884236e-15,
+        "ellipse_error": 0.3547063648707949,
+        "extent_ratio": 2.6724137931034346
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857165
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "174",
+    "size_m": [
+      0.5700000000000003,
+      1.3299999999999956
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783258815,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 2.6235341047919123
+      },
+      {
+        "circle_radius": 0.034200000000000015,
+        "drain_ratio": 0.12
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "175",
+    "size_m": [
+      0.4699999999999984,
+      0.7799999999999949
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783312,
+        "ellipse_error": 0.0022306335139110622,
+        "extent_ratio": 1.4927829313587875
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "176",
+    "size_m": [
+      0.5899999999999972,
+      3.389999999999999
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779674
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779674
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779674
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779674
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "177",
+    "size_m": [
+      0.589999999999999,
+      3.3899999999999992
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779666
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779666
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779666
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779666
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "178",
+    "size_m": [
+      0.5700000000000003,
+      1.3299999999999974
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478322551,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 2.623534104791916
+      },
+      {
+        "circle_radius": 0.0342,
+        "drain_ratio": 0.11999999999999994
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "179",
+    "size_m": [
+      0.7000000000000015,
+      1.6700000000000035
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 6.661338147750939e-15,
+        "ellipse_error": 0.3547063648707929,
+        "extent_ratio": 2.6724137931034218
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857127
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "17A",
+    "size_m": [
+      0.4699999999999984,
+      0.7800000000000029
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783229,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.4927829313588137
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "17B",
+    "size_m": [
+      0.4299999999999988,
+      0.7800000000000047
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184782724,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.6316464598573233
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "17C",
+    "size_m": [
+      0.5599999999999961,
+      1.3300000000000018
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783014566,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 2.6703829280917653
+      },
+      {
+        "circle_radius": 0.033600000000000095,
+        "drain_ratio": 0.12000000000000119
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "17D",
+    "size_m": [
+      0.6999999999999975,
+      1.6699999999999982
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 7.327471962526033e-15,
+        "ellipse_error": 0.35470636487079643,
+        "extent_ratio": 2.6724137931034266
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857169
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "17E",
+    "size_m": [
+      0.5900000000000108,
+      3.389999999999998
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779611
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779611
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779611
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779611
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "17F",
+    "size_m": [
+      0.890000000000001,
+      1.2300000000000004
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "180",
+    "size_m": [
+      1.0799999999999983,
+      1.4500000000000015
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "181",
+    "size_m": [
+      1.4899999999999967,
+      2.4000000000000146
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+    "handle": "182",
+    "size_m": [
+      1.5100000000000007,
+      2.3999999999999972
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1D8",
+    "size_m": [
+      0.42999999999999805,
+      0.6800000000000003
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783401,
+        "ellipse_error": 0.002230633513909286,
+        "extent_ratio": 1.4224610162858635
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1D9",
+    "size_m": [
+      0.31999999999999695,
+      0.47000000000000053
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783569677,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 1.651421021319906
+      },
+      {
+        "circle_radius": 0.01920000000000013,
+        "drain_ratio": 0.12000000000000195
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1DA",
+    "size_m": [
+      0.42999999999999816,
+      1.2100000000000022
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478332543,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 3.1639298340181576
+      },
+      {
+        "circle_radius": 0.025799999999999997,
+        "drain_ratio": 0.1200000000000005
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1DB",
+    "size_m": [
+      0.8000000000000019,
+      0.8399999999999961
+    ],
+    "children": [
+      {
+        "vertices": 5,
+        "closed_gap": 0.0,
+        "offset": 8.881784197001252e-16,
+        "ellipse_error": 0.41421356237309226,
+        "extent_ratio": 1.0571428571428587
+      },
+      {
+        "circle_radius": 0.045,
+        "drain_ratio": 0.11249999999999973
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1DC",
+    "size_m": [
+      0.7000000000000021,
+      1.5899999999999999
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 3.219646771412954e-15,
+        "ellipse_error": 0.35224858288573735,
+        "extent_ratio": 2.5344827586206637
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07142857142857122
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1DD",
+    "size_m": [
+      0.5999999999999998,
+      1.8100000000000027
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666668
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666668
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666668
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666668
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1DE",
+    "size_m": [
+      0.5999999999999986,
+      1.2099999999999995
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666673
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666673
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666673
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666673
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1DF",
+    "size_m": [
+      0.32000000000000134,
+      0.46999999999999875
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783203304,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.651421021319914
+      },
+      {
+        "circle_radius": 0.01920000000000018,
+        "drain_ratio": 0.12000000000000062
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E0",
+    "size_m": [
+      0.4199999999999987,
+      0.6399999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783123,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.3706627159729172
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E1",
+    "size_m": [
+      0.6000000000000032,
+      1.2299999999999989
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666653
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666653
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666653
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666653
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E2",
+    "size_m": [
+      0.6000000000000018,
+      2.0699999999999985
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666659
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666659
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666659
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666659
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E3",
+    "size_m": [
+      1.0200000000000016,
+      1.2500000000000004
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E4",
+    "size_m": [
+      0.4300000000000095,
+      0.6999999999999937
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783418,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 1.4642981050001025
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E5",
+    "size_m": [
+      0.3200000000000018,
+      0.47000000000000214
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783264366,
+        "ellipse_error": 0.002230633513909508,
+        "extent_ratio": 1.6514210213199279
+      },
+      {
+        "circle_radius": 0.019200000000000116,
+        "drain_ratio": 0.12000000000000006
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E6",
+    "size_m": [
+      0.3199999999999976,
+      0.46999999999999686
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478339204,
+        "ellipse_error": 0.00223063351390973,
+        "extent_ratio": 1.6514210213198999
+      },
+      {
+        "circle_radius": 0.01920000000000007,
+        "drain_ratio": 0.12000000000000134
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E7",
+    "size_m": [
+      0.4299999999999974,
+      0.6599999999999989
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184782929,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.3806239275715737
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E8",
+    "size_m": [
+      0.7899999999999955,
+      0.8199999999999954
+    ],
+    "children": [
+      {
+        "vertices": 5,
+        "closed_gap": 0.0,
+        "offset": 6.8833827526759706e-15,
+        "ellipse_error": 0.41421356237309226,
+        "extent_ratio": 1.0434782608695556
+      },
+      {
+        "circle_radius": 0.045,
+        "drain_ratio": 0.11392405063291204
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1E9",
+    "size_m": [
+      0.46000000000000335,
+      1.1499999999999977
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478352527,
+        "ellipse_error": 0.0022306335139132827,
+        "extent_ratio": 2.810929397991333
+      },
+      {
+        "circle_radius": 0.0276000000000003,
+        "drain_ratio": 0.12000000000000044
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1EA",
+    "size_m": [
+      0.7699999999999988,
+      1.7800000000000094
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 9.658940314238862e-15,
+        "ellipse_error": 0.3591967881714373,
+        "extent_ratio": 2.5538461538461275
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06493506493506504
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1EB",
+    "size_m": [
+      1.049999999999997,
+      1.9899999999999956
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+    "handle": "1EC",
+    "size_m": [
+      1.049999999999996,
+      1.759999999999999
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "D5",
+    "size_m": [
+      0.3499999999999992,
+      0.5499999999999963
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783268,
+        "ellipse_error": 0.00223063351391084,
+        "extent_ratio": 1.4134959258470696
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "D6",
+    "size_m": [
+      0.4100000000000037,
+      0.509999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478304787,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.3986087736347093
+      },
+      {
+        "circle_radius": 0.024600000000000167,
+        "drain_ratio": 0.11999999999999973
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "D7",
+    "size_m": [
+      0.7800000000000002,
+      0.7800000000000029
+    ],
+    "children": [
+      {
+        "vertices": 5,
+        "closed_gap": 0.0,
+        "offset": 8.881784197001252e-16,
+        "ellipse_error": 0.41421356237309515,
+        "extent_ratio": 1.0000000000000064
+      },
+      {
+        "circle_radius": 0.045,
+        "drain_ratio": 0.11538461538461535
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "D8",
+    "size_m": [
+      1.149999999999999,
+      2.0599999999999996
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "D9",
+    "size_m": [
+      0.5999999999999988,
+      2.6500000000000004
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666672
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666672
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666672
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2666666666666672
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "DA",
+    "size_m": [
+      0.6000000000000005,
+      2.3900000000000006
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666644
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666644
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666644
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666644
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "DB",
+    "size_m": [
+      0.6300000000000043,
+      0.9200000000000014
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478339204,
+        "ellipse_error": 0.002230633513910618,
+        "extent_ratio": 1.6419397118425512
+      },
+      {
+        "circle_radius": 0.03780000000000037,
+        "drain_ratio": 0.12000000000000034
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "DC",
+    "size_m": [
+      0.3499999999999992,
+      0.5699999999999985
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783023,
+        "ellipse_error": 0.002230633513909508,
+        "extent_ratio": 1.464895777696063
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "DD",
+    "size_m": [
+      0.45000000000000373,
+      0.509999999999998
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783408695,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.2742879937560585
+      },
+      {
+        "circle_radius": 0.02700000000000038,
+        "drain_ratio": 0.1200000000000007
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "DE",
+    "size_m": [
+      0.7800000000000002,
+      1.8500000000000014
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 1.5543122344752192e-15,
+        "ellipse_error": 0.3610685169142538,
+        "extent_ratio": 2.6212121212121056
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06410256410256408
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+    "handle": "DF",
+    "size_m": [
+      1.0699999999999985,
+      1.1100000000000012
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "129",
+    "size_m": [
+      0.6899999999999977,
+      1.5499999999999972
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 0.0,
+        "ellipse_error": 0.3506858277332414,
+        "extent_ratio": 2.5087719298245554
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07246376811594227
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "12A",
+    "size_m": [
+      0.46999999999999886,
+      0.7800000000000011
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783234,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.4927829313588048
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "12B",
+    "size_m": [
+      0.6000000000000014,
+      2.5900000000000034
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "12C",
+    "size_m": [
+      0.6000000000000014,
+      2.6000000000000014
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "12D",
+    "size_m": [
+      0.6899999999999977,
+      1.5500000000000043
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 0.0,
+        "ellipse_error": 0.35068582773324164,
+        "extent_ratio": 2.508771929824584
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07246376811594227
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "12E",
+    "size_m": [
+      0.46999999999999886,
+      0.7800000000000011
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783234,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.4927829313588046
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "12F",
+    "size_m": [
+      0.6000000000000014,
+      2.519999999999996
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26666666666666605
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "130",
+    "size_m": [
+      0.5200000000000031,
+      0.730000000000004
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783245,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.2627559757130313
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "131",
+    "size_m": [
+      0.7399999999999949,
+      1.5600000000000023
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 0.0,
+        "ellipse_error": 0.35226518550092667,
+        "extent_ratio": 2.322580645161317
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06756756756756804
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "132",
+    "size_m": [
+      0.6099999999999994,
+      2.5400000000000027
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721335
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721335
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721335
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.26229508196721335
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "133",
+    "size_m": [
+      0.5200000000000031,
+      0.7299999999999969
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783245,
+        "ellipse_error": 0.002230633513909952,
+        "extent_ratio": 1.2627559757130187
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "134",
+    "size_m": [
+      0.730000000000004,
+      1.5
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 0.0,
+        "ellipse_error": 0.3499790398108986,
+        "extent_ratio": 2.262295081967202
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.06849315068493114
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "135",
+    "size_m": [
+      1.25,
+      3.479999999999997
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+    "handle": "136",
+    "size_m": [
+      1.5399999999999991,
+      2.259999999999998
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "D8",
+    "size_m": [
+      0.6499999999999995,
+      1.8399999999999999
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384636
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384636
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384636
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.24615384615384636
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "D9",
+    "size_m": [
+      0.6599999999999993,
+      1.740000000000001
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 9.992007221626409e-16,
+        "ellipse_error": 0.3562332450202037,
+        "extent_ratio": 2.9999999999999876
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07575757575757584
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "DA",
+    "size_m": [
+      0.48000000000000087,
+      0.6099999999999994
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478328657,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.428889110645596
+      },
+      {
+        "circle_radius": 0.028800000000000048,
+        "drain_ratio": 0.11999999999999998
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "DB",
+    "size_m": [
+      0.48000000000000087,
+      0.7600000000000002
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 4.163336342344337e-17,
+        "offset": 0.10040196184783201,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.4242042283156109
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "DC",
+    "size_m": [
+      0.2899999999999978,
+      0.46000000000000085
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.00040196184783058975,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.7834862387255614
+      },
+      {
+        "circle_radius": 0.017399999999999895,
+        "drain_ratio": 0.12000000000000018
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "DD",
+    "size_m": [
+      0.4999999999999991,
+      0.809999999999997
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783101,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.457185799918708
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "DE",
+    "size_m": [
+      0.5899999999999994,
+      1.8400000000000007
+    ],
+    "children": [
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779664
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779664
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779664
+      },
+      {
+        "circle_radius": 0.08,
+        "drain_ratio": 0.2711864406779664
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "DF",
+    "size_m": [
+      0.6300000000000007,
+      1.7300000000000004
+    ],
+    "children": [
+      {
+        "vertices": 69,
+        "closed_gap": 0.0,
+        "offset": 2.220446049250313e-16,
+        "ellipse_error": 0.355388436352589,
+        "extent_ratio": 3.156862745098037
+      },
+      {
+        "circle_radius": 0.025,
+        "drain_ratio": 0.07936507936507929
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "E0",
+    "size_m": [
+      0.4999999999999999,
+      0.609999999999999
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.0004019618478333653,
+        "ellipse_error": 0.002230633513910174,
+        "extent_ratio": 1.3717335462197728
+      },
+      {
+        "circle_radius": 0.030000000000000006,
+        "drain_ratio": 0.12000000000000005
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "E1",
+    "size_m": [
+      0.4999999999999978,
+      0.7600000000000009
+    ],
+    "children": [
+      {
+        "vertices": 48,
+        "closed_gap": 0.0,
+        "offset": 0.10040196184783406,
+        "ellipse_error": 0.002230633513910396,
+        "extent_ratio": 1.3672360591829955
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "E2",
+    "size_m": [
+      1.819999999999999,
+      2.210000000000001
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "handle": "E3",
+    "size_m": [
+      1.0700000000000003,
+      1.2399999999999975
+    ],
+    "children": [
+      {
+        "line_vertices": 2
+      },
+      {
+        "line_vertices": 2
+      }
+    ]
+  }
+]

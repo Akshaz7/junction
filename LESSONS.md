@@ -14,3 +14,5 @@ E-19 pass 1 (ENGINE, 14 Nov): plan-map counts of "storeys" = number of pages; ro
 - Judge-set shapes (floor compare, 'wider than N', waste take-off, named rooms, rule check) are code in engine/analytics.py, hooked before the exit finder; results/qa/run_judge.py grades 43 hand-gold questions (22/43 -> 41/43 correct).
 - 22:13 Manual 3D edits were sent over /ws without chat_id, so the server relayed but never stored them and the chat could not undo them (and they leaked into every chat on that doc). Anything that should be part of a chat's state must carry chat_id.
 - /api/changes drops any entry whose summary has generated_for_demo: saved 3D-edit versions are labelled with summary.edited/generated instead (and say 'generated from 3D edits' in the UI).
+
+- F-EVMETHOD: source quantities rescaled at answer time need both original and chosen page scales in the calculation; retaining only the stored artifact field misstates the operand. Page-specific scales and printed areas must remain separate.

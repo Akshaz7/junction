@@ -1,0 +1,171 @@
+[
+ {
+  "file": "dxf_northstar",
+  "q": "floor_area",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "dxf_northstar",
+  "q": "trick",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "q": "floor_area",
+  "original_verdict": "inconsistent",
+  "safe": true,
+  "answer": {
+   "text_md": "**The model has no area data for rooms, so I cannot give a figure.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "q": "baseboard",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**I couldn't find that on this sheet: no matching tags or table rows.** Check the legend or ask with the tag (for example FP-1).",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "q": "pipe_duct",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**The ducts and pipes cannot be measured from this sheet.** No measured duct and pipe runs are indexed; this does not establish that none are drawn.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "mep_hvac_m003",
+  "q": "trick",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "q": "baseboard",
+  "original_verdict": "likely wrong",
+  "safe": true,
+  "answer": {
+   "text_md": "**Baseboard length cannot be measured reliably from this sheet.** Room detection boxes are not wall boundaries and can overlap; measured room outlines are needed.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "q": "slab",
+  "original_verdict": "wrong framing",
+  "safe": true,
+  "answer": {
+   "text_md": "**Slab area by thickness is not recorded in this drawing.** Room floor areas do not establish slab thicknesses or slab areas.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "pdf_base_plan",
+  "q": "trick",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "scan_finna",
+  "q": "floor_area",
+  "original_verdict": "wrong reason",
+  "safe": true,
+  "answer": {
+   "text_md": "**The model has no area data for rooms, so I cannot give a figure.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "scan_finna",
+  "q": "slab",
+  "original_verdict": "wrong framing",
+  "safe": true,
+  "answer": {
+   "text_md": "**Slab area by thickness is not recorded in this drawing.** Room floor areas do not establish slab thicknesses or slab areas.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "scan_habs",
+  "q": "floor_area",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**Floor area cannot be measured from this sheet.** No room boundaries or room-area table are recorded; an equipment drawing or site outline is not a floor plan.",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ },
+ {
+  "file": "scan_habs",
+  "q": "trick",
+  "original_verdict": "fail",
+  "safe": true,
+  "answer": {
+   "text_md": "**The requested door fire rating is not recorded in this drawing.**",
+   "value": null,
+   "unit": null,
+   "confidence": 0.0,
+   "abstained": true
+  }
+ }
+]

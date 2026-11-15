@@ -52,7 +52,7 @@ export function uploadFile(file: File, signal: AbortSignal, onProgress: (fractio
 }
 
 const stageNames: Record<string, string> = {
-  scene: 'Building 3D', ifc_scene: 'Building 3D', extrude: 'Building 3D', usdz: 'Preparing AR model',
+  scene: 'Building 3D', ifc_scene: 'Building 3D', ifc_index: 'Reading model quantities', extrude: 'Building 3D', usdz: 'Preparing AR model',
   publish: 'Finishing up', pool: 'Finishing up',
 }
 /** The server's internal stage name as plain words. */
@@ -76,7 +76,7 @@ type PollOptions = {
   signal: AbortSignal
   onProgress: (step: string, progress: number | null) => void
   /** Fires once when pages and text exist (ingest `readable`) while processing continues. */
-  onReadable?: (document: Document) => void
+  onReadable?: (document: Document, note?: string) => void
   transport?: typeof fetch
   intervalMs?: number
   timeoutMs?: number
@@ -136,7 +136,9 @@ export async function waitForUpload(docId: string, options: PollOptions): Promis
       if (status.status === 'none' || status.status === 'stored') throw new UploadError(status.reason || status.detail || 'Your file was saved, but processing is unavailable on this server. Please try again later.', 'poll')
       if (status.readable && !announcedReadable && onReadable) {
         announcedReadable = true
-        onReadable(document ?? await readDocument())
+        const readable = document ?? await readDocument()
+        if (status.detail) onReadable(readable, status.detail)
+        else onReadable(readable)
       }
       onProgress(friendlyStage(status.step) || (legacy ? 'Checking your drawing. Detailed progress is unavailable…' : 'Preparing your drawing…'), uploadProgress(status.progress))
       await pause(intervalMs, bounded)
