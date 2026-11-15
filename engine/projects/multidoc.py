@@ -216,17 +216,18 @@ def _agree(c: Combined, q: str, kind: str, rows: list, doc_ids, t0):
         who = []
         for d, st in docs:
             info = c.infos[d]
-            lab = "the 3D model" if info.role == "model" else "the drawing"
+            lab = "the 3D model" if info.role == "model" else ("the drawing" if sum(1 for x, _ in docs if c.infos[x].role != "model") == 1 else "the sheet")
             who.append(f"{lab} ({short_title(info.title or d, 50)}) has {st['n']} {what if st['n'] != 1 else what[:-1]} {{m_%d}}" % idx[d])
         head = "They match" if ok else "They do not match"
         diff = ""
         if not ok and len(docs) == 2:
             na = {(i.name or "").strip() for i in _items_of(c.infos[docs[0][0]], kind, docs[0][1]["ids"])}
             nb = {(i.name or "").strip() for i in _items_of(c.infos[docs[1][0]], kind, docs[1][1]["ids"])}
-            if "" not in na | nb:
+            if "" not in na | nb and (na & nb):   # names only help when the two sources share a naming scheme
                 only_a, only_b = sorted(na - nb), sorted(nb - na)
                 if only_a or only_b:
-                    diff = (f" Only in the model: {', '.join(only_a) or 'none'}; only in the drawing: {', '.join(only_b) or 'none'}.")
+                    la, lb = (short_title(c.infos[docs[0][0]].title or docs[0][0], 40), short_title(c.infos[docs[1][0]].title or docs[1][0], 40))
+                    diff = (f" Only in {la}: {', '.join(only_a[:12]) or 'none'}; only in {lb}: {', '.join(only_b[:12]) or 'none'}.")
             diff = diff or f" The difference is {abs(counts[0] - counts[1])}."
         lines.append(f"On {row_label(c, r)}: " + " and ".join(who) + f". {head}.{diff}")
         steps.append({"kind": "check", "title": "Compared", "ok": ok, "cite": None,
@@ -333,7 +334,8 @@ def answer(question: str, doc_ids, root, t0=None):
                 p_ = seen_pairs.setdefault(did, [0, 0])
                 p_[0] += n_other
                 p_[1] += n_used
-            shows = "; ".join(f"{short_title(c.infos[d].title or d, 50)} shows {a}" + (" (matches)" if a == b else f" (differs from {b})") for d, (a, b) in seen_pairs.items())
+            lvl = (" on " + " and ".join(dict.fromkeys(row_label(c, r) for r in use))) if len(use) <= 2 else ""
+            shows = "; ".join(f"{short_title(c.infos[d].title or d, 50)} shows {a} {noun(a)}{lvl}" + (" (matches)" if a == b else f" (differs from {b})") for d, (a, b) in seen_pairs.items())
             text += f" The same building also appears in other selected documents, so they were not added again: as a cross-check, {shows}."
         found = f"{_fmt(total, area)} {unit_word} on {len(use)} {'level' if len(use) == 1 else 'levels'}, from {len(parts)} {'source' if len(parts) == 1 else 'sources'}"
         return _build(c, q, text, total, area, picks, doc_ids, t0, f"multi-document total / {kind} / {'area' if area else 'count'} -> combine, no model",

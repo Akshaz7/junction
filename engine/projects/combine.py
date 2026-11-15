@@ -325,7 +325,8 @@ def combine(docs: list, root: Path | str) -> Combined:
 
 def row_label(c: Combined, r: Row) -> str:
     g = next((g for g in c.groups if g.key == r.group), None)
-    return f"{r.name} ({g.label})" if c.multi_group and g and g.label else r.name
+    generic = {"building", "gebaeude", "gebäude", "default building", "unnamed", "unnamed building", "default", "project", "site"}
+    return f"{r.name} ({g.label})" if c.multi_group and g and g.label and g.label.strip().lower() not in generic else r.name
 
 
 def value(r: Row, kind: str, what: str = "n"):

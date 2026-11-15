@@ -166,7 +166,7 @@ def _rewrite_headline(ans, f):
         markers = " ".join(dict.fromkeys(re.findall(r"\[\d+\]", head)))
         head = f"**{_summary(f['counts'])} reported.**" + (f" {markers}" if markers else "")
     coverage = f"The headline reports the source count; {f['boxes']:,} have numbered boxes."
-    if coverage not in head:
+    if coverage not in head and "headline reports the source count" not in head:
         head += " " + coverage
     ans["text_md"] = head + (sep + rest if sep else "")
 

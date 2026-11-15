@@ -68,3 +68,20 @@ def test_app_feature_ignores_comparison_question():
     from engine.library import app_feature
     assert app_feature("Does the plan show the same number of doors as the 3D model?") is None
     assert app_feature("Show it in 3D") == "3d"
+
+
+def test_compare_wording_for_unrelated_names_and_crosscheck_level(art):
+    from engine.answer import answer
+    t = answer("Does the ground floor plan drawing show the same number of doors as the ground floor of the 3D model?", [F, P])["answer"]["text_md"]
+    assert "Only in the model" not in t and "Only in FZK-Haus (Simple Phantasy Building): Haustuer, Terrassentuer" in t
+    t = answer("How many doors are there?", [F, P])["answer"]["text_md"]
+    assert "shows 3 doors on Erdgeschoss" in t
+
+
+def test_row_label_drops_generic_building_suffix():
+    from engine.projects.combine import Combined, Group, Row, row_label
+    g = Group(key="g1", label="Building")
+    c = Combined(infos={}, groups=[g, Group(key="g2", label="Building")], rows=[], multi_group=True)
+    assert row_label(c, Row(key="a", name="00 begane grond", group="g1")) == "00 begane grond"
+    g.label = "Haus A"
+    assert row_label(c, Row(key="a", name="00 EG", group="g1")) == "00 EG (Haus A)"
