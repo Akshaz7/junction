@@ -1,0 +1,201 @@
+{
+  "blind": {
+    "doc_id": "opening_design__kb-classical-moulding-federal-profiles",
+    "path": "data/full/junction-dataset/data/opening_design/Lake_Kegonsa_Home/Info/mouldings/Federal-Moulding-Collection/KB Classical Moulding - Federal Profiles.dxf",
+    "source": "opening_design"
+  },
+  "excluded_lists": [
+    "data/sets/heldout_docs.txt",
+    "ACC forbidden list"
+  ],
+  "candidates": 9,
+  "development_candidates": [
+    {
+      "doc_id": "swiss_dwellings__site886-bldg1894-floor8386",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site886_bldg1894_floor8386.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 195997
+    },
+    {
+      "doc_id": "swiss_dwellings__site1125-bldg2268-floor10441",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1125_bldg2268_floor10441.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 305725
+    },
+    {
+      "doc_id": "swiss_dwellings__site960-bldg2014-floor8910",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site960_bldg2014_floor8910.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 472167
+    },
+    {
+      "doc_id": "swiss_dwellings__site1104-bldg2244-floor10289",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1104_bldg2244_floor10289.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 219514
+    },
+    {
+      "doc_id": "swiss_dwellings__site292-bldg545-floor2188",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site292_bldg545_floor2188.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 209915
+    },
+    {
+      "doc_id": "swiss_dwellings__site3999-bldg6289-floor25930",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site3999_bldg6289_floor25930.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 145708
+    },
+    {
+      "doc_id": "swiss_dwellings__site1028-bldg2114-floor9560",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1028_bldg2114_floor9560.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 179784
+    },
+    {
+      "doc_id": "swiss_dwellings__site2143-bldg2986-floor13618",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site2143_bldg2986_floor13618.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 306115
+    },
+    {
+      "doc_id": "swiss_dwellings__site572-bldg1284-floor48868",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site572_bldg1284_floor48868.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 350880
+    },
+    {
+      "doc_id": "swiss_dwellings__site1257-bldg2450-floor11435",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1257_bldg2450_floor11435.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 144539
+    },
+    {
+      "doc_id": "swiss_dwellings__site711-bldg1524-floor6605",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site711_bldg1524_floor6605.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 241741
+    },
+    {
+      "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1102_bldg2242_floor10281.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 168987
+    },
+    {
+      "doc_id": "swiss_dwellings__site468-bldg1118-floor4902",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site468_bldg1118_floor4902.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 189615
+    },
+    {
+      "doc_id": "swiss_dwellings__site454-bldg1103-floor4831",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site454_bldg1103_floor4831.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 173774
+    },
+    {
+      "doc_id": "swiss_dwellings__site1205-bldg2372-floor11000",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1205_bldg2372_floor11000.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 171390
+    },
+    {
+      "doc_id": "swiss_dwellings__site1265-bldg2463-floor11515",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1265_bldg2463_floor11515.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 220491
+    },
+    {
+      "doc_id": "swiss_dwellings__site1038-bldg2130-floor9623",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1038_bldg2130_floor9623.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 234988
+    },
+    {
+      "doc_id": "swiss_dwellings__site3779-bldg5809-floor24634",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site3779_bldg5809_floor24634.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 186011
+    },
+    {
+      "doc_id": "swiss_dwellings__site717-bldg1534-floor6671",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site717_bldg1534_floor6671.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 220054
+    },
+    {
+      "doc_id": "swiss_dwellings__site1045-bldg2151-floor9728",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1045_bldg2151_floor9728.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 292188
+    },
+    {
+      "doc_id": "swiss_dwellings__site824-bldg2379-floor11031",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site824_bldg2379_floor11031.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 306544
+    },
+    {
+      "doc_id": "swiss_dwellings__site1282-bldg2500-floor11695",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1282_bldg2500_floor11695.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 324029
+    },
+    {
+      "doc_id": "swiss_dwellings__site1020-bldg2100-floor9473",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1020_bldg2100_floor9473.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 109106
+    },
+    {
+      "doc_id": "swiss_dwellings__site745-bldg1634-floor7253",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site745_bldg1634_floor7253.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 318473
+    },
+    {
+      "doc_id": "swiss_dwellings__site3440-bldg5316-floor23642",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site3440_bldg5316_floor23642.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 161952
+    },
+    {
+      "doc_id": "swiss_dwellings__site868-bldg1844-floor8189",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site868_bldg1844_floor8189.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 320950
+    },
+    {
+      "doc_id": "swiss_dwellings__site310-bldg619-floor51658",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site310_bldg619_floor51658.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 191669
+    },
+    {
+      "doc_id": "swiss_dwellings__site1280-bldg2497-floor11675",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site1280_bldg2497_floor11675.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 236391
+    },
+    {
+      "doc_id": "swiss_dwellings__site11712-bldg18269-floor48996",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site11712_bldg18269_floor48996.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 210513
+    },
+    {
+      "doc_id": "swiss_dwellings__site3641-bldg5604-floor24226",
+      "path": "data/full/junction-dataset/data/swiss_dwellings/site3641_bldg5604_floor24226.dxf",
+      "source": "swiss_dwellings",
+      "bytes": 377428
+    }
+  ],
+  "additional_blind": {
+    "doc_id": "swiss_dwellings__site1073-bldg2196-floor10014",
+    "path": "data/full/junction-dataset/data/swiss_dwellings/site1073_bldg2196_floor10014.dxf",
+    "source": "swiss_dwellings",
+    "bytes": 268838
+  },
+  "accuracy_exclusion": "ACC-COMMON explicitly permits development on other nonforbidden files; no training is performed. Original heldout_docs is the training exclusion; ACC-specific forbidden list is used for this accuracy-development task."
+}

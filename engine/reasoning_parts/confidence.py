@@ -45,6 +45,7 @@ def run(ctx: dict) -> dict:
 
     factors: list[tuple[float, str]] = []     # (signed effect, phrase for the reason line)
     exact = False
+    inferred_cad_fixture = any(it.source == "dxf" and it.props.get("classification") == "geometry" for it in cited)
     ordering = any(s.get("step") == "order" for s in ctx.get("trace") or [])
     missing = bool(cites) and not any(c.get("item_ids") or c.get("bbox_px") or c.get("quote") for c in cites)
     if missing:
@@ -53,6 +54,8 @@ def run(ctx: dict) -> dict:
         base, src = 65, "Some ordering measurements are missing or estimated; check the table before ordering"
     elif is_ifc and not models_used:
         base, src, exact = 97, "The result comes directly from the building model's own data", True
+    elif inferred_cad_fixture and not models_used:
+        base, src = 65, "The fixtures were identified from the shapes of the CAD symbols"
     elif from_cad and not models_used:
         base, src, exact = 95, ("The result was measured from the CAD file's geometry and units" if measured else "The objects were counted directly in the CAD drawing"), True
     elif ctx.get("doc") is None and route == "index" and not models_used:
@@ -113,7 +116,9 @@ def run(ctx: dict) -> dict:
 
     improve = None
     if label == "Estimate":
-        if ordering:
+        if inferred_cad_fixture:
+            improve = "Check the numbered fixture symbols against the drawing or the fixture schedule."
+        elif ordering:
             improve = "Check missing measurements and the finish specification before ordering."
         elif route == "planmap" and measured:
             improve = "Add a printed scale (e.g. 1:100) or scale bar to make sizes exact."
