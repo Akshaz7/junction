@@ -40,7 +40,7 @@ export default defineConfig(({ mode }) => {
     ],
     server: {
       proxy: {
-        '/api': { target: 'http://localhost:8000', changeOrigin: true },
+        '/api': { target: process.env.API_PROXY_TARGET ?? 'http://localhost:8000', changeOrigin: true },
         '/ws': { target: 'http://localhost:8000', ws: true },
       },
     },

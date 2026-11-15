@@ -1,9 +1,26 @@
 import { describe, expect, it } from 'vitest'
-import { cssMatrix, discipline, overlayActionAnswer, overlayAlignedAnswer, overlayRequest, rankOverlaySheets, type OverlayDoc } from './sheet-overlay'
+import { cssMatrix, discipline, floorKey, isOverlayMatch, overlayActionAnswer, overlayAlignedAnswer, overlayRequest, rankOverlaySheets, type OverlayDoc } from './sheet-overlay'
 
 const doc = (id: string, title: string, extra: Partial<OverlayDoc> = {}): OverlayDoc => ({ doc_id: id, title, kind: 'pdf', pages: 1, source: 'uploaded', formats: ['pdf'], licence: '', credit: '', heldout: false, ...extra })
 const base = doc('a', 'Floor plan', { project: 'Site', floor: '3' })
 const vent = doc('v', 'Ventilation', { project: 'Site', floor: '3' })
+
+describe('overlay candidates for uploaded sheets with no floor metadata', () => {
+  const up = { project: 'Uploads', folder: 'Uploads/Reference drawings', discipline: 'Reference drawings' }
+  const ark = doc('ark', 'ARK-103-03 floor plan 3rd floor', up)
+  const ventU = doc('vent', 'L30301_VENTILATION SYSTEMS_3RD FLOOR_BLOCK U', up)
+  const noise = ['Alpha plan', 'Zed 2nd floor ventilation'].map((t, i) => doc(`n${i}`, t, up))
+  it('reads the floor from titles in any case and wording', () => {
+    expect(floorKey(ark)).toBe('3'); expect(floorKey(ventU)).toBe('3')
+    expect(floorKey(doc('l', 'Plan', { floor: 'Level 3' }))).toBe('3')
+    expect(floorKey(doc('g', 'Ground floor plan'))).toBe('0'); expect(floorKey(doc('p', 'Plan'))).toBeNull()
+  })
+  it('offers the ventilation sheet for the architecture sheet and vice versa, first', () => {
+    expect(rankOverlaySheets(ark, [...noise, ventU, ark])[0].doc_id).toBe('vent')
+    expect(rankOverlaySheets(ventU, [...noise, ark, ventU])[0].doc_id).toBe('ark')
+    expect(isOverlayMatch(ark, ventU)).toBe(true); expect(isOverlayMatch(ark, noise[1])).toBe(false)
+  })
+})
 
 describe('sheet overlay', () => {
   it('ranks same project/floor first without hiding other sheets', () => {
