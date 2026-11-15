@@ -506,7 +506,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         from engine.ifc_storeys import elevation, sort_key
         sts = sorted(doc.storeys, key=sort_key)
         n = len(sts)
-        trace.append(_step("count", f"{n} distinct storey(s) declared in the model"))
+        unknown_elevations = any(elevation(s) is None for s in sts)
+        trace.append(_step("count", f"{n} retained storey record(s); duplicates checked where names and elevations are available"))
         if not n:
             return _answer_obj(question, [doc_id], "This model does not declare any storeys (no IfcBuildingStorey), so I cannot give a floor count from it.",
                                None, None, 0.0, True, [], [], {"doc_id": doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
@@ -521,6 +522,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                             else f"{s_['name']} (elevation unavailable)" for s_ in sts)
         _, cites, scene = _evidence(doc, rep)
         text = f"The model has **{n} {'storey' if n == 1 else 'storeys'}**, from lowest to highest: {listing}. {_cite_marks(cites)}"
+        if unknown_elevations:
+            text = (f"The model declares **{n} storey records**: {listing}. "
+                    f"Some elevations are unavailable, so duplicate levels and floor order cannot be fully checked. {_cite_marks(cites)}")
         res = _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)
         from engine.calc_routes import storeys
         return storeys(res, doc, declared=sts)

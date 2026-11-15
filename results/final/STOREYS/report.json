@@ -1,0 +1,614 @@
+{
+  "cached_munich": [
+    {
+      "question": "How many storeys are there?",
+      "answer": {
+        "text_md": "**The model has 5 storeys, from lowest to highest: 0. Foundation (-3.2 m), 1. Kellergeschoss (-2.8 m), 2. Erdgeschoss (-0.0 m), 3. Obergeschoss (+2.9 m), 4. Dachgeschoss (+5.7 m).** [1] The headline reports the source count; 0 have numbered boxes.",
+        "value": 5,
+        "unit": "count",
+        "confidence": 0.69,
+        "abstained": false
+      },
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / storey / unscoped (rules)",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0.0
+        },
+        {
+          "step": "dedupe_storeys",
+          "detail": "Excluded 10 duplicate storey records by name and elevation (tolerance 0.001 m). 0. Foundation: 0. Foundation, Foundation (3 records); 1. Kellergeschoss: 1. Kellergeschoss, Kellergeschoss (3 records); 2. Erdgeschoss: 2. Erdgeschoss, Erdgeschoss (3 records); 3. Obergeschoss: 3. Obergeschoss, Obergeschoss (3 records); 4. Dachgeschoss: 4. Dachgeschoss, Dachgeschoss (3 records)",
+          "groups": [
+            {
+              "name": "0. Foundation",
+              "elevation_m": -3.24,
+              "source_indices": [
+                0,
+                1,
+                2
+              ],
+              "sources": [
+                {
+                  "name": "0. Foundation",
+                  "elevation_m": -3.24
+                },
+                {
+                  "name": "Foundation",
+                  "elevation_m": -3.24
+                },
+                {
+                  "name": "Foundation",
+                  "elevation_m": -3.24
+                }
+              ]
+            },
+            {
+              "name": "1. Kellergeschoss",
+              "elevation_m": -2.82,
+              "source_indices": [
+                3,
+                4,
+                5
+              ],
+              "sources": [
+                {
+                  "name": "1. Kellergeschoss",
+                  "elevation_m": -2.82
+                },
+                {
+                  "name": "Kellergeschoss",
+                  "elevation_m": -2.82
+                },
+                {
+                  "name": "Kellergeschoss",
+                  "elevation_m": -2.82
+                }
+              ]
+            },
+            {
+              "name": "2. Erdgeschoss",
+              "elevation_m": -0.0,
+              "source_indices": [
+                6,
+                7,
+                8
+              ],
+              "sources": [
+                {
+                  "name": "2. Erdgeschoss",
+                  "elevation_m": -0.0
+                },
+                {
+                  "name": "Erdgeschoss",
+                  "elevation_m": -0.0
+                },
+                {
+                  "name": "Erdgeschoss",
+                  "elevation_m": -0.0
+                }
+              ]
+            },
+            {
+              "name": "3. Obergeschoss",
+              "elevation_m": 2.89,
+              "source_indices": [
+                9,
+                10,
+                11
+              ],
+              "sources": [
+                {
+                  "name": "3. Obergeschoss",
+                  "elevation_m": 2.89
+                },
+                {
+                  "name": "Obergeschoss",
+                  "elevation_m": 2.89
+                },
+                {
+                  "name": "Obergeschoss",
+                  "elevation_m": 2.89
+                }
+              ]
+            },
+            {
+              "name": "4. Dachgeschoss",
+              "elevation_m": 5.71,
+              "source_indices": [
+                12,
+                13,
+                14
+              ],
+              "sources": [
+                {
+                  "name": "4. Dachgeschoss",
+                  "elevation_m": 5.71
+                },
+                {
+                  "name": "Dachgeschoss",
+                  "elevation_m": 5.71
+                },
+                {
+                  "name": "Dachgeschoss",
+                  "elevation_m": 5.71
+                }
+              ]
+            }
+          ],
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        },
+        {
+          "step": "count",
+          "detail": "5 retained storey record(s); duplicates checked where names and elevations are available",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        }
+      ],
+      "citations": [
+        {
+          "n": 1,
+          "doc_id": "ifc_bench__city-house-munich-arc",
+          "page": 1,
+          "kind": "element",
+          "bbox_px": null,
+          "item_ids": [
+            "0IJKQpLH1EchWYbeIBEmzb",
+            "1P1t78HeYaKra11p4ZpaY8",
+            "1UJvPTHl5Fbuqhj9oVI$VM",
+            "2Ciy1G4LCfj6Ts04qmQpEm",
+            "2IPI8WoUnATvextfB8MnnD"
+          ],
+          "quote": null,
+          "label": "All floors \u00b7 5 slabs"
+        }
+      ],
+      "reasoning_card_present": true,
+      "schema_valid": true
+    },
+    {
+      "question": "How many rooms per floor?",
+      "answer": {
+        "text_md": "**Rooms per floor: 0. Foundation 0, 1. Kellergeschoss 6, 2. Erdgeschoss 4, 3. Obergeschoss 5, 4. Dachgeschoss 4.** [1][2][3][4]",
+        "value": 19,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "trace": [
+        {
+          "step": "route",
+          "detail": "storey comparison / room / count -> code, no model",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        },
+        {
+          "step": "count",
+          "detail": "0. Foundation 0, 1. Kellergeschoss 6, 2. Erdgeschoss 4, 3. Obergeschoss 5, 4. Dachgeschoss 4",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        },
+        {
+          "step": "dedupe_storeys",
+          "detail": "Excluded 10 duplicate storey records by name and elevation (tolerance 0.001 m). 0. Foundation: 0. Foundation, Foundation (3 records); 1. Kellergeschoss: 1. Kellergeschoss, Kellergeschoss (3 records); 2. Erdgeschoss: 2. Erdgeschoss, Erdgeschoss (3 records); 3. Obergeschoss: 3. Obergeschoss, Obergeschoss (3 records); 4. Dachgeschoss: 4. Dachgeschoss, Dachgeschoss (3 records)",
+          "groups": [
+            {
+              "name": "0. Foundation",
+              "elevation_m": -3.24,
+              "source_indices": [
+                0,
+                1,
+                2
+              ],
+              "sources": [
+                {
+                  "name": "0. Foundation",
+                  "elevation_m": -3.24
+                },
+                {
+                  "name": "Foundation",
+                  "elevation_m": -3.24
+                },
+                {
+                  "name": "Foundation",
+                  "elevation_m": -3.24
+                }
+              ]
+            },
+            {
+              "name": "1. Kellergeschoss",
+              "elevation_m": -2.82,
+              "source_indices": [
+                3,
+                4,
+                5
+              ],
+              "sources": [
+                {
+                  "name": "1. Kellergeschoss",
+                  "elevation_m": -2.82
+                },
+                {
+                  "name": "Kellergeschoss",
+                  "elevation_m": -2.82
+                },
+                {
+                  "name": "Kellergeschoss",
+                  "elevation_m": -2.82
+                }
+              ]
+            },
+            {
+              "name": "2. Erdgeschoss",
+              "elevation_m": -0.0,
+              "source_indices": [
+                6,
+                7,
+                8
+              ],
+              "sources": [
+                {
+                  "name": "2. Erdgeschoss",
+                  "elevation_m": -0.0
+                },
+                {
+                  "name": "Erdgeschoss",
+                  "elevation_m": -0.0
+                },
+                {
+                  "name": "Erdgeschoss",
+                  "elevation_m": -0.0
+                }
+              ]
+            },
+            {
+              "name": "3. Obergeschoss",
+              "elevation_m": 2.89,
+              "source_indices": [
+                9,
+                10,
+                11
+              ],
+              "sources": [
+                {
+                  "name": "3. Obergeschoss",
+                  "elevation_m": 2.89
+                },
+                {
+                  "name": "Obergeschoss",
+                  "elevation_m": 2.89
+                },
+                {
+                  "name": "Obergeschoss",
+                  "elevation_m": 2.89
+                }
+              ]
+            },
+            {
+              "name": "4. Dachgeschoss",
+              "elevation_m": 5.71,
+              "source_indices": [
+                12,
+                13,
+                14
+              ],
+              "sources": [
+                {
+                  "name": "4. Dachgeschoss",
+                  "elevation_m": 5.71
+                },
+                {
+                  "name": "Dachgeschoss",
+                  "elevation_m": 5.71
+                },
+                {
+                  "name": "Dachgeschoss",
+                  "elevation_m": 5.71
+                }
+              ]
+            }
+          ],
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        }
+      ],
+      "citations": [
+        {
+          "n": 1,
+          "doc_id": "ifc_bench__city-house-munich-arc",
+          "page": 1,
+          "kind": "element",
+          "bbox_px": [
+            55.0,
+            70.6,
+            392.1,
+            912.8
+          ],
+          "item_ids": [
+            "1lX7jPqsH6yBGktuQiczV9",
+            "1lX7jPqsH6yBGktuQiczVB",
+            "1lX7jPqsH6yBGktuQiczVD",
+            "3uV4Cix0909uZhDD2U4lwn",
+            "1lX7jPqsH6yBGktuQiczVF",
+            "1lX7jPqsH6yBGktuQiczSn"
+          ],
+          "quote": null,
+          "label": "1. Kellergeschoss \u00b7 6 rooms"
+        },
+        {
+          "n": 2,
+          "doc_id": "ifc_bench__city-house-munich-arc",
+          "page": 3,
+          "kind": "element",
+          "bbox_px": [
+            55.0,
+            71.0,
+            392.1,
+            912.4
+          ],
+          "item_ids": [
+            "1lX7jPqsH6yBGktuQiczRD",
+            "1lX7jPqsH6yBGktuQiczR8",
+            "1lX7jPqsH6yBGktuQiczii",
+            "3uV4Cix0909uZhDD2U4lxD"
+          ],
+          "quote": null,
+          "label": "2. Erdgeschoss \u00b7 4 rooms"
+        },
+        {
+          "n": 3,
+          "doc_id": "ifc_bench__city-house-munich-arc",
+          "page": 5,
+          "kind": "element",
+          "bbox_px": [
+            55.0,
+            71.0,
+            392.1,
+            912.4
+          ],
+          "item_ids": [
+            "3uV4Cix0909uZhDD2U4iB2",
+            "3uV4Cix0909uZhDD2U4iB7",
+            "3uV4Cix0909uZhDD2U4lxb",
+            "3uV4Cix0909uZhDD2U4iB5",
+            "3uV4Cix0909uZhDD2U4iBB"
+          ],
+          "quote": null,
+          "label": "3. Obergeschoss \u00b7 5 rooms"
+        },
+        {
+          "n": 4,
+          "doc_id": "ifc_bench__city-house-munich-arc",
+          "page": 7,
+          "kind": "element",
+          "bbox_px": [
+            55.0,
+            40.0,
+            392.1,
+            921.1
+          ],
+          "item_ids": [
+            "3uV4Cix0909uZhDD2U4lpi",
+            "3uV4Cix0909uZhDD2U4lxp",
+            "3uV4Cix0909uZhDD2U4loT",
+            "3uV4Cix0909uZhDD2U4luF"
+          ],
+          "quote": null,
+          "label": "4. Dachgeschoss \u00b7 4 rooms"
+        }
+      ],
+      "reasoning_card_present": true,
+      "schema_valid": true
+    },
+    {
+      "question": "How many rooms on the first floor?",
+      "answer": {
+        "text_md": "**There are 5 rooms on 3. Obergeschoss.** [1]",
+        "value": 5,
+        "unit": "count",
+        "confidence": 1.0,
+        "abstained": false
+      },
+      "trace": [
+        {
+          "step": "route",
+          "detail": "count / room / storey (rules)",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0.0
+        },
+        {
+          "step": "dedupe_storeys",
+          "detail": "Excluded 10 duplicate storey records by name and elevation (tolerance 0.001 m). 0. Foundation: 0. Foundation, Foundation (3 records); 1. Kellergeschoss: 1. Kellergeschoss, Kellergeschoss (3 records); 2. Erdgeschoss: 2. Erdgeschoss, Erdgeschoss (3 records); 3. Obergeschoss: 3. Obergeschoss, Obergeschoss (3 records); 4. Dachgeschoss: 4. Dachgeschoss, Dachgeschoss (3 records)",
+          "groups": [
+            {
+              "name": "0. Foundation",
+              "elevation_m": -3.24,
+              "source_indices": [
+                0,
+                1,
+                2
+              ],
+              "sources": [
+                {
+                  "name": "0. Foundation",
+                  "elevation_m": -3.24
+                },
+                {
+                  "name": "Foundation",
+                  "elevation_m": -3.24
+                },
+                {
+                  "name": "Foundation",
+                  "elevation_m": -3.24
+                }
+              ]
+            },
+            {
+              "name": "1. Kellergeschoss",
+              "elevation_m": -2.82,
+              "source_indices": [
+                3,
+                4,
+                5
+              ],
+              "sources": [
+                {
+                  "name": "1. Kellergeschoss",
+                  "elevation_m": -2.82
+                },
+                {
+                  "name": "Kellergeschoss",
+                  "elevation_m": -2.82
+                },
+                {
+                  "name": "Kellergeschoss",
+                  "elevation_m": -2.82
+                }
+              ]
+            },
+            {
+              "name": "2. Erdgeschoss",
+              "elevation_m": -0.0,
+              "source_indices": [
+                6,
+                7,
+                8
+              ],
+              "sources": [
+                {
+                  "name": "2. Erdgeschoss",
+                  "elevation_m": -0.0
+                },
+                {
+                  "name": "Erdgeschoss",
+                  "elevation_m": -0.0
+                },
+                {
+                  "name": "Erdgeschoss",
+                  "elevation_m": -0.0
+                }
+              ]
+            },
+            {
+              "name": "3. Obergeschoss",
+              "elevation_m": 2.89,
+              "source_indices": [
+                9,
+                10,
+                11
+              ],
+              "sources": [
+                {
+                  "name": "3. Obergeschoss",
+                  "elevation_m": 2.89
+                },
+                {
+                  "name": "Obergeschoss",
+                  "elevation_m": 2.89
+                },
+                {
+                  "name": "Obergeschoss",
+                  "elevation_m": 2.89
+                }
+              ]
+            },
+            {
+              "name": "4. Dachgeschoss",
+              "elevation_m": 5.71,
+              "source_indices": [
+                12,
+                13,
+                14
+              ],
+              "sources": [
+                {
+                  "name": "4. Dachgeschoss",
+                  "elevation_m": 5.71
+                },
+                {
+                  "name": "Dachgeschoss",
+                  "elevation_m": 5.71
+                },
+                {
+                  "name": "Dachgeschoss",
+                  "elevation_m": 5.71
+                }
+              ]
+            }
+          ],
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        },
+        {
+          "step": "load",
+          "detail": "19 room elements of 214 in the model",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        },
+        {
+          "step": "scope",
+          "detail": "storey = 3. Obergeschoss: 5 left",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        },
+        {
+          "step": "count",
+          "detail": "5 room",
+          "ms": 0,
+          "model": null,
+          "cost_usd": 0
+        }
+      ],
+      "citations": [
+        {
+          "n": 1,
+          "doc_id": "ifc_bench__city-house-munich-arc",
+          "page": 5,
+          "kind": "element",
+          "bbox_px": [
+            55.0,
+            71.0,
+            392.1,
+            912.4
+          ],
+          "item_ids": [
+            "3uV4Cix0909uZhDD2U4iB2",
+            "3uV4Cix0909uZhDD2U4iB7",
+            "3uV4Cix0909uZhDD2U4lxb",
+            "3uV4Cix0909uZhDD2U4iB5",
+            "3uV4Cix0909uZhDD2U4iBB"
+          ],
+          "quote": null,
+          "label": "3. Obergeschoss \u00b7 5 rooms"
+        }
+      ],
+      "reasoning_card_present": true,
+      "schema_valid": true
+    }
+  ],
+  "unit_tests": {
+    "passed": 55,
+    "deselected": 1,
+    "command": "MODELS_FAKE=1 python -m pytest -q engine/tests/test_ifc_storeys.py engine/tests/test_solvers.py engine/tests/test_solvers_e19.py engine/tests/test_storeys.py engine/tests/test_analytics.py -k \"not test_named_rooms_and_planmap_superlative\"",
+    "existing_failure": "test_named_rooms_and_planmap_superlative expects 9 Zimmer rooms; cached data returns 12. The same assertion fails with original HEAD analytics loaded; unrelated to IFC deduplication."
+  },
+  "limitations": [
+    "Legacy artifacts have only level names/elevations, not storey GlobalIds. Existing element citations and original array indices are preserved.",
+    "Missing elevations are retained as separate declarations; ordinal lookup abstains because floor ordering is unknown.",
+    "Validation checks declaration identity, source pointers, containment, and API schema; it makes no new geometry or physical measurement accuracy claim."
+  ],
+  "source_artifacts_modified": false,
+  "live_model_cost_usd": 0,
+  "blind_file": "resbim-283_model.ifc; reserved randomly before development, first opened during final validation; no thresholds or behavior tuned from its output."
+}

@@ -8,7 +8,7 @@ import pytest
 from engine.analytics import storey_compare
 from engine.ifc_storeys import canonical_storeys
 from engine.solvers import solve
-from engine.solvers.data import load_doc
+from engine.solvers.data import load_doc, load_sheet_parent
 from engine.solvers.solve import resolve_storey
 
 
@@ -92,6 +92,7 @@ def test_unknown_elevations_count_without_crashing_or_assuming_order(tmp_path):
     result = solve("How many storeys?", doc_id, root=tmp_path)
     assert result["answer"]["value"] == 5
     assert "elevation unavailable" in result["answer"]["text_md"]
+    assert "duplicate levels and floor order cannot be fully checked" in result["answer"]["text_md"]
     assert resolve_storey("rooms on the first floor", load_doc(doc_id, tmp_path).storeys) is None
 
 
@@ -109,3 +110,15 @@ def test_same_name_different_heights_remain_separate_room_scopes(tmp_path):
     assert solve("How many rooms on the first floor?", doc_id, root=tmp_path)["answer"]["value"] == 3
     result = storey_compare("How many rooms per floor?", doc, time.perf_counter())
     assert result["answer"]["value"] == 5
+
+
+def test_floor_sheet_title_resolves_an_export_alias(tmp_path):
+    doc_id, _ = fixture(tmp_path)
+    sheet_id = doc_id + "-plan-01-ground"
+    folder = tmp_path / sheet_id
+    folder.mkdir()
+    (folder / "doc.json").write_text(json.dumps({"title": "Floor plan: Ground"}))
+    sheet = load_sheet_parent(sheet_id, tmp_path)
+    assert len(sheet.storeys) == 1
+    assert sheet.storeys[0]["name"] == "0. Ground"
+    assert len(sheet.items) == 3

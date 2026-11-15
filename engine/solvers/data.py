@@ -225,10 +225,12 @@ def load_sheet_parent(doc_id: str, root: Path, whole: bool = False) -> Doc | Non
     if parent is None or parent.mode != "ifc" or not parent.storeys:
         return None
     title = (_json(d / "doc.json") if (d / "doc.json").exists() else {}).get("title") or ""
-    nm = title.rsplit(":", 1)[-1].strip().casefold()
-    st = next((s for s in parent.storeys if s["name"].strip().casefold() == nm), None)
-    if st is None:
+    from engine.ifc_storeys import name_key
+    nm = name_key(title.rsplit(":", 1)[-1])
+    matches = [s for s in parent.storeys if nm in {name_key(n) for n in [s["name"], *s.get("aliases", [])]}]
+    if len(matches) != 1:
         return None
+    st = matches[0]
     if whole:   # "... in the model 'X'": the whole building, not just this sheet's floor
         return Doc(doc_id, "ifc", parent.items, title, parent.storeys, meta={**parent.meta, "sheet_of": parent.doc_id})
     items = [i for i in parent.items if i.storey == st["name"]]
