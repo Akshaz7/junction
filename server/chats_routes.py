@@ -5,6 +5,7 @@ import os
 import time
 import uuid
 
+import jsonschema
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 from sse_starlette.sse import EventSourceResponse
@@ -19,6 +20,21 @@ router = APIRouter(prefix="/api")
 def _real_engine(question, doc_ids, on_event, scene_state=None, history=None):
     from engine.answer import answer  # the function, not the engine.answer module
     return answer(question, doc_ids, on_event, scene_state=scene_state, history=history)
+
+
+def _invalid_answer_fallback(question, doc_ids):
+    """Plain honest abstention used when the engine's answer fails contract validation: no schema text reaches the user."""
+    return {
+        "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
+        "answer": {"text_md": "I couldn't compute that reliably. Try rephrasing the question or asking it in smaller parts.",
+                   "value": None, "unit": None, "confidence": 0.0, "abstained": True},
+        "citations": [],
+        "evidence": {"boxes": [], "scene": {"doc_id": doc_ids[0] if doc_ids else "", "highlight_item_ids": [],
+                                            "camera_target_item_id": None}},
+        "trace": [{"step": "validate", "detail": "answer failed validation -> plain abstention", "ms": 0, "model": None,
+                   "cost_usd": 0}],
+        "route": "index", "cost": {"usd_total": 0, "calls": []}, "latency_ms": 0,
+    }
 
 
 def _no_data_answer(question, doc_ids, on_event=None):
@@ -436,7 +452,11 @@ async def ask(chat_id: str, body: NewMessage):
                 task.cancel()  # suppress late events/results; Python cannot interrupt a provider's running thread
         try:
             ans = ans if ans is not None else task.result()
-            validate_answer(ans)
+            try:
+                validate_answer(ans)
+            except jsonschema.ValidationError:
+                ans = _invalid_answer_fallback(body.content, doc_ids)
+                validate_answer(ans)
         except Exception as e:
             yield {"event": "error", "data": json.dumps({"detail": f"engine failed: {e}"})}
             return
