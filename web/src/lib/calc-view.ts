@@ -1,4 +1,4 @@
-import type { Calculation, CalculationSource } from './types'
+import type { Answer, Bbox, Calculation, CalculationSource, Citation, ClaimsCalculation } from './types'
 
 type Row = Calculation['rows'][number]
 
@@ -75,11 +75,20 @@ export function totalsOf(calc: Pick<Calculation, 'rows' | 'result'>): Totals {
   return { sums, count: calc.rows.length, reconciles: ok, note: ok ? 'Rows add up to the result.' : `Rows add up to ${fmt(total)}, the result is ${fmt(result)}: see the steps for what was left out or added.` }
 }
 
-export type FocusTarget = { item_id: string; doc_id?: string; page?: number }
+export type FocusTarget = { item_id: string; doc_id?: string; page?: number; bbox?: Bbox; cite?: number | null }
 /** What a source points at on the drawing, if anything the viewer can highlight. */
 export function focusOf(source: CalculationSource | undefined): FocusTarget | null {
-  if (!source?.item_id) return null
-  return { item_id: source.item_id, ...(source.doc_id ? { doc_id: source.doc_id } : {}), ...(source.page != null ? { page: source.page } : {}) }
+  if (!source?.item_id && !source?.bbox) return null
+  return { item_id: source.item_id || `source-${source.page ?? 1}-${source.bbox!.join('-')}`, ...(source.doc_id ? { doc_id: source.doc_id } : {}), ...(source.page != null ? { page: source.page } : {}), ...(source.bbox ? { bbox: source.bbox } : {}) }
+}
+
+/** A calculation can open its source document even if the answer has no citation chips. */
+export function calculationCitation(answer: Answer): Citation | undefined {
+  if (answer.citations[0]) return answer.citations[0]
+  const source = answer.reasoning?.calc?.steps?.flatMap((step) => step.inputs ?? []).find((input) => input.source?.doc_id)?.source
+  const docId = source?.doc_id || answer.doc_ids[0] || answer.evidence.scene.doc_id
+  if (!docId) return undefined
+  return { n: 1, doc_id: docId, page: source?.page ?? 1, kind: 'region', bbox_px: source?.bbox ?? null, item_ids: source?.item_id ? [source.item_id] : [], quote: null }
 }
 
 export function sourceText(source: CalculationSource | undefined, docTitle?: (id: string) => string): string {
@@ -100,8 +109,12 @@ export const signed = (delta: number) => `${delta > 0 ? '+' : delta < 0 ? '−' 
 
 /** The headline numbers for the compact card: result, scale, a few counts, margin. */
 /** The few numbers for the compact card. Driven only by what the calculation contains: no step names are assumed. */
-export function keyNumbers(calc: Calculation | undefined): { label: string; text: string }[] {
+export function keyNumbers(calc: Calculation | ClaimsCalculation | undefined): { label: string; text: string }[] {
   if (!calc) return []
+  if (calc.kind === 'claims') return [
+    { label: 'Method', text: calc.method.label },
+    { label: 'Claims', text: `${calc.result.claims_total} total · ${calc.result.verified} verified · ${calc.result.read_only} read only · ${calc.result.inferred} inferred` },
+  ]
   const out: { label: string; text: string }[] = []
   const r = calc.result
   if (r && typeof r.value === 'number') out.push({ label: 'Result', text: withUnit(r.value, r.unit) })

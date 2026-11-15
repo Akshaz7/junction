@@ -35,7 +35,7 @@ export const areaCalc: Calculation = {
   margin: { value: 0.4, unit: 'm2', pct: 1, why: 'outline traced at ±0.5 px', sources: [] },
 }
 
-export const scanReasoning: Reasoning = {
+export const scanReasoning = {
   steps: [{ kind: 'found', title: 'Found', text: '40 walls and 11 doors on the scanned drawing', cite: 1 }],
   confidence: {
     label: 'Estimate', pct: 65, reason: 'The result was read from the drawing image by a model.', improve: 'Upload a CAD file to make it exact.',
@@ -44,7 +44,7 @@ export const scanReasoning: Reasoning = {
   margin: scanCalc.margin,
   calc: scanCalc,
   graph_path: [{ label: 'scan-1.png', kind: 'file' }, { label: 'Page 1', kind: 'sheet' }, { label: 'Door 3', kind: 'item', item_id: 'door-3', relation: 'width measured' }, { label: '0.02903 m/px', kind: 'scale', relation: 'gives' }],
-}
+} satisfies Reasoning
 
 const ifcSrc = (id: string) => ({ doc_id: 'model', item_id: id, artifact: 'IfcDoor' })
 /** A scan whose sheet prints its scale: a different method with different step names. */

@@ -45,6 +45,8 @@ it('source links call onFocus; table sorts; close works', async () => {
 
 it('says so when there is no calculation', async () => {
   await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: undefined, graph_path: undefined }} onClose={() => {}} />))
+  expect(host.textContent).toContain(scanReasoning.steps[0].text)
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, steps: [], calc: undefined, graph_path: undefined }} onClose={() => {}} />))
   expect(host.textContent).toContain('No calculation was recorded')
 })
 
@@ -110,4 +112,17 @@ it('folds supporting steps behind "Show all N steps", by level or by count', asy
   expect(host.querySelectorAll('.calc-steps')[0].children.length).toBe(3)
   await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: { ...base, steps: mk(5) } }} onClose={() => {}} />))
   expect(host.querySelector('[data-testid="calc-more-steps"]')).toBeNull()
+})
+
+import claimsCalc from '../lib/__fixtures__/claims-calc.json'
+it('claims calc: shows claim list with status chips, check line, crop, click-to-box, collapsed details', async () => {
+  const onFocus = vi.fn()
+  const reasoning = { steps: [], calc: claimsCalc, confidence: { label: 'Cross-checked', pct: 80, reason: 'r', improve: null } } as unknown as Parameters<typeof CalculationPanel>[0]['reasoning']
+  await act(async () => root.render(<CalculationPanel reasoning={reasoning} onClose={() => {}} onFocus={onFocus} />))
+  expect(host.querySelectorAll('.calc-claims > li').length).toBeGreaterThan(0)
+  expect(host.querySelector('.calc-claim-status.is-verified')).toBeTruthy()
+  expect(host.querySelector('.calc-claim-check')?.textContent).toBeTruthy()
+  expect(host.querySelector('.calc-crop')).toBeTruthy()
+  await act(async () => host.querySelector<HTMLButtonElement>('.calc-claims .calc-source-link')!.click())
+  expect(onFocus).toHaveBeenCalled()
 })

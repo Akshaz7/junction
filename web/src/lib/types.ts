@@ -46,6 +46,7 @@ export interface CalculationSource {
 /** How the engine chose to measure this answer, and the other ways it considered. */
 export interface CalculationMethod { id: string; label: string; why_chosen: string; alternatives?: { id: string; label?: string; value?: number | string | null; unit?: string; rejected_because: string }[] }
 export interface Calculation {
+  kind?: 'numeric'
   formula: string
   method?: CalculationMethod
   steps: { id: string; label: string; expr: string; value: number | null; unit: string; note?: string; operation?: string; level?: 'main' | 'detail';
@@ -63,6 +64,20 @@ export interface Calculation {
   reader?: { doc_ids?: string[]; model_confidence?: number; note?: string; tool_calls?: unknown[]; calculations?: unknown[] }
   unavailable?: string[]
 }
+/** Additive read-and-cite trace: steps describe claims rather than arithmetic. */
+export interface ClaimsCalculation {
+  kind: 'claims'
+  formula: null
+  method: CalculationMethod
+  steps: {
+    id?: string; level: 'main' | 'detail'; section: 'claim' | 'inventory' | 'scale' | 'model_read'
+    label: string; expr?: string | null; value?: unknown; unit?: string | null
+    status?: 'verified' | 'read_only' | 'inferred'; check?: string; cite?: number | null
+    inputs: { name?: string; value?: unknown; unit?: string | null; source: CalculationSource }[]
+  }[]
+  checks: { method: string; value?: unknown; agrees?: boolean }[]
+  result: { claims_total: number; verified: number; read_only: number; inferred: number }
+}
 /** One thing that moved the confidence figure, with its size in percentage points (negative lowers it). */
 export interface ConfidenceFactor { label: string; delta: number; note?: string; base?: boolean }
 /** A hop in the chain of evidence (file -> sheet -> item -> measurement). */
@@ -73,7 +88,7 @@ export interface Reasoning {
   margin?: EvidenceMargin
   based_on?: { elements: number; estimated: number; unresolved: number; text: string }
   arithmetic?: { formula: string; text: string; terms: { doc_id: string; item_id: string; cite?: number | null; value: number; unit: string; measurement?: { formula: string; operands: { value: number; unit: string }[] } }[]; result: number; unit: string }[]
-  calc?: Calculation
+  calc?: Calculation | ClaimsCalculation
   graph_path?: GraphPathStep[] | null
   /** Accuracy note of the 3D scene built from a PDF, when the pipeline wrote one. */
   quality?: { summary?: string | null; score?: number | null; error?: unknown } | null
