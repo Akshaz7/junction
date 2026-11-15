@@ -177,6 +177,24 @@ def _pdf_vector_on() -> bool:
     return os.environ.get("PDF_VECTOR", "1") != "0"
 
 
+def _flag_vlm_fixtures(ddir: Path, pages: list[int]) -> None:
+    """A DXF read from its render by the VLM has no CAD block or layer behind a fixture the model names: keep it for
+    inspection but below the counting confidence (a toilet nobody drew as a symbol must not become a count)."""
+    for n in pages:
+        f = ddir / f"planmap-{n}.json"
+        if not f.is_file():
+            continue
+        pm = json.loads(f.read_text())
+        changed = False
+        for item in pm["items"]:
+            if item["kind"] in ("toilet", "sink", "shower", "bathtub") and item.get("source") == "vlm":
+                item["conf"] = min(item.get("conf") or 0.4, 0.4)
+                item.setdefault("props", {})["note"] = "read from the rendered DXF by a model; no CAD block or sanitary layer confirms it"
+                changed = True
+        if changed:
+            f.write_text(json.dumps(pm))
+
+
 def _dxf_planmap_usable(ddir: Path) -> bool:
     f = ddir / "planmap-1.json"
     if not f.is_file():
@@ -513,6 +531,7 @@ def _run(doc_id: str, st: Status) -> str:
                 if have:
                     st.stages[-1]["note"] = "no rooms/walls/doors/windows on the expected layers: read the render with the VLM"
                 plan_pages = _vlm_pages(doc_id, ddir, st, cost)
+                _flag_vlm_fixtures(ddir, plan_pages)
         elif ok and kind == "raster" and not light:
             def vision():
                 r = subprocess.run([sys.executable, str(REPO / "vision" / "build_planmaps.py"), doc_id],
