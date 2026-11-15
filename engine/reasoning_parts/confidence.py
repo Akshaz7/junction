@@ -116,6 +116,9 @@ def _finite(value):
         return False
 
 
+ESTIMATE_CAP = 70
+
+
 def factors(card, res, question, *, source=None, allow_route_score=True):
     """Decompose an existing score; never invent an accuracy boost or penalty.
 
@@ -170,11 +173,15 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
     else:
         base, pct, kind = 0, None, 'unavailable'
         label, note = 'No numeric confidence recorded', 'No measured accuracy or route score is available; percentage is unknown.'
+    capped = False
+    if kind == 'recorded_engine_score' and card.get('label') == 'Estimate' and _finite(pct) and pct >= ESTIMATE_CAP:
+        # An unverified Estimate must never read as certain.
+        pct, capped = ESTIMATE_CAP, _finite(base) and base > ESTIMATE_CAP
     card.update(pct=pct, pct_kind=kind)
     entries = [{'label': label, 'delta': base, 'base': True, 'note': note}]
     if pct is not None and pct != base:
         entries.append({'label': 'Applied evidence confidence cap' if pct < base else 'Recorded evidence-card adjustment', 'delta': pct - base,
-                        'note': card.get('reason', 'Existing evidence cap; no additional heuristic deduction.')})
+                        'note': 'An Estimate is not independently verified, so it is capped.' if capped else card.get('reason', 'Existing evidence cap; no additional heuristic deduction.')})
     if kind == 'recorded_engine_score':
         score_note = 'The percentage is an uncalibrated route/model score, not measured answer accuracy.'
         reason = card.get('reason') or ''
