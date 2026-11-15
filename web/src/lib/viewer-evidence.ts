@@ -15,7 +15,7 @@ export function viewerEvidence(answer: Answer, citation: Citation): { regions: V
     .filter((box) => box.page === citation.page && (!itemIds.size || itemIds.has(box.item_id)) && (box.doc_id ? box.doc_id === citation.doc_id : boxDoc === citation.doc_id || itemIds.has(box.item_id)))
     .map((box) => ({ id: box.item_id, label: box.label, bbox: box.bbox_px, text: false, kind: box.kind ?? pageCitations.find((item) => item.item_kind && item.item_ids.includes(box.item_id))?.item_kind ?? kindFromItemId(box.item_id) }))
   for (const source of pageCitations) {
-    if (source.bbox_px && (source.kind === 'text' || !source.item_ids.some((id) => regions.some((region) => region.id === id)))) {
+    if (source.bbox_px && !source.item_ids.some((id) => regions.some((region) => region.id === id))) {
       regions.push({ id: `citation-${source.n}`, label: String(source.n), bbox: source.bbox_px, text: source.kind === 'text' })
     }
   }
@@ -23,8 +23,9 @@ export function viewerEvidence(answer: Answer, citation: Citation): { regions: V
     id: region.id, label: region.label, bbox: region.bbox,
     itemIds: pageCitations.find((source) => region.id === `citation-${source.n}`)?.item_ids ?? [region.id],
   }))
-  // IFC citations can identify real elements without any page coordinates.
-  for (const source of pageCitations) {
+  // IFC citations can identify real elements without any page coordinates. A citation that
+  // carries its own box is already one painted region: its other ids are not extra stops.
+  for (const source of pageCitations.filter((entry) => !entry.bbox_px)) {
     for (const id of source.item_ids) {
       if (!sources.some((entry) => entry.itemIds.includes(id))) {
         sources.push({ id, label: String(source.n), bbox: null, itemIds: [id] })
