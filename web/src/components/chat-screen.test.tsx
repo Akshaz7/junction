@@ -150,3 +150,17 @@ it('a pair.chat proof for this device\'s code opens the chat before its first me
   await act(async () => emitProof('proof-chat', proof))
   expect(window.location.hash).toBe('#/chat?chat=proof-chat')
 })
+
+it('a paired desktop with Follow on stays put when the pairing check fails (timeout, 429) for a stranger\'s chat', async () => {
+  const { addPairing } = await import('../lib/pairing')
+  await mount()
+  addPairing('abc12345')
+  await act(async () => setFollow(true))
+  for (const failure of [async () => { throw new Error('timeout') }, async () => ({ ok: false, status: 429 }), async () => ({ ok: true, json: async () => ({ paired: false }) })]) {
+    vi.stubGlobal('fetch', vi.fn(failure))
+    window.location.hash = '#/chat'
+    await act(async () => { emitQuestion('judge-skeptic-chat'); await new Promise((r) => setTimeout(r, 30)) })
+    expect(window.location.hash).toBe('#/chat')
+  }
+  vi.unstubAllGlobals()
+})

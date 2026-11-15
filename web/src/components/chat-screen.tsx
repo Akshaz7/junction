@@ -244,7 +244,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.chat_id === chatId.current) return
       // Strangers' chats never raise the notice: only with Follow on, and only for chats this browser knows.
       if (!followingRef.current) return
-      void isPairedChat(event.chat_id, { failOpen: true }).then((known) => {
+      void isPairedChat(event.chat_id).then((known) => {
         if (known && followingRef.current && !submitting.current) window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
       })
     })
