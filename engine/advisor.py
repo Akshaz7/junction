@@ -47,7 +47,7 @@ def _card(kind: str, title: str, body: str, ids: list[str], src: dict, key: str)
     if source is None or not ids:
         return None
     return {"card_id": f"adv:{key}", "kind": kind, "title": _cut(title, MAX_TITLE), "body": _cut(body, MAX_BODY),
-            "item_ids": ids[:50], "source": source}
+            "item_ids": ids[:50], "item_total": len(ids), "source": source}
 
 
 def _new_width(item, detail: dict) -> float | None:
