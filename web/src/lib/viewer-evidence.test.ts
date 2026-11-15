@@ -73,4 +73,18 @@ describe('citation to drawing evidence', () => {
     expect(viewerEvidence(answer, answer.citations[0]).regions.map((r) => r.label)).toEqual(['1'])
     expect(viewerEvidence(answer, answer.citations[1]).regions.map((r) => r.label)).toEqual(['2'])
   })
+
+  it('counts only painted boxes when a citation lists many ids without coordinates', () => {
+    const answer = makeDemoAnswer('How many windows are there?')
+    const doc = answer.doc_ids[0]
+    answer.evidence.boxes = [{ item_id: 'rot-2', doc_id: doc, page: 1, label: '1', bbox_px: [1, 2, 3, 4] }]
+    const many = Array.from({ length: 25 }, (_, i) => `wall-${i}`)
+    answer.citations = [
+      { ...answer.citations[0], n: 1, doc_id: doc, page: 1, kind: 'region', item_ids: many, bbox_px: [5, 6, 50, 60] },
+      { ...answer.citations[0], n: 2, doc_id: doc, page: 1, kind: 'text', item_ids: ['rot-2'], bbox_px: [1, 2, 3, 4] },
+    ]
+    const result = viewerEvidence(answer, answer.citations[1])
+    expect(result.sources).toHaveLength(result.regions.length)
+    expect(result.sources.length).toBeLessThan(10)
+  })
 })
