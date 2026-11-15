@@ -2,6 +2,7 @@ import { apiFetch } from './api'
 import type { KgGraph, KgNodeDetail, KgStats } from './kg'
 import { mockCluster, mockGraph, mockNode } from './kg-mock'
 
+export const GRAPH_TIMEOUT_MS = 25_000
 export const projectRoles = ['model', 'plan', 'section', 'elevation', 'detail', 'schedule', 'scan', 'photo', 'spec', 'revision', 'other'] as const
 export type ProjectRole = typeof projectRoles[number]
 export type ProjectDoc = { doc_id: string; title: string; kind: string; formats: string[]; role: ProjectRole; level: string | null; role_source: 'auto' | 'user'; thumb_url?: string; status?: string }
@@ -44,7 +45,14 @@ const realApi = {
   /** Knowledge graph. depth "cluster" is the overview; "full" has every item. A 202 answer is a partial graph still being built. */
   graph: async (id: string, options: { depth?: 'cluster' | 'full'; level?: string; kinds?: string[]; docId?: string } = {}): Promise<KgGraph> => {
     const query = new URLSearchParams({ depth: options.depth ?? 'cluster', ...(options.level ? { level: options.level } : {}), ...(options.kinds?.length ? { kinds: options.kinds.join(',') } : {}), ...(options.docId ? { doc_id: options.docId } : {}) })
-    const response = await apiFetch(`/api${path(id)}/graph?${query}`)
+    // A request that never answers must end in a message with Retry, not an endless skeleton.
+    const timeout = new AbortController()
+    const timer = setTimeout(() => timeout.abort(), GRAPH_TIMEOUT_MS)
+    let response: Response
+    try { response = await apiFetch(`/api${path(id)}/graph?${query}`, { signal: timeout.signal }) } catch (error) {
+      if (timeout.signal.aborted) throw new Error('The graph is taking too long to load. Check the connection and try again.')
+      throw error
+    } finally { clearTimeout(timer) }
     if (!response.ok) {
       const body = await response.json().catch(() => null)
       throw new Error(typeof body?.detail === 'string' ? body.detail : `The graph could not be loaded (${response.status}). Please try again.`)

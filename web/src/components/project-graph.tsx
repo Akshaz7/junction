@@ -30,7 +30,14 @@ function useGraph(projectId: string, docCount: number) {
     setState({ error: '' }); void load()
     return () => { live = false; if (timer) clearTimeout(timer) }
   }, [projectId, docCount, key])
-  return { ...state, retry: () => setKey((value) => value + 1) }
+  const [slow, setSlow] = useState(false)
+  useEffect(() => {
+    setSlow(false)
+    if (state.graph || state.error || !docCount) return
+    const timer = setTimeout(() => setSlow(true), 8_000)
+    return () => clearTimeout(timer)
+  }, [projectId, docCount, key, state.graph, state.error])
+  return { ...state, slow, retry: () => setKey((value) => value + 1) }
 }
 
 function StatsStrip({ graph, onUnlinked, active }: { graph: KgGraph; onUnlinked: () => void; active: boolean }) {
@@ -149,7 +156,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
   project: Project; focus?: string[]
   onShow: (docId: string, itemIds?: string[], mode?: '2d' | '3d') => void; onAsk: (text: string) => void; canShow3d?: (docId: string) => boolean
 }) {
-  const { graph, error, retry } = useGraph(project.id, project.docs.length)
+  const { graph, error, slow, retry } = useGraph(project.id, project.docs.length)
   const [shown, setShown] = useState<{ nodes: KgNode[]; edges: KgGraph['edges'] }>({ nodes: [], edges: [] })
   const [mode, setMode] = useState<'overview' | 'all'>('overview')
   const [filters, setFilters] = useState<GraphFilters>(noFilters)
@@ -275,7 +282,7 @@ export function GraphTab({ project, focus = [], onShow, onAsk, canShow3d }: {
 
   if (!project.docs.length) return <div className="pj-empty" data-testid="graph-empty"><h2>No graph yet</h2><p>Add plans, models or scans to this project and their items are linked here.</p></div>
   if (error && !graph) return <ErrorLine message={error} onRetry={retry} />
-  if (!graph) return <div className="kg-loading" aria-busy="true" aria-label="Building the graph"><div className="overview-stats pj-stats kg-stats">{[0, 1, 2, 3, 4, 5].map((n) => <div key={n} className="overview-stat"><Skeleton lines={2} /></div>)}</div><div className="kg-stage"><Skeleton lines={4} className="kg-skel" /></div></div>
+  if (!graph) return <div className="kg-loading" aria-busy="true" aria-label="Building the graph">{slow && <p className="pj-hint" role="status">Still loading the graph. <button type="button" className="pj-link" onClick={retry}>Try again</button></p>}<div className="overview-stats pj-stats kg-stats">{[0, 1, 2, 3, 4, 5].map((n) => <div key={n} className="overview-stat"><Skeleton lines={2} /></div>)}</div><div className="kg-stage"><Skeleton lines={4} className="kg-skel" /></div></div>
   if (!graph.nodes.length) return <div className="pj-empty" data-testid="graph-empty"><h2>{graph.partial ? 'Linking the files…' : 'No links found yet'}</h2><p>{graph.partial ? 'The graph is still being built. It appears here when it is ready.' : 'The files in this project have nothing in common that could be linked.'}</p></div>
 
   return <div className="kg" data-testid="graph-tab">
