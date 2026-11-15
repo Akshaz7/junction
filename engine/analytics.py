@@ -328,6 +328,11 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
     if kind is None or kind == "storey":
         return None
     items = _of_kind(doc, kind)
+    flights = []
+    if kind == "stairs" and not area:
+        # A flight aggregated into a stair assembly is a part of that stair, not another stair.
+        flights = [i for i in items if i.props.get("count_component_of")]
+        items = [i for i in items if not i.props.get("count_component_of")]
     by: dict[str, list[Item]] = {}
     for s in doc.storeys:
         by[s["name"]] = []
@@ -365,6 +370,11 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
         text = (f"| Storey | {col} |\n|---|---|\n" + "\n".join(rows) + f"\n| **Total** | {_fmt(tot) if area else tot} |\n\n{{marks}}")
         return _done(question, doc, text, tot, "m2" if area else "count", items, trace, t0=t0)
     text = f"{_noun(kind).capitalize()} per floor{' (area)' if area else ''}: {parts}. {{marks}}"
+    if flights:
+        text += (f" {len(flights)} stair flight{'s' if len(flights) != 1 else ''} belong to these stair assemblies and are not counted as stairs"
+                 + (": " + ", ".join(f"{k} {n}" for k in order if (n := sum(1 for i in flights if i.storey == k))) if re.search(r"flight", question, re.I) else "") + ".")
+    if re.search(r"\b(?:protected|escape)\b", question, re.I):
+        text += " This counts elements only; whether a stair is a protected escape stair is not determined from the count."
     return _done(question, doc, text, sum(score.values()), "m2" if area else "count", items, trace, t0=t0)
 
 
