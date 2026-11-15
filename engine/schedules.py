@@ -195,16 +195,38 @@ def _int_qty(text):
     return int(text) if re.fullmatch(r'[1-9]\d*', text.strip()) else None
 
 
+def _words_above(pt, table):
+    """Text-layer words in the band just above a grid (its header and sheet heading)."""
+    x0, y0, x1, y1 = table.bbox_px
+    return [w for w in getattr(pt, 'words', None) or []
+            if y0 - 150 <= w['bbox_px'][3] <= y0 + 2 and x0 - 20 <= (w['bbox_px'][0] + w['bbox_px'][2]) / 2 <= x1 + 20]
+
+
+def _col_words(table, col, words):
+    cells = [c for c in table.cells if c.c == col and c.cs == 1]
+    if not cells or not words:
+        return []
+    lo, hi = min(c.bbox_px[0] for c in cells), max(c.bbox_px[2] for c in cells)
+    top = max((w['bbox_px'][3] for w in words), default=0)
+    return [w for w in words if lo - 10 <= (w['bbox_px'][0] + w['bbox_px'][2]) / 2 <= hi + 10
+            and w['bbox_px'][3] >= top - 60]
+
+
 def solve_list(pt, table, req):
     """Read a whole door/window schedule as a table: per type width, height, quantity, total.
 
     Nothing is guessed: a missing or non-integer quantity, a duplicated type or a
     table that does not name its kind defers to the other routes.
     """
-    for start in range(1, min(table.nrows, 6)):
-        roles = {}
+    for start in range(0, min(table.nrows, 6)):
+        roles, above = {}, []
+        if start == 0:
+            above = _words_above(pt, table)  # header printed above the ruled grid
+            if not above:
+                continue
         for col in range(table.ncols):
             texts = [_norm(c.text) for r in range(start) if (c := table.cell_at(r, col)) is not None and c.text.strip()]
+            texts += [_norm(w['text']) for w in _col_words(table, col, above)]
             for role, rx in _LIST_ROLES:
                 if role not in roles and any(re.search(rx, t) for t in texts):
                     roles[role] = col
@@ -215,6 +237,7 @@ def solve_list(pt, table, req):
             continue
         body = ' '.join(c.text for c in table.cells)
         heading = table.title + ' ' + ' '.join(c.text for c in table.cells if c.r < start)
+        heading += ' ' + ' '.join(w['text'] for w in above)
         if not re.search(r'\b' + req.kind + r's?\b', heading + ' ' + body, re.I):
             return None
         rows, seen = [], set()
