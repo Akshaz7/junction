@@ -69,7 +69,7 @@ it('expands to full width and has a resize separator', async () => {
 })
 
 import { scanCalc, scanPrintedCalc, ifcCountCalc, ifcWallAreaCalc } from '../lib/__fixtures__/calc-fixture'
-import type { Calculation } from '../lib/types'
+import type { Calculation, Reasoning } from '../lib/types'
 
 for (const [name, calc] of [['scan door prior', scanCalc], ['scan printed scale', scanPrintedCalc], ['IFC count', ifcCountCalc], ['IFC wall area', ifcWallAreaCalc]] as [string, Calculation][]) {
   it(`renders whatever the ${name} calculation contains, with its method`, async () => {
@@ -163,3 +163,12 @@ it('error boundary shows a fallback instead of blanking the app', async () => {
   spy.mockRestore()
   expect(host.textContent).toContain('Could not render this calculation')
 })
+
+import bathroomReasoning from '../lib/__fixtures__/bathroom-reasoning.json'
+import doorsReasoning from '../lib/__fixtures__/doors-reasoning.json'
+for (const [name, r] of [['bathroom area (JUDGE-QS F6)', bathroomReasoning], ['doors', doorsReasoning]] as const) {
+  it(`renders the real ${name} payload without crashing`, async () => {
+    await act(async () => root.render(<CalculationPanel reasoning={r as unknown as Reasoning} onClose={() => {}} />))
+    expect(host.querySelector('[data-testid="calc-panel"]')).toBeTruthy()
+  })
+}
