@@ -4,7 +4,10 @@ import re
 import cv2
 import numpy as np
 
-from planmap import _components, _poly_off
+try:
+    from .planmap import _components, _poly_off
+except ImportError:  # direct script execution
+    from planmap import _components, _poly_off
 
 ROOM_CLASSES = {1: "outdoor", 3: "kitchen", 4: "living", 5: "bedroom", 6: "bathroom", 7: "entry", 8: "storage", 9: "garage", 10: "undefined"}
 # Finnish plan abbreviations -> room type (exact token match after upper-casing, punctuation stripped)
@@ -17,8 +20,14 @@ LABEL_TYPES = {
     "ET": "entry", "VH": "entry", "ETEINEN": "entry", "TAMBUURI": "entry", "VAR": "storage", "VARASTO": "storage", "KHH": "storage",
     "TEKN": "technical", "TEKNINEN": "technical", "AUTOTALLI": "garage", "AT": "garage", "TERASSI": "terrace", "TERR": "terrace",
     "TYÖH": "study", "TYOH": "study", "PUKUH": "dressing", "KOMERO": "storage", "ULKOVARASTO": "storage", "ULKO": "outdoor",
+    "BEDROOM": "bedroom", "CHAMBRE": "bedroom", "SCHLAFZIMMER": "bedroom", "SOVRUM": "bedroom",
+    "KITCHEN": "kitchen", "CUISINE": "kitchen", "KÜCHE": "kitchen", "KUCHE": "kitchen", "KÖK": "kitchen",
+    "BATH": "bathroom", "BATHROOM": "bathroom", "BAINS": "bathroom", "BAD": "bathroom", "BADRUM": "bathroom",
+    "LIVING": "living", "SALON": "living", "SEJOUR": "living", "SÉJOUR": "living", "WOHNZIMMER": "living", "VARDAGSRUM": "living",
+    "HALL": "entry", "ENTREE": "entry", "ENTRÉE": "entry", "FLUR": "corridor", "CORRIDOR": "corridor", "DEGT": "corridor",
+    "OFFICE": "office", "BUREAU": "office", "BÜRO": "office", "KONTOR": "office", "GARAGE": "garage",
 }
-AREA_RE = re.compile(r"(\d{1,4}(?:[.,]\d{1,2})?)\s*(?:m\s*[²2'\"\^]?|㎡)\s*$", re.I)
+AREA_RE = re.compile(r"(?<![\d.,])(\d+(?:[.,]\d+)?)\s*(m\s*(?:²|2|\^2)|㎡|sq\.?\s*m|ft\s*(?:²|2)|sq\.?\s*ft)\s*$", re.I)
 DOOR_WIDTH_M = 0.9
 
 
@@ -70,9 +79,12 @@ def label_rooms(rooms_items, texts):
     for r in rooms_items:
         types = []
         for t in sorted(r.pop("_texts"), key=lambda t: t["bbox"][1]):
-            tok = re.sub(r"[^A-ZÅÄÖ0-9]", "", t["text"].upper())
-            if tok in LABEL_TYPES:
-                types.append((tok, LABEL_TYPES[tok]))
+            # A printed room number belongs to the label, not to the type token.
+            tokens = re.findall(r"[^\W\d_]+", t["text"].upper(), re.U)
+            for tok in tokens:
+                if tok in LABEL_TYPES:
+                    types.append((t["text"], LABEL_TYPES[tok]))
+                    break
         if types:
             r["label"] = " ".join(t for t, _ in types)
             r["props"]["label_room_type"] = types[0][1]
@@ -80,42 +92,63 @@ def label_rooms(rooms_items, texts):
     return rooms_items
 
 
-def estimate_scale(room_list, texts, door_items):
-    """Return scale dict (CONTRACT 5.4). Order: stated area text (checked against the door prior), else door prior, else none."""
+def estimate_scale(room_list, texts, door_items, image_size=None, dpi=None):
+    """Printed room areas first; the door guess cannot choose their interpretation.
+
+    Only an explicit square-area unit is accepted. Total-floor text is never
+    assigned to a single room. Multiple inconsistent readings are flagged.
+    """
     door_px = [max(i["bbox_px"][2] - i["bbox_px"][0], i["bbox_px"][3] - i["bbox_px"][1]) for i in door_items]
     prior = None
     if len(door_px) >= 2:
         prior = DOOR_WIDTH_M / float(np.median(door_px))  # door icon bbox (leaf + swing) ~ door width
+    printed = None
+    if image_size:
+        from engine.scale_text import detect
+        words = [{"text": t["text"], "bbox_px": t["bbox"]} for t in texts]
+        # A guessed door width must not veto an explicit printed scale.
+        printed = detect(words, *image_size, dpi=dpi)
+        if printed and printed["method"] not in ("dimension", "scalebar"):
+            printed = {**printed, "basis": printed["method"], "method": "dimension"}
     indoor = [r for r in room_list if r["props"]["room_type"] not in ("outdoor", "garage", "balcony", "terrace")]
-    total_px = sum(r["props"]["area_px"] for r in indoor)
-    cands = []
+    cands, room_areas = [], {}
     for t in texts:
         m = AREA_RE.search(t["text"].replace(" ", ""))
         if not m:
             continue
         a = float(m.group(1).replace(",", "."))
-        if not 3 <= a <= 400:
+        if "ft" in m.group(2).lower():
+            a *= 0.09290304
+        if not np.isfinite(a) or a <= 0:
+            continue
+        if re.search(r"\b(?:total|shab|surface habitable|wohnfl.che|gross|net floor)\b", t["text"], re.I):
             continue
         cx, cy = _centre(t["bbox"])
         own = [r for r in indoor if r["polygon_px"] and cv2.pointPolygonTest(np.array(r["polygon_px"], np.int32), (float(cx), float(cy)), False) >= 0]
         if own:
-            cands.append((a, own[0]["props"]["area_px"], "room", t, [own[0]]))
-        if total_px:
-            cands.append((a, total_px, "total", t, indoor))
-    if cands and prior:
-        good = [(np.sqrt(a / px), a, px, kind, text, owners) for a, px, kind, text, owners in cands if px and 0.55 < np.sqrt(a / px) / prior < 1.8]
-        if good:
-            s, a, px, kind, text, owners = min(good, key=lambda g: abs(np.log(g[0] / prior)))
-            ratio = s / prior
-            conf = 0.75 if 0.8 < ratio < 1.25 else 0.55
-            return {"m_per_px": float(s), "method": "dimension", "confidence": conf, "evidence": f"{len(good)} stated area text(s)",
-                    "derivation": _area_derivation(a, px, kind, text, owners),
-                    "selection_rule": "Choose the room/total-area interpretation closest to the door prior in log scale, among ratios 0.55–1.8 of that prior; this is a heuristic association, not independent verification."}
-    if cands and not prior:
-        a, px, kind, text, owners = cands[0]
-        return {"m_per_px": float(np.sqrt(a / px)), "method": "dimension", "confidence": 0.4, "evidence": "area text, no door check",
-                "derivation": _area_derivation(a, px, kind, text, owners),
-                "selection_rule": "Use the first stated-area interpretation; without a door or independent dimension check the association is unverified."}
+            room = min(own, key=lambda r: r["props"]["area_px"])
+            room_areas.setdefault(id(room), (room, [], []))[1].append(a)
+            room_areas[id(room)][2].append(t)
+    for room, areas, atexts in room_areas.values():
+        # Repeated OCR of one label is harmless; conflicting labels are not.
+        if max(areas) / min(areas) > 1.05:
+            continue
+        a = float(np.median(areas))
+        room["props"]["area_m2_label"] = round(a, 2)
+        px = room["props"].get("area_px")
+        if px and px > 0:
+            cands.append((float(np.sqrt(a / px)), a, px, room, atexts[0]))
+    if printed:
+        return printed
+    if cands:
+        s = float(np.median([c[0] for c in cands]))
+        good = [c for c in cands if abs(c[0] / s - 1) <= .15]
+        if len(good) > len(cands) / 2:
+            v, a, px, room, text = min(good, key=lambda c: abs(c[0] - s))
+            return {"m_per_px": float(np.median([c[0] for c in good])), "method": "dimension", "confidence": .8 if len(good) >= 2 else .55,
+                    "evidence": f"{len(good)} printed room area label(s) matched to their enclosed outlines",
+                    "derivation": _area_derivation(a, px, "room", text, [room]),
+                    "selection_rule": "Use the median scale over printed room areas that agree within 15%; each label is associated to the smallest room outline containing it, an inferred association rather than an independent check."}
     if prior:
         return {"m_per_px": prior, "method": "door-prior", "confidence": 0.3, "evidence": f"median door icon {np.median(door_px):.0f}px = {DOOR_WIDTH_M} m"}
     return {"m_per_px": None, "method": "none", "confidence": 0.0}
@@ -133,4 +166,5 @@ def _area_derivation(area, pixels, kind, text, rooms):
 def apply_scale(room_list, scale):
     s = scale.get("m_per_px")
     for r in room_list:
-        r["props"]["area_m2"] = round(r["props"]["area_px"] * s * s, 2) if s else None
+        label_area = r["props"].get("area_m2_label")
+        r["props"]["area_m2"] = label_area if label_area is not None else round(r["props"]["area_px"] * s * s, 2) if s else None

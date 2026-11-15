@@ -63,6 +63,26 @@ CAVEAT = "Areas are estimated from door sizes because no printed scale was found
 ROOMWORD = re.compile(r"kitchen|bed ?room|bath|living|dining|hall|closet|office|\bwc\b|garage|laundry|toilet|lounge|study|utility|pantry|foyer|balcon", re.I)
 
 
+def define_rooms(res: dict, question: str, doc) -> dict:
+    """Keep the meaning of a scan's room count visible, even after explanation."""
+    ans = res.get("answer") or {}
+    if (doc is None or doc.mode != "planmap" or ans.get("unit") != "count" or ans.get("abstained")
+            or not re.search(r"\b(?:rooms?|spaces?)\b", question, re.I)):
+        return res
+    ids = {iid for c in res.get("citations") or [] for iid in c.get("item_ids") or []}
+    rooms = [i for i in doc.items if i.kind == "room" and i.item_id in ids]
+    if not rooms or all(i.source in ("dxf", "ifc") for i in rooms):
+        return res
+    # Defining a segmentation region is not an independent check of a room.
+    ans["confidence"] = min(float(ans.get("confidence") or .45), .45)
+    connected = all(i.props.get("boundary_method") == "connected-interior" for i in rooms)
+    note = ("Rooms mean connected interior spaces separated by walls and closed door/window openings; open-plan zones count together."
+            if connected else "Rooms here are the spaces outlined by the automatic reader; open-plan zones may be split or merged.")
+    if note not in ans.get("text_md", ""):
+        ans["text_md"] = ans.get("text_md", "").rstrip() + "\n\n" + note
+    return res
+
+
 def _undercounted(doc) -> bool:
     """More room-like words printed on the drawing than rooms the reader found."""
     words = sum(1 for i in doc.items if i.kind == "text" and ROOMWORD.search(str(i.label or i.props.get("text") or "")))
@@ -81,6 +101,7 @@ def sparse_note(doc, question: str, res: dict) -> str | None:
 
 
 def guard(res: dict, question: str, doc) -> dict:
+    define_rooms(res, question, doc)
     ans = res.get("answer") or {}
     why = scale_problem(doc, res)
     if why:

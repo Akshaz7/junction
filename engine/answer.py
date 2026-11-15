@@ -351,6 +351,7 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
     res = cite_sheet_numbers(res, question, _root())
     from engine.numeric import guard_answer_value
     res = guard_answer_value(res, question, doc_ids, _root(), hidden=(scene_state or {}).get("hidden"))
+    _doc = None
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
@@ -368,6 +369,8 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
             res = explain(res, question, _root(), on_event=on_event)
     except Exception:  # noqa: BLE001
         pass
+    if _doc is not None:
+        res = rastersanity.define_rooms(res, question, _doc)
     try:   # X20-X23/D01: feet, acres, unit prices on top of the metric answer (engine/units.py; value unchanged)
         from engine import units
         if res.get("xdisc") is None:
@@ -625,6 +628,12 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
+            return res
+
+        # P&IDs need individual symbol evidence before the text-only fallback.
+        from engine.scan_count import answer_counts
+        if (res := answer_counts(question, doc_ids, root, t0, incurred=calls)) is not None:
+            res["trace"] = trace + res["trace"]
             return res
 
         # text-layer upload with no plan map: answer from the file's printed text (notes, schedule rows), "not shown" only when absent
