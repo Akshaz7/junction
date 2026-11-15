@@ -16,6 +16,7 @@ _GLUE = {"me", "us", "know", "see", "show", "tell", "ask", "explain", "of", "in"
          "than", "list", "name", "count", "find", "give", "get", "check", "determine", "describe", "say", "understand"}
 _WH_NEXT = {"which": {"of", "one", "file", "files", "document", "documents", "doc", "docs", "drawing", "drawings", "floor",
                       "floors", "plan", "plans", "room", "rooms", "storey", "story", "level", "model", "models", "sheet"}}
+_OPENS = re.compile(r"^\W*(?:what|how|which|where|who|when|why|is|are|does|do|can|could|should|will|was|were|has|have)\b", re.I)
 _CMP = re.compile(r"\bwhich\s+(?:one\s+)?(?:of\s+)?(?:these|the|those|my|both)?\s*(?:\w+\s+)?(?:files?|documents?|docs?|drawings?|plans?|"
                   r"floor\s*plans?|models?|sheets?)\s+(?:has|have|got|contains?|shows?)\s+(?:the\s+)?(more|most|fewer|fewest|less|least)\s+"
                   r"(.+?)\s*\??\s*$", re.I)
@@ -27,12 +28,20 @@ def split(question: str) -> list[str]:
     if len(q.split()) < 5:
         return []
     segs: list[str] = []
-    for chunk in re.split(r"(?<=\?)\s+(?=\S)", q):          # '?' boundaries
-        segs.extend(_runon(chunk))
+    chunks: list[str] = []
+    for c in re.split(r"(?<=\?)\s+(?=\S)", q):               # '?' boundaries, only where a new question starts
+        if chunks and _OPENS.match(c) and _OPENS.match(chunks[-1]):
+            chunks.append(c)
+        elif chunks:
+            chunks[-1] += " " + c
+        else:
+            chunks.append(c)
+    for chunk in chunks:
+        segs.extend(_runon(chunk) if _OPENS.match(chunk) else [chunk])
     segs = [s.strip(" ,;") for s in segs if len(re.findall(r"\w+", s)) >= 2]
     segs = [re.sub(r"\s+(?:and|then|also|plus)\s*$", "", s, flags=re.I).strip(" ,;") for s in segs]
-    if len(segs) < 2:
-        return []
+    if len(segs) < 2 or any(re.search(r"\b(?:of each|each of|them|those|the same|their)\b", x, re.I) for x in segs[1:]):
+        return []                                   # a later part leans on the earlier answer: keep it whole
     return [s if s.endswith("?") else s + "?" for s in segs]
 
 

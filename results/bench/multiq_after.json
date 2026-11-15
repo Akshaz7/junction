@@ -7,7 +7,7 @@
   "of": 200,
   "stopped_by_max_usd": false,
   "cost_usd": 0.0,
-  "wall_s": 22.09
+  "wall_s": 23.21
  },
  "cells": {
   "ALL x ALL": {
@@ -21,8 +21,8 @@
    "answered_accuracy": 0.8278,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 440,
-   "latency_ms_p95": 1330
+   "latency_ms_mean": 462,
+   "latency_ms_p95": 1352
   },
   "ALL x area": {
    "n": 39,
@@ -35,8 +35,8 @@
    "answered_accuracy": 0.9474,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 950,
-   "latency_ms_p95": 4623
+   "latency_ms_mean": 1167,
+   "latency_ms_p95": 5436
   },
   "ALL x count": {
    "n": 146,
@@ -49,8 +49,8 @@
    "answered_accuracy": 0.7929,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 260,
-   "latency_ms_p95": 512
+   "latency_ms_mean": 235,
+   "latency_ms_p95": 504
   },
   "ALL x length": {
    "n": 1,
@@ -63,8 +63,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1040,
-   "latency_ms_p95": 1040
+   "latency_ms_mean": 571,
+   "latency_ms_p95": 571
   },
   "ALL x text": {
    "n": 13,
@@ -77,8 +77,8 @@
    "answered_accuracy": null,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 906,
-   "latency_ms_p95": 1410
+   "latency_ms_mean": 898,
+   "latency_ms_p95": 1495
   },
   "ALL x volume": {
    "n": 1,
@@ -91,8 +91,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 254,
-   "latency_ms_p95": 254
+   "latency_ms_mean": 441,
+   "latency_ms_p95": 441
   },
   "cubicasa5k x ALL": {
    "n": 102,
@@ -105,8 +105,8 @@
    "answered_accuracy": 0.7113,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 229,
-   "latency_ms_p95": 492
+   "latency_ms_mean": 216,
+   "latency_ms_p95": 391
   },
   "cubicasa5k x count": {
    "n": 102,
@@ -119,8 +119,8 @@
    "answered_accuracy": 0.7113,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 229,
-   "latency_ms_p95": 492
+   "latency_ms_mean": 216,
+   "latency_ms_p95": 391
   },
   "ifc_bench x ALL": {
    "n": 12,
@@ -133,8 +133,8 @@
    "answered_accuracy": null,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 867,
-   "latency_ms_p95": 1410
+   "latency_ms_mean": 882,
+   "latency_ms_p95": 1495
   },
   "ifc_bench x text": {
    "n": 12,
@@ -147,8 +147,8 @@
    "answered_accuracy": null,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 867,
-   "latency_ms_p95": 1410
+   "latency_ms_mean": 882,
+   "latency_ms_p95": 1495
   },
   "ifc_models x ALL": {
    "n": 25,
@@ -161,8 +161,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1717,
-   "latency_ms_p95": 4629
+   "latency_ms_mean": 1962,
+   "latency_ms_p95": 5454
   },
   "ifc_models x area": {
    "n": 20,
@@ -175,8 +175,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1649,
-   "latency_ms_p95": 4629
+   "latency_ms_mean": 2069,
+   "latency_ms_p95": 8562
   },
   "ifc_models x count": {
    "n": 3,
@@ -189,8 +189,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 2878,
-   "latency_ms_p95": 456
+   "latency_ms_mean": 2221,
+   "latency_ms_p95": 673
   },
   "ifc_models x length": {
    "n": 1,
@@ -203,8 +203,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1040,
-   "latency_ms_p95": 1040
+   "latency_ms_mean": 571,
+   "latency_ms_p95": 571
   },
   "ifc_models x volume": {
    "n": 1,
@@ -217,8 +217,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 254,
-   "latency_ms_p95": 254
+   "latency_ms_mean": 441,
+   "latency_ms_p95": 441
   },
   "opening_design x ALL": {
    "n": 4,
@@ -231,8 +231,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1069,
-   "latency_ms_p95": 1330
+   "latency_ms_mean": 711,
+   "latency_ms_p95": 1050
   },
   "opening_design x area": {
    "n": 1,
@@ -245,8 +245,8 @@
    "answered_accuracy": null,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1330,
-   "latency_ms_p95": 1330
+   "latency_ms_mean": 1050,
+   "latency_ms_p95": 1050
   },
   "opening_design x count": {
    "n": 2,
@@ -259,8 +259,8 @@
    "answered_accuracy": 1.0,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 789,
-   "latency_ms_p95": 777
+   "latency_ms_mean": 353,
+   "latency_ms_p95": 53
   },
   "opening_design x text": {
    "n": 1,
@@ -273,8 +273,8 @@
    "answered_accuracy": null,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 1367,
-   "latency_ms_p95": 1367
+   "latency_ms_mean": 1087,
+   "latency_ms_p95": 1087
   },
   "swiss_dwellings x ALL": {
    "n": 57,
@@ -287,8 +287,8 @@
    "answered_accuracy": 0.9474,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 125,
-   "latency_ms_p95": 216
+   "latency_ms_mean": 140,
+   "latency_ms_p95": 235
   },
   "swiss_dwellings x area": {
    "n": 18,
@@ -301,8 +301,8 @@
    "answered_accuracy": 0.8889,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 152,
-   "latency_ms_p95": 234
+   "latency_ms_mean": 172,
+   "latency_ms_p95": 290
   },
   "swiss_dwellings x count": {
    "n": 39,
@@ -315,8 +315,8 @@
    "answered_accuracy": 0.9744,
    "cost_usd_total": 0.0,
    "cost_usd_per_answer": 0.0,
-   "latency_ms_mean": 112,
-   "latency_ms_p95": 176
+   "latency_ms_mean": 125,
+   "latency_ms_p95": 182
   }
  },
  "text": {
