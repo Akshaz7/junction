@@ -1,0 +1,12 @@
+{
+  "label": "before",
+  "case": "reserved",
+  "doc_id": "opening_design__facilities-building-transfer-20181108-to-structure-mbm-for-pricing-1810-s-park",
+  "source": "data/junction-dataset-preview/data/opening_design/Facilities_Building/Transfer/20181108 - to structure & MBM - for pricing/1810 S Park.ifc",
+  "source_mb": 21.520804,
+  "peak_sampled_mib": 902.33,
+  "seconds": 7.74,
+  "exit_code": -9,
+  "stopped": "memory cap",
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-4xtvs7d9"
+}

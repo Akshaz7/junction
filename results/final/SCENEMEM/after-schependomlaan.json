@@ -1,0 +1,27 @@
+{
+  "label": "after",
+  "case": "schependomlaan",
+  "doc_id": "external__schependomlaan-design",
+  "source": "data/external/ifc_round2/schependomlaan_design.ifc",
+  "source_mb": 49.286967,
+  "peak_sampled_mib": 208.05,
+  "seconds": 21.43,
+  "exit_code": 0,
+  "stopped": null,
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-p9t3mz7y",
+  "fresh_index_metrics": {
+    "peak_worker_rss_mib": 138.2,
+    "memory_budget_mib": 320.0,
+    "worker_exit_code": 0,
+    "batches": 30
+  },
+  "ok": true,
+  "result": {
+    "doc_id": "external__schependomlaan-design",
+    "elements": 3736,
+    "nodes": 3510,
+    "storeys": 6,
+    "s": 21.2
+  },
+  "resource_peak_mib": 218.75
+}

@@ -1,0 +1,100 @@
+{
+  "cases": [
+    {
+      "case": "munich",
+      "schema": "IFC4X3",
+      "source_mb": 33.499586,
+      "authoring_applications": [
+        "Autodesk Revit 2025 (ENU)"
+      ],
+      "indexed_objects_unchanged": 214,
+      "source_quantities_unchanged": 775,
+      "unique_linked_nodes": 210,
+      "vertices": 133211,
+      "triangles": 258068,
+      "peak_scene_rss_mib": 291.1875,
+      "scene_seconds": 17.5,
+      "binary_payload_sha256": "da59b2bb055c106b72fcee1d3576850ca2205ee551dc77a8232243565abbb529",
+      "warnings": [
+        "Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications."
+      ]
+    },
+    {
+      "case": "schependomlaan",
+      "schema": "IFC2X3",
+      "source_mb": 49.286967,
+      "authoring_applications": [
+        "ArchiCAD-64 18.0.0"
+      ],
+      "indexed_objects_unchanged": 3736,
+      "source_quantities_unchanged": 27232,
+      "unique_linked_nodes": 3510,
+      "vertices": 137339,
+      "triangles": 260274,
+      "peak_scene_rss_mib": 218.75,
+      "scene_seconds": 21.2,
+      "binary_payload_sha256": "9b58e34cfa359c7bd8e788f14438fc5972bd671b117dceed442aeb6223387c66",
+      "warnings": [
+        "3D geometry is unavailable for 98 indexed objects. Their stored properties remain available; check the source model for those shapes.",
+        "Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications."
+      ]
+    },
+    {
+      "case": "reserved",
+      "schema": "IFC2X3",
+      "source_mb": 21.520804,
+      "authoring_applications": [
+        "Autodesk Revit 2018 (ENU)"
+      ],
+      "indexed_objects_unchanged": 269,
+      "source_quantities_unchanged": 41,
+      "unique_linked_nodes": 262,
+      "vertices": 78743,
+      "triangles": 150092,
+      "peak_scene_rss_mib": 184.171875,
+      "scene_seconds": 10.5,
+      "binary_payload_sha256": "0a918fdba2258aa550069cbdc558bca71acf4dab63d4935f3b8a5cb43b2f4d29",
+      "warnings": [
+        "Some model shapes have no building object type. Counts by object type may be incomplete; check the 3D shapes or export with object classifications."
+      ]
+    }
+  ],
+  "reserved_selection": "SystemRandom choice among non-heldout registry IFCs >15 MB before development; source opened only for final validation.",
+  "models_called": 0,
+  "spend_usd": 0,
+  "platform": "darwin",
+  "limitations": [
+    "RSS measured on macOS; Linux container not available in this worker.",
+    "Before runs for Munich and the reserved file were stopped at a 900 MiB guard; their recorded peaks are lower bounds."
+  ],
+  "tests": {
+    "pipeline_passed": 29,
+    "server_passed": 26,
+    "commands": [
+      "MODELS_FAKE=1 python -m pytest -q pipeline/tests/test_ifc_streaming.py pipeline/tests/test_ifc_index.py pipeline/tests/test_ifc_enrich.py",
+      "MODELS_FAKE=1 python -m pytest -q server/tests/test_ifc_large.py server/tests/test_robust_upload.py"
+    ]
+  },
+  "baseline_commit": "2ba8777b4f09174ab4338dde61edc3dbef011566",
+  "implementation_commit": "720ea980c9222f2a71424dccdd6a5bc199288103",
+  "before": [
+    {
+      "case": "munich",
+      "peak_mib": 971.17,
+      "lower_bound": true,
+      "exit_code": -9
+    },
+    {
+      "case": "schependomlaan",
+      "peak_mib": 603.046875,
+      "lower_bound": false,
+      "exit_code": 0
+    },
+    {
+      "case": "reserved",
+      "peak_mib": 902.33,
+      "lower_bound": true,
+      "exit_code": -9
+    }
+  ]
+}

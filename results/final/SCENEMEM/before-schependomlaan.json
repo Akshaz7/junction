@@ -1,0 +1,21 @@
+{
+  "label": "before",
+  "case": "schependomlaan",
+  "doc_id": "external__schependomlaan-design",
+  "source": "data/external/ifc_round2/schependomlaan_design.ifc",
+  "source_mb": 49.286967,
+  "peak_sampled_mib": 600.12,
+  "seconds": 19.94,
+  "exit_code": 0,
+  "stopped": null,
+  "work": "/var/folders/0w/hpdhrkhj6rlc8z87xrw57bf00000gn/T/f-scenemem-r5y19i9w",
+  "ok": true,
+  "result": {
+    "doc_id": "external__schependomlaan-design",
+    "elements": 3736,
+    "nodes": 3510,
+    "storeys": 6,
+    "s": 19.5
+  },
+  "resource_peak_mib": 603.046875
+}
