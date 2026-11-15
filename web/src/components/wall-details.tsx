@@ -1,4 +1,4 @@
-import { howMeasured, wallMeasure, type WallDetails as Details } from '../lib/wall-details'
+import { HEIGHT_HINT, heightSourceText, howMeasured, isHeightAssumed, wallMeasure, type WallDetails as Details } from '../lib/wall-details'
 import './wall-details.css'
 
 /** Shared by the drawing sidebar and the picked 3D wall. */
@@ -8,7 +8,13 @@ export function WallDetails({ wall }: { wall: Details }) {
     <dl>
       <div><dt>Length</dt><dd>{wallMeasure(wall.length_m, 'm')}</dd></div>
       <div><dt>Thickness</dt><dd>{wallMeasure(wall.thickness_m, 'm')}</dd></div>
-      <div><dt>Height</dt><dd>{wallMeasure(wall.height_m, 'm')} <small>({wall.height_source})</small></dd></div>
+      <div className={isHeightAssumed(wall) ? 'wall-height-assumed' : undefined}><dt>Height</dt><dd>
+        {isHeightAssumed(wall)
+          ? <><strong>{wallMeasure(wall.height_m, 'm')}, {heightSourceText(wall)}</strong><span role="alert" className="wall-height-warning">Every area below depends on this assumed height. {HEIGHT_HINT}.</span></>
+          : <>{wallMeasure(wall.height_m, 'm')}, <small>{heightSourceText(wall)}</small>
+            {wall.height_how && <small className="wall-height-how">{wall.height_how}</small>}
+            {typeof wall.height_ifc_quantity_m === 'number' && <small className="wall-height-how">Stored IFC quantity: {wallMeasure(wall.height_ifc_quantity_m, 'm')}</small>}</>}
+      </dd></div>
       <div><dt>Storey</dt><dd>{wall.storey || 'Not recorded'}</dd></div>
     </dl>
     {wall.faces.map((face) => <div className="wall-detail-face" key={face.label}>
