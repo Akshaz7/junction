@@ -859,11 +859,11 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             except SolverUnsupported:
                 continue
             res = _recount_ladder(res, question, did, parsed, root, calls, hid)
-            if (not os.environ.get("MODELS_FAKE") and parsed.type == "count" and parsed.kind == "room"
-                    and any(s.get("step") == "filter" and "unlabelled room(s)" in s.get("detail", "") for s in res["trace"])):
-                rr = _reader(question, [did], root, [*trace, *res["trace"]], calls, t0, emit)
-                if rr is not None and not rr["answer"].get("abstained"):
-                    return rr
+            from engine.solvers.raster import missing_detection_reason
+            from engine.solvers.data import load_doc as _load_count
+            if not res["answer"].get("abstained") and (reason := missing_detection_reason(question, _load_count(did, root), res)):
+                res["answer"]["text_md"] += " " + reason + " This is the automatic detection count, not a verified total from the drawing."
+                res["answer"]["confidence"] = min(res["answer"]["confidence"], .3)
             for s in res["trace"]:
                 if s["step"] != "route":
                     add(s)

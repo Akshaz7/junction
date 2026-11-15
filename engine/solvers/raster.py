@@ -28,10 +28,31 @@ def reading_reason(question, doc_ids, root):
     p=parse(question)
     if demo_map and p.type == 'count':
         return 'The structured map is labelled generated for demo; the count needs checking against the source drawing.'
-    if p.type=='count' and p.kind not in (None,'storey'):
-        kinds=p.kinds or [p.kind]
-        if any(not any(i.kind==k and i.conf>=.5 for i in doc.items) for k in kinds):
-            return 'The automatic reader did not detect that item type; this does not establish a zero count.'
     if re.search(r'\bhow many\s+(?:[\w-]+\s+)?classrooms?\b',q):
         return 'The classroom labels need to be read from the drawing; a floor count would not answer this question.'
+    return None
+
+
+def missing_detection_reason(question, doc, result):
+    """Qualify missing raster detections after the solver and recount have finished.
+
+    An absent detector class must not bypass the calibrated recount. Nor may a
+    reader's re-query of those same detections replace an already usable count.
+    A count with supporting boxes (including recount boxes) keeps its evidence.
+    """
+    if doc is None or doc.mode != 'planmap' or result.get('route') != 'planmap':
+        return None
+    p = parse(question)
+    if p.type != 'count' or p.kind in (None, 'storey'):
+        return None
+    if not any(i.source in ('det', 'seg', 'vlm') for i in doc.items):
+        return None
+    if (result.get('evidence') or {}).get('boxes'):
+        return None
+    kinds = set(p.kinds or [p.kind])
+    # A combined shower/bath question asks for one total, not two class totals.
+    if p.kind in ('shower', 'bathtub') and re.search(r'\bshowers?\b', question, re.I) and re.search(r'\bbath ?tubs?\b', question, re.I):
+        kinds = {'shower', 'bathtub'}
+    if not any(i.kind in kinds and i.conf >= .5 for i in doc.items):
+        return 'The automatic reader did not detect that item type; this does not establish a zero count.'
     return None
