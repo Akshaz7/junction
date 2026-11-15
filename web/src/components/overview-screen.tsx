@@ -13,10 +13,10 @@ const capabilities = [
   { title: 'Code checks', detail: 'Fire and access rules with sources.', icon: ShieldCheck, href: '#/tools' },
 ] as const
 
-export function OverviewScreen({ docs = [] }: { docs?: Document[] }) {
+export function OverviewScreen(_props: { docs?: Document[] }) {
   return <section className="overview-screen" aria-label="Workspace overview">
     <div className="overview-hero">
-      <p className="overview-eyebrow"><FileStack size={14} aria-hidden /> PDF, DXF, IFC and scans{docs.length ? ` · ${docs.length} in your library` : ''}</p>
+      <p className="overview-eyebrow"><FileStack size={14} aria-hidden /> PDF, DXF, IFC and scans</p>
       <h2>Stoa Pro: ask your drawings anything</h2>
       <p className="overview-lede">Read every drawing and model once, then get exact answers you can check on the plan, in 3D and in AR.</p>
       <a className="overview-cta" href="#/chat">Start a chat <ArrowRight size={16} aria-hidden /></a>
