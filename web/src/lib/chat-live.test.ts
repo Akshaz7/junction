@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createChatLiveClient, decodeChatEvent } from './chat-live'
+import { createChatLiveClient, decodeChatEvent, inScope, mergeScopes } from './chat-live'
 
 class Socket extends EventTarget {
   readyState = 0
@@ -62,6 +62,55 @@ describe('live chat notifications', () => {
     expect(sockets[1].readyState).toBe(3)
     vi.advanceTimersByTime(20_000)
     expect(connect).toHaveBeenCalledTimes(2)
+  })
+
+  it('scopes chat events per listener and tells the server the union of scopes (F-WSSCOPE)', () => {
+    vi.useFakeTimers()
+    const sockets: Socket[] = []
+    const connect = vi.fn(() => { const socket = new Socket(); sockets.push(socket); return socket as unknown as WebSocket })
+    const client = createChatLiveClient({ url: 'ws://test/ws', connect })
+    const mine = vi.fn(), overview = vi.fn(), pill = vi.fn()
+    const stopMine = client.subscribe(mine, { chatIds: ['chat-a'] })
+    client.subscribe(pill, {})
+    sockets[0].open()
+    expect(sockets[0].sent).toEqual(['{"type":"subscribe","chat_ids":["chat-a"],"summaries":false}'])
+    const stopOverview = client.subscribe(overview, { summaries: true })
+    expect(sockets[0].sent.at(-1)).toBe('{"type":"subscribe","chat_ids":["chat-a"],"summaries":true}')
+    const other = { ...message, chat_id: 'chat-b' }
+    sockets[0].receive(JSON.stringify(other))
+    sockets[0].receive(JSON.stringify({ type: 'chat.status', chat_id: 'chat-b', text: 'x' }))
+    sockets[0].receive(JSON.stringify(message))
+    expect(mine.mock.calls.filter(([e]) => e.type?.startsWith('chat.')).map(([e]) => e.chat_id)).toEqual(['chat-a'])
+    expect(overview.mock.calls.filter(([e]) => e.type === 'chat.message')).toHaveLength(2)
+    expect(overview.mock.calls.some(([e]) => e.type === 'chat.status')).toBe(false)
+    expect(pill.mock.calls.some(([e]) => e.type?.startsWith('chat.'))).toBe(false)
+    stopOverview()
+    expect(sockets[0].sent.at(-1)).toBe('{"type":"subscribe","chat_ids":["chat-a"],"summaries":false}')
+    // An unscoped (legacy) listener means the server keeps streaming everything: no scope is sent for it.
+    const legacy = vi.fn()
+    const sentBefore = sockets[0].sent.length
+    client.subscribe(legacy)
+    expect(sockets[0].sent).toHaveLength(sentBefore)
+    sockets[0].receive(JSON.stringify(other))
+    expect(legacy).toHaveBeenLastCalledWith(other)
+    stopMine()
+  })
+
+  it('resends the subscription after a reconnect and unions scopes', () => {
+    vi.useFakeTimers()
+    const sockets: Socket[] = []
+    const connect = vi.fn(() => { const socket = new Socket(); sockets.push(socket); return socket as unknown as WebSocket })
+    const client = createChatLiveClient({ url: 'ws://test/ws', connect })
+    client.subscribe(vi.fn(), { chatIds: ['b', 'a'] })
+    sockets[0].open()
+    sockets[0].close()
+    vi.advanceTimersByTime(250)
+    sockets[1].open()
+    expect(sockets[1].sent).toEqual(['{"type":"subscribe","chat_ids":["a","b"],"summaries":false}'])
+    expect(mergeScopes([{ chatIds: ['a'] }, undefined])).toBeNull()
+    expect(inScope(undefined, { type: 'chat.done', chat_id: 'x' })).toBe(true)
+    expect(inScope({}, { type: 'connected' })).toBe(true)
+    expect(inScope({ chatIds: ['x'] }, { type: 'chat.done', chat_id: 'y' })).toBe(false)
   })
 
   it('retries connection failures and cancels a pending reconnect on unmount', () => {

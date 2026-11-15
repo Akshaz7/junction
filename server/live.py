@@ -30,12 +30,29 @@ INSTANCE = uuid.uuid4().hex  # tags our own NOTIFYs so _on_notify can skip them
 PING_INTERVAL = 20.0  # seconds; keeps Aiven's proxy from cutting idle sockets
 # Web viewer: highlight/edit/pong; iOS LiveSocket: highlight/pong.
 # ping and scene.join are the existing keepalive and late-join requests.
-CLIENT_EVENTS = frozenset({"ping", "pong", "scene.join", "scene.highlight", "scene.edit"})
+CLIENT_EVENTS = frozenset({"ping", "pong", "scene.join", "scene.highlight", "scene.edit", "subscribe"})
+MAX_SUBSCRIBED_CHATS = 50
+
+
+def wants(scope: dict | None, event: dict) -> bool:
+    """F-WSSCOPE: chat.* events go only to sockets that asked for that chat.
+
+    scope None = a client that never sent `subscribe` (iOS, the 3D viewer, older web builds): it gets everything.
+    A subscribed socket gets, for chat.* events: every event of its `chat_ids`, plus (when `summaries`) the
+    one-per-message `chat.message` of any chat (overview list, Follow). doc.*, scene.*, pair.* stay global."""
+    t = event.get("type")
+    if scope is None or not isinstance(t, str) or not t.startswith("chat."):
+        return True
+    cid = event.get("chat_id")
+    if cid is None:
+        return True
+    return str(cid) in scope["chat_ids"] or (scope["summaries"] and t == "chat.message")
 
 
 class Hub:
     def __init__(self):
         self.sockets: set[WebSocket] = set()
+        self.scopes: dict[WebSocket, dict] = {}  # only sockets that sent `subscribe`
         self.listening = asyncio.Event()  # recreated in start(): one hub, possibly several event loops (tests)
         self._task: asyncio.Task | None = None
         self._conn: asyncpg.Connection | None = None
@@ -87,6 +104,8 @@ class Hub:
     async def broadcast(self, event: dict):
         text = json.dumps(event)
         for ws in list(self.sockets):
+            if not wants(self.scopes.get(ws), event):
+                continue
             try:
                 await ws.send_text(text)
             except Exception:
@@ -216,7 +235,13 @@ async def ws_endpoint(ws: WebSocket):
                 if error:
                     await ws.send_text(json.dumps({"type": "scene.error", "detail": error}))
                     continue
-            if t == "ping":
+            if t == "subscribe":
+                ids = msg.get("chat_ids")
+                ids = [str(i) for i in ids if isinstance(i, str) and i][:MAX_SUBSCRIBED_CHATS] if isinstance(ids, list) else []
+                hub.scopes[ws] = {"chat_ids": set(ids), "summaries": msg.get("summaries") is True}
+                await ws.send_text(json.dumps({"type": "subscribed", "chat_ids": sorted(hub.scopes[ws]["chat_ids"]),
+                                               "summaries": hub.scopes[ws]["summaries"]}))
+            elif t == "ping":
                 await ws.send_text(json.dumps({"type": "pong"}))
             elif t == "scene.join":
                 await send_scene_state(ws, msg.get("chat_id"), msg.get("doc_id") if isinstance(msg.get("doc_id"), str) else None)
@@ -234,3 +259,4 @@ async def ws_endpoint(ws: WebSocket):
         pass
     finally:
         hub.sockets.discard(ws)
+        hub.scopes.pop(ws, None)

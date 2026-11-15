@@ -201,6 +201,9 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       })
     }
     if (catchUp.current) { catchUp.current = false; refresh() } // events missed between the opening snapshot and this subscription
+    // Bursts of message/done events collapse into one snapshot fetch (F-WSSCOPE).
+    let soon: ReturnType<typeof setTimeout> | undefined
+    function refreshSoon() { clearTimeout(soon); soon = setTimeout(refresh, 120) }
     const unsubscribe = chatLive.subscribe((event) => {
       // A (re)connect snapshot also recovers everything missed while backgrounded or in native AR.
       if (event.type === 'connected') { expectingAnswer.current = false; refresh(); return }
@@ -211,16 +214,16 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       if (event.type === 'chat.message' && event.role === 'user' && event.text) {
         // Show the question straight from the event; the snapshot fetch below only reconciles.
         setPendingQuestion(event.text); setBusy(true); setStatuses(['Thinking…']); setTraces([]); setStreamText(''); setError(''); setFailed(null)
-        refresh()
-      } else if (event.type === 'chat.message' || event.type === 'chat.done') refresh()
+        refreshSoon()
+      } else if (event.type === 'chat.message' || event.type === 'chat.done') refreshSoon()
       else if (event.type === 'chat.status') setStatuses((previous) => previous.at(-1) === event.text ? previous : [...previous, event.text])
       else if (event.type === 'chat.delta') setStreamText(event.text)
       else if (event.type === 'chat.trace') {
         setTraces((previous) => JSON.stringify(previous.at(-1)) === JSON.stringify(event.step) ? previous : [...previous, event.step])
         setStatuses((previous) => previous.at(-1) === event.step.detail ? previous : [...previous, event.step.detail])
       }
-    })
-    return () => { controller?.abort(); unsubscribe() }
+    }, { chatIds: liveChatId ? [liveChatId] : [] })
+    return () => { clearTimeout(soon); controller?.abort(); unsubscribe() }
   }, [demo, liveChatId])
 
   // Another device asked a question in a different chat: banner (or auto-open when "follow" is on).
@@ -246,7 +249,7 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
       void isPairedChat(event.chat_id).then((known) => {
         if (known && followingRef.current && !submitting.current) window.location.hash = `#/chat?chat=${encodeURIComponent(event.chat_id)}`
       })
-    })
+    }, { summaries: true })
   }, [demo])
   useEffect(() => { if (liveChatId) setIncoming((previous) => previous?.chatId === liveChatId ? null : previous) }, [liveChatId])
   function openIncoming(id: string) {
