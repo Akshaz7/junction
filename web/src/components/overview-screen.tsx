@@ -14,27 +14,42 @@ function useOverviewSection<T>(load: (signal: AbortSignal) => Promise<T>, liveCh
   const [refreshKey, setRefreshKey] = useState(0)
   useEffect(() => {
     let controller: AbortController
-    function refresh() {
+    let settled: Promise<unknown> = Promise.resolve()
+    function refresh(quiet = false) {
       controller?.abort()
       controller = new AbortController()
       const signal = controller.signal
       const current = controller
-      setState((previous) => ({ ...previous, loading: true, error: '' }))
+      if (!quiet) setState((previous) => ({ ...previous, loading: true, error: '' }))
       // A panel must never spin forever: after 15 s show "Not available yet" with Retry.
       const timeout = window.setTimeout(() => { if (!signal.aborted) { setState((previous) => previous.loading ? { loading: false, error: 'Not available yet.' } : previous); current.abort() } }, 15_000)
-      load(signal).then((data) => {
+      settled = load(signal).then((data) => {
         if (!signal.aborted) setState({ data, loading: false, error: '' })
       }).catch((error: unknown) => {
         if (!signal.aborted) setState({ loading: false, error: error instanceof Error ? error.message : 'Could not load this section.' })
       }).finally(() => window.clearTimeout(timeout))
     }
     refresh()
+    // Live events must not turn into a request storm: dedupe while a load is in flight and allow one refresh per 15 s.
+    let inFlight = false
+    let wasDown = false
+    let last = Date.now()
+    let trailing: ReturnType<typeof setTimeout> | undefined
+    function liveRefresh() {
+      if (inFlight || trailing !== undefined) return
+      const wait = Math.max(0, 15_000 - (Date.now() - last))
+      trailing = setTimeout(() => {
+        trailing = undefined; inFlight = true; last = Date.now()
+        refresh(true)
+        void settled.finally(() => { inFlight = false })
+      }, wait)
+    }
     const unsubscribe = liveChats ? chatLive.subscribe((event) => {
-      if (event.type === 'connected') setLive('open')
-      if (event.type === 'disconnected') setLive('connecting')
-      if (event.type === 'chat.message' || event.type === 'connected') refresh()
+      if (event.type === 'connected') { setLive('open'); if (wasDown) { wasDown = false; liveRefresh() } }
+      if (event.type === 'disconnected') { setLive('connecting'); wasDown = true }
+      if (event.type === 'chat.message') liveRefresh()
     }) : undefined
-    return () => { controller.abort(); unsubscribe?.() }
+    return () => { controller.abort(); unsubscribe?.(); if (trailing !== undefined) clearTimeout(trailing) }
   }, [load, liveChats, refreshKey])
   return { ...state, live, retry: () => setRefreshKey((value) => value + 1) }
 }
