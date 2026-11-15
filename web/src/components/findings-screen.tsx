@@ -23,6 +23,13 @@ export function AdvisorCardsPanel({ cards, onShowItems }: { cards: AdvisorCard[]
   </section>
 }
 
+function coverageNotice(coverage?: { checked: string[]; not_checked: { rule_id: string; reason: string }[] } | null) {
+  if (!coverage) return 'No findings were returned. Which checks ran is not known, so this is not an all-clear.'
+  const ran = coverage.checked.length ? `${coverage.checked.length} ran (${coverage.checked.join(', ')})` : 'none ran'
+  const skipped = coverage.not_checked.length ? `; ${coverage.not_checked.length} had no usable input (${coverage.not_checked.map((c) => `${c.rule_id}: ${c.reason}`).join('; ')})` : ''
+  return `No findings. Checks: ${ran}${skipped}. Not an all-clear for the checks that did not run.`
+}
+
 export function FindingsScreen({ docs }: { docs: Document[] }) {
   const [chosen, setChosen] = useState('')
   const docId = chosen || drawingDocuments(docs)[0]?.doc_id || ''
@@ -62,7 +69,7 @@ export function FindingsScreen({ docs }: { docs: Document[] }) {
       if (controller.signal.aborted) return
       if (result.status === 'waiting' || result.status === 'not_enough_data') { setNotice(result.detail || (result.status === 'waiting' ? 'Waiting for the drawing to finish processing' : 'Not enough readable data')); return }
       setFindings(result.findings)
-      setNotice(result.status === 'no_checks' ? 'Checks are not available for this drawing yet.' : result.findings.length ? 'Checks complete.' : 'Checks complete. No findings were returned by the available rules.')
+      setNotice(result.status === 'no_checks' ? 'Checks are not available for this drawing yet.' : result.findings.length ? 'Checks complete.' : coverageNotice(result.coverage))
       retry.current = () => { void loadAdvice() }
       const advice = await findingsApi.advise(docId, controller.signal)
       if (!controller.signal.aborted) setCards(advice)
