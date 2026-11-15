@@ -4,6 +4,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Viewer } from './viewer';
 import { formatM, formatM2 } from '../lib/measure';
+import '../components/viewer-tools/measure-layer.css';
 
 export type P3 = [number, number, number];
 export type Measure3DMode = 'distance' | 'area';
@@ -84,9 +85,10 @@ export function Measure3DOverlay({ viewer, measure }: { viewer: Viewer | null; m
   const anchor = screen.length ? (measure.mode === 'distance' && screen.length >= 2
     ? { x: (screen[0].x + screen[1].x) / 2, y: (screen[0].y + screen[1].y) / 2 }
     : { x: screen.reduce((s, p) => s + p.x, 0) / screen.length, y: screen.reduce((s, p) => s + p.y, 0) / screen.length }) : null;
-  return <svg className="viewer3d-measure" data-testid="measure-3d" aria-hidden="true">
-    {screen.length > 1 && <path d={path} className={closed ? 'is-closed' : ''} />}
-    {screen.map((p, i) => <circle key={i} cx={p.x} cy={p.y} r={4} />)}
-    {live && anchor && <g transform={`translate(${anchor.x},${anchor.y - 14})`}><rect x={-34} y={-11} width={68} height={22} rx={6} /><text textAnchor="middle" dy="4">{live}</text></g>}
+  // Same marks as the 2D MeasureLayer (measure-layer.css): forest line, dashed open shape, card-filled dots, outlined label.
+  return <svg className="viewer3d-measure measure-layer" data-testid="measure-3d" aria-hidden="true">
+    {screen.length > 1 && <path d={path} className={measure.mode === 'distance' ? 'measure-line' : `measure-shape ${closed ? 'is-closed' : ''}`} />}
+    {screen.map((p, i) => <circle key={i} className={`measure-dot ${measure.cursor && i === screen.length - 1 ? 'is-cursor' : ''}`} cx={p.x} cy={p.y} r={4} />)}
+    {live && anchor && <text className="measure-label" x={anchor.x} y={anchor.y - 10} textAnchor="middle" fontSize={13}>{live}</text>}
   </svg>;
 }

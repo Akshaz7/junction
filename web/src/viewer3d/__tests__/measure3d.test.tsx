@@ -154,7 +154,8 @@ describe('Measure3DOverlay', () => {
     expect(circles[1].getAttribute('cx')).toBe('30')
     expect(circles[1].getAttribute('cy')).toBe('40')
     expect(svg.querySelector('text')!.textContent).toBe('5.00 m')
-    expect(svg.querySelector('g')!.getAttribute('transform')).toBe('translate(15,6)')
+    const label = svg.querySelector('text.measure-label')!
+    expect([label.getAttribute('x'), label.getAttribute('y')]).toEqual(['15', '10'])
   })
   it('area: closed path and area label', () => {
     const m = renderOverlay()
@@ -164,7 +165,7 @@ describe('Measure3DOverlay', () => {
     const svg = host.querySelector('[data-testid="measure-3d"]')!
     const path = svg.querySelector('path')!
     expect(path.getAttribute('d')).toBe('M0,0 L30,0 L30,40 Z')
-    expect(path.getAttribute('class')).toBe('is-closed')
+    expect(path.getAttribute('class')).toBe('measure-shape is-closed')
     expect(svg.querySelectorAll('circle')).toHaveLength(3)
     expect(svg.querySelector('text')!.textContent).toBe('6.00 m²')
   })
