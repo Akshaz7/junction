@@ -27,6 +27,7 @@ AREAQ = re.compile(r"\b(area|areas|m2|m²|square met(?:er|re)s|sq\.? ?m|floor sp
 AGG = re.compile(r"\b(across|both|combined|altogether|in total|overall|in all|all together|total)\b", re.I)
 PER = re.compile(r"\b(?:per|on each|in each|for each|by|every)\s+(?:floor|level|storey|story)\b|\beach\s+(?:floor|level|storey|story)\b", re.I)
 WHICH = re.compile(r"\b(?:which|what)\s+(?:floor|level|storey|story)\b", re.I)
+AGREE = re.compile(r"\b(?:same (?:number|count|amount|quantity)|as many\b.*\bas\b|equal|match(?:es)?|agree|consistent|tally|mismatch|add up)\b", re.I)
 COMPARE = re.compile(r"\b(compare|comparison|versus|vs\.?|difference|differ|against)\b", re.I)
 LEVEL_PHRASE = re.compile(
     r"\b(?:(?:ground|basement|cellar|first|second|third|fourth|fifth|sixth|top|upper|attic|roof|\d+(?:st|nd|rd|th)?\.?)\s*(?:floor|level|storey|story|og|obergeschoss|kerros)"
@@ -149,9 +150,9 @@ def _confidence(c: Combined, dids) -> tuple[str, int, str, str | None]:
 
 
 def _build(c: Combined, question: str, text: str, value_, area: bool, picks: list, doc_ids, t0, trace_text: str,
-           found: str, extra_steps=None, ok_cross=None):
+           found: str, extra_steps=None, ok_cross=None, gather=None):
     from engine.solvers.solve import _answer_obj
-    items, per_doc = _gather(c, picks)
+    items, per_doc = gather if gather is not None else _gather(c, picks)
     boxes, cites, marks, scene = _cite(c, items)
     if scene is None:
         scene = {"doc_id": next(iter(items), doc_ids[0]), "highlight_item_ids": [], "camera_target_item_id": None}
@@ -189,6 +190,54 @@ def _cross_checks(c: Combined, kind: str, rows: list) -> list:
     return notes
 
 
+def _agree(c: Combined, q: str, kind: str, rows: list, doc_ids, t0):
+    """'Does the plan show the same number of doors as the model?' -> every side counted and cited, then match or mismatch."""
+    cands = rows or [r for r in c.rows if sum(1 for d, st in r.docs.items() if st[kind]["n"] or c.infos[d].role == "model") >= 2]
+    sides = []
+    for r in cands:
+        docs = [(d, st[kind]) for d, st in r.docs.items() if st[kind]["n"] or c.infos[d].role == "model"]
+        if len(docs) >= 2:
+            sides.append((r, sorted(docs, key=lambda x: (c.infos[x[0]].role != "model", x[0]))))
+    if not sides:
+        return None
+    what = PLURAL[kind]
+    items: dict[str, list] = {}
+    per_doc: dict[str, float] = {}
+    lines, steps, all_ok = [], [], True
+    for r, docs in sides:
+        counts = []
+        for d, st in docs:
+            items.setdefault(d, []).extend(_items_of(c.infos[d], kind, st["ids"]))
+            per_doc[d] = per_doc.get(d, 0) + st["n"]
+            counts.append(st["n"])
+        ok = len(set(counts)) == 1
+        all_ok = all_ok and ok
+        idx = {d: i for i, d in enumerate(list(per_doc))}
+        who = []
+        for d, st in docs:
+            info = c.infos[d]
+            lab = "the 3D model" if info.role == "model" else "the drawing"
+            who.append(f"{lab} ({short_title(info.title or d, 50)}) has {st['n']} {what if st['n'] != 1 else what[:-1]} {{m_%d}}" % idx[d])
+        head = "They match" if ok else "They do not match"
+        diff = ""
+        if not ok and len(docs) == 2:
+            na = {(i.name or "").strip() for i in _items_of(c.infos[docs[0][0]], kind, docs[0][1]["ids"])}
+            nb = {(i.name or "").strip() for i in _items_of(c.infos[docs[1][0]], kind, docs[1][1]["ids"])}
+            if "" not in na | nb:
+                only_a, only_b = sorted(na - nb), sorted(nb - na)
+                if only_a or only_b:
+                    diff = (f" Only in the model: {', '.join(only_a) or 'none'}; only in the drawing: {', '.join(only_b) or 'none'}.")
+            diff = diff or f" The difference is {abs(counts[0] - counts[1])}."
+        lines.append(f"On {row_label(c, r)}: " + " and ".join(who) + f". {head}.{diff}")
+        steps.append({"kind": "check", "title": "Compared", "ok": ok, "cite": None,
+                      "text": f"{row_label(c, r)}: " + " vs ".join(f"{n}" for n in counts) + (" match" if ok else " differ")})
+    text = ("**Yes, the counts match.** " if all_ok else "**No, the counts differ.** ") + " ".join(lines)
+    picks = [(r, kind) for r, _ in sides]
+    first = sides[0][1][0]
+    return _build(c, q, text, int(sides[0][1][0][1]["n"]), False, picks, doc_ids, t0, f"multi-document comparison / {kind} / count -> each source counted and cited, no model",
+                  f"{what.capitalize()} counted in {len(per_doc)} documents for {len(sides)} {'level' if len(sides) == 1 else 'levels'}", steps, gather=(items, per_doc))
+
+
 def answer(question: str, doc_ids, root, t0=None):
     t0 = t0 or time.perf_counter()
     doc_ids = list(dict.fromkeys(doc_ids or []))
@@ -201,7 +250,7 @@ def answer(question: str, doc_ids, root, t0=None):
     kind = _kind(q) or ("room" if area else None)
     if (kind is None and not COMPARE.search(q)) or (area and kind not in (None, "room")):
         return None
-    shape = ("compare" if COMPARE.search(q) else "which" if WHICH.search(q) else "per" if PER.search(q) else
+    shape = ("agree" if (AGREE.search(q) and kind and not area) else "compare" if COMPARE.search(q) else "which" if WHICH.search(q) else "per" if PER.search(q) else
              "total" if (AGG.search(q) or re.search(r"\bhow many\b|\bnumber of\b", q, re.I)) else None)
     if shape is None:
         return None
@@ -212,6 +261,8 @@ def answer(question: str, doc_ids, root, t0=None):
     if not c.rows or (kind and not any(r.chosen.get(kind) for r in c.rows)):
         return None
     rows, unknown, rest = _levels_in(q, c, one_building=shape in ("compare", "which", "per"))
+    if shape == "agree":
+        return _agree(c, q, kind, rows, doc_ids, t0)
     if not _plain(rest):
         return None
     if kind is None:
@@ -277,7 +328,13 @@ def answer(question: str, doc_ids, root, t0=None):
             steps.append({"kind": "note", "title": "Not added", "cite": None, "ok": None,
                           "text": f"{len(c.unplaced)} drawing{'s' if len(c.unplaced) != 1 else ''} without a stated level: set the level on the project page to include {'them' if len(c.unplaced) != 1 else 'it'}"})
         if notes:
-            text += " The same building also appears in other selected documents; they were not added again and serve as a cross-check."
+            seen_pairs = {}
+            for did, used, r, n_other, n_used in notes:
+                p_ = seen_pairs.setdefault(did, [0, 0])
+                p_[0] += n_other
+                p_[1] += n_used
+            shows = "; ".join(f"{short_title(c.infos[d].title or d, 50)} shows {a}" + (" (matches)" if a == b else f" (differs from {b})") for d, (a, b) in seen_pairs.items())
+            text += f" The same building also appears in other selected documents, so they were not added again: as a cross-check, {shows}."
         found = f"{_fmt(total, area)} {unit_word} on {len(use)} {'level' if len(use) == 1 else 'levels'}, from {len(parts)} {'source' if len(parts) == 1 else 'sources'}"
         return _build(c, q, text, total, area, picks, doc_ids, t0, f"multi-document total / {kind} / {'area' if area else 'count'} -> combine, no model",
                       found, steps)

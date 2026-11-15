@@ -355,6 +355,8 @@ def app_feature(question: str) -> str | None:
         return None
     if _MEASURE.match(q):
         return None
+    if re.match(r"(?:does|do|is|are|did)\b", q, re.I) and re.search(r"\b(?:number|count|same|many|match(?:es)?|differ\w*|equal|agree)\b", q, re.I):
+        return None   # "Does the plan show the same number of doors as the 3D model?" is a comparison, not a request to open a view
     if _AR.search(q):
         return "ar"
     if _3D.search(q) and not re.search(r"\b(hide|isolate|highlight|remove)\b", q, re.I):
