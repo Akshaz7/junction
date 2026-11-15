@@ -127,12 +127,30 @@ def build(res: dict, question: str, root: Path) -> dict | None:
             c["label"] = "Cross-checked" if cap >= 80 else "Estimate"
             c["reason"] = hint.get("reason") or c.get("reason")
             c["improve"] = hint.get("improve") or c.get("improve")
+    from engine.taught_items import evidence_step
+    manual, all_marked = evidence_step(cited), False
+    if manual:
+        steps.insert(0, manual)
+        res.setdefault('trace', []).append({'step': 'user_label', 'detail': manual['text'], 'ms': 0, 'model': None, 'cost_usd': 0})
+        if unit == 'count' and all(it.props.get('confirmed_by_user') for it in cited):
+            all_marked = True
+            c = {'label': 'Cross-checked', 'pct': 100,
+                 'reason': 'Every cited item was marked by you. This is review coverage, not proof that every item on the sheet was found.',
+                 'improve': 'Check for items that have not been marked.'}
+        else:
+            c['reason'] += ' Includes items marked by you; their labels are user-verified, not their dimensions or sheet completeness.'
     from engine.reasoning_parts.counts import enforce
     card = enforce(res, {"steps": steps[:4], "confidence": c, **quantitative}, question)
+    if manual and card["steps"] and card["steps"][0].get("title") != manual.get("title"):
+        card["steps"] = [manual, *card["steps"]][:4]   # the invariant rewrites Found; the user's own marks stay first
+    if all_marked:
+        card["confidence"] = c
     return card if card["steps"] or quantitative else None
 
 
 def attach(res: dict, question: str, root: Path) -> dict:
+    if (res.get("mistakes") is not None or res.get("route") == "symbols") and res.get("reasoning"):
+        return res
     if res.get("reasoning"):   # these routes bring their own card; the invariant still applies
         from engine.reasoning_parts.counts import enforce
         res["reasoning"] = enforce(res, res["reasoning"], question)

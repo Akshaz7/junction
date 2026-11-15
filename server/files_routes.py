@@ -24,6 +24,10 @@ async def _restore(request: Request):
     d = request.path_params.get("doc_id")
     if d and SAFE_ID.match(d):
         await artifact_store.ensure_doc(d)
+        pool = await db.get_pool()
+        if pool is not None:
+            from .taught_store import restore_materialized
+            await restore_materialized(pool, d)
 
 
 router = APIRouter(prefix="/api", dependencies=[Depends(_restore)])
@@ -73,24 +77,46 @@ async def planmap(doc_id: str, n: int):
 
 @router.get("/docs/{doc_id}/scene")
 async def scene(doc_id: str):
+    await _taught_scene(doc_id)
     # S-04 will trigger extrusion here when no scene exists.
     f = _doc_dir(doc_id) / "scene.json"
     if not f.is_file():
         return _not_built("scene")
-    return FileResponse(f, media_type="application/json")
+    return FileResponse(f, media_type="application/json", headers={'Cache-Control': 'no-store'})
+
+
+async def _taught_scene(doc_id):
+    from .taught_scene import ensure
+    try:
+        await ensure(doc_id)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc))
+
+
+@router.get('/docs/{doc_id}/knowledge-graph')
+async def knowledge_graph(doc_id: str):
+    _doc_dir(doc_id)
+    from engine.kg import build
+    return await asyncio.to_thread(build, doc_id, config.artifacts_dir())
 
 
 @router.get("/docs/{doc_id}/files/{name}")
 async def doc_file(doc_id: str, name: str):
     if name not in FILE_NAMES and not THUMB.match(name):
         raise HTTPException(404, "unknown file")
+    if name.startswith('scene.'):
+        await _taught_scene(doc_id)
+        if name == 'scene.usdz':
+            manifest = _doc_dir(doc_id) / 'scene.json'
+            if manifest.is_file() and not json.loads(manifest.read_text()).get('usdz'):
+                return _not_built('Updated AR model')
     f = _doc_dir(doc_id) / name
     if not f.is_file():
         if name == "elements.json" or re.match(r"^text-\d+\.json$", name):
             # Optional sidecars the viewer probes for every document: an empty payload, not a console-visible 404.
             return JSONResponse({"status": "not_built", "elements": [], "words": []})
         return _not_built(name)
-    return FileResponse(f)
+    return FileResponse(f, headers={'Cache-Control': 'no-store'})
 
 
 def _slug(s: str) -> str:

@@ -4,6 +4,7 @@ import { Copy, FileDown, LoaderCircle, Printer, X } from 'lucide-react'
 import { workspaceApi } from '../lib/api'
 import type { Answer, Document } from '../lib/types'
 import { buildAnswerReport, buildChatReport, drawReportPage, reportCrop, reportToHtml, reportToMarkdown, type AnswerReport, type ReportDrawing, type ReportPage } from '../lib/answer-export'
+import { loadReportNotes } from '../lib/markup-report'
 import reportStyles from './answer-export.css?inline'
 import './answer-export.css'
 
@@ -84,6 +85,8 @@ function ExportDialog({ answer, docs, chatId, demo, onClose }: ExportAnswerButto
       signal.throwIfAborted()
       const options = { chatId: chatId ?? undefined, baseUrl: window.location.origin, demo: demo || workspaceApi.isDemo }
       const report = chat ? buildChatReport(chat, metadata, options) : buildAnswerReport(answer, metadata, options)
+      const noteSources = [...new Map(report.entries.flatMap((entry) => entry.sources).map((source) => [source.docId, source])).values()]
+      report.notes = await loadReportNotes(noteSources, signal)
       const drawings: Record<string, ReportDrawing> = {}
       // One decoded drawing/canvas at a time keeps a whole-chat export usable on a phone.
       for (const page of report.entries.flatMap((entry) => entry.pages)) {

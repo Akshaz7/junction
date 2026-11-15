@@ -62,6 +62,8 @@ def dedupe_openings(items: list, thr: float = 0.3) -> list:
     drop = set()
     for d in ds:
         for w in ws:
+            if d.props.get('confirmed_by_user') or w.props.get('confirmed_by_user'):
+                continue
             if d.page == w.page and id(d) not in drop and id(w) not in drop and _iou(d.bbox_px, w.bbox_px) > thr:
                 drop.add(id(w if d.conf >= w.conf else d))
     return [i for i in items if id(i) not in drop] if drop else items
@@ -101,14 +103,33 @@ def _load_doc(doc_id: str, root: Path, prefer: str | None = None) -> Doc | None:
         ]
         # D-07 storey plans: one page per storey. Give each element its page and pixel box so answers can draw 2D boxes.
         placed = {}
+        manual = {}
         for p in pms:
             m = _json(p)
             for x in m.get("items", []):
                 if x.get("bbox_px"):
-                    placed[x["item_id"]] = (m.get("page", 1), x["bbox_px"])
+                    placed[x["item_id"]] = (m.get("page", 1), x["bbox_px"], x.get('polygon_px'))
+                if (x.get('props') or {}).get('confirmed_by_user'):
+                    manual[x['item_id']] = (m.get('page', 1), x)
         for it in items:
             if it.item_id in placed:
-                it.page, it.bbox_px = placed[it.item_id]
+                it.page, it.bbox_px, it.polygon_px = placed[it.item_id]
+            if it.item_id in manual:
+                it.props.update(manual[it.item_id][1].get('props') or {})
+        existing = {it.item_id for it in items}
+        for iid, (page, x) in manual.items():
+            if iid not in existing:
+                # Same-kind overlap links a marked plan box to its IFC identity too.
+                target = next((it for it in items if it.kind == x['kind'] and it.page == page
+                               and it.bbox_px and _iou(it.bbox_px, x['bbox_px']) >= .5), None)
+                if target:
+                    labels = x['props'].get('user_labels', [])
+                    target.props.setdefault('user_labels', []).extend(labels)
+                    target.props['confirmed_by_user'] = True
+                    target.props['linked_item_ids'] = [target.item_id, iid]
+                else:
+                    items.append(Item(iid, x['kind'], label=x.get('label'), page=page, bbox_px=x.get('bbox_px'),
+                                      props=x.get('props') or {}, source='taught', conf=1.0))
         return Doc(doc_id, "ifc", items, title, e.get("storeys") or [], meta={**(e.get("building") or {}), "unit_provenance": e.get("unit_provenance")})
     if pms:
         items, scale, page_scales = [], None, {}

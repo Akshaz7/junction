@@ -1,0 +1,34 @@
+{
+  "verified_at": "2026-11-15T00:16:42.410753+02:00",
+  "engine_unit_tests": {
+    "command": "MODELS_FAKE=1 .venv/bin/python -m pytest engine/tests/test_symbol_teach.py -q",
+    "passed": 7
+  },
+  "server_integration_tests": {
+    "command": "MODELS_FAKE=1 .venv/bin/python -m pytest server/tests/test_markup.py -q",
+    "passed": 4,
+    "database": "isolated local schemas; actual chat SSE and persistence"
+  },
+  "web_unit_tests": {
+    "command": "cd web && npx vitest run src/lib/markup-report.test.ts src/lib/answer-export.test.ts src/components/answer-export.test.ts src/components/keyboard.test.tsx",
+    "passed": 31,
+    "skipped": 1
+  },
+  "browser": {
+    "command": "cd web && ../scripts/heavy.sh npx playwright test --config e2e/markup.config.ts",
+    "passed": 1,
+    "test_seconds": 8.8,
+    "web_port": 5387,
+    "api_port": 8387,
+    "browsers": 1,
+    "database": "isolated local schema; real shared symbol matcher; no model calls"
+  },
+  "production_build": {
+    "command": "cd web && npm run build",
+    "passed": true
+  },
+  "source_pdfs_committed": false,
+  "data_files_committed": false,
+  "live_model_cost_usd": 0,
+  "deployment": "Apply server/migrations/007_markup.sql using the normal server migration runner."
+}
