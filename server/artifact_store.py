@@ -200,6 +200,28 @@ def evict_restored(keep: str | None = None, cap: int | None = None) -> list[str]
     return out
 
 
+TOPUP = ("wallgeom.json", "ifc-quantities.json", "ifc-accuracy.json")  # small sidecars added after a doc was first stored
+
+
+async def _topup(doc_id: str) -> None:
+    """A doc already on disk (baked image or earlier restore) still gets sidecars that were backfilled to PostgreSQL later."""
+    d = config.artifacts_dir() / doc_id
+    missing = [n for n in TOPUP if not (d / n).exists()]
+    if not missing or not d.is_dir():
+        return
+    from . import db
+    pool = await db.get_pool()
+    if pool is None:
+        return
+    try:
+        for n in missing:
+            row = await pool.fetchrow("select data from doc_artifacts where doc_id=$1 and name=$2", doc_id, n)
+            if row is not None:
+                (d / n).write_bytes(bytes(row["data"]))
+    except Exception as e:  # noqa: BLE001 - optional sidecars never break a request
+        print("topup failed:", doc_id, repr(e)[:200])
+
+
 async def ensure_doc(doc_id: str) -> None:
     """Make sure a document's files are on disk. Uploads and dataset docs both live in PostgreSQL (doc_artifacts) when
     they are not baked into the image; they are pulled back lazily on first use (cheap no-op afterwards)."""
@@ -209,6 +231,7 @@ async def ensure_doc(doc_id: str) -> None:
     if _on_disk(doc_id):
         _restored.add(doc_id)
         _touch(doc_id)
+        await _topup(doc_id)
         return
     from . import db
     pool = await db.get_pool()
