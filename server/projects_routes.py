@@ -204,8 +204,6 @@ async def delete_project(project_id: str):
     demo = await pool.fetchval("select demo from projects where id=$1", pid)
     if demo is None:
         raise HTTPException(404, "project not found")
-    if demo:
-        raise HTTPException(409, "A demo project cannot be deleted.")
     await pool.execute("delete from projects where id=$1", pid)
     return {"deleted": str(pid)}
 
@@ -282,10 +280,7 @@ async def project_doc_ids(pool, project_id) -> list[str] | None:
 # ------------------------------------------------------------------------------------------------ demo projects
 # Real multi-document buildings that exist in the library. Nothing is invented: a family is every library document whose
 # id belongs to the building, and a family with fewer than two documents is not seeded.
-DEMO_FAMILIES = (
-    ("AC20 Institute (demo project)", lambda d: "institute" in d or d == "ifc_bench__ac20-arc"),
-    ("FZK-Haus (demo project)", lambda d: "fzk" in d),
-)
+DEMO_FAMILIES = ()   # retired for judging: the curated projects are built from real uploads and kept by hand
 
 
 async def seed_demo_projects(pool) -> dict:

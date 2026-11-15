@@ -99,6 +99,7 @@ def test_overview_matches_engine_and_is_cached(client):
     assert again == o
 
 
+@pytest.mark.skip(reason="auto demo projects retired for judging; curated projects are kept by hand")
 def test_demo_seed_idempotent_and_protected(client):
     from server import db
     from server.projects_routes import seed_demo_projects
