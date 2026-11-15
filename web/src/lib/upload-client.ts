@@ -2,7 +2,8 @@ import type { Document, UploadReceipt } from './types'
 import { uploadProgress, validateUpload } from './upload-state'
 
 export class UploadError extends Error {
-  constructor(message: string, readonly retry: 'upload' | 'poll' = 'upload') { super(message) }
+  /** `ambiguous`: the request failed after bytes may have been stored (5xx, dropped connection, timeout). */
+  constructor(message: string, readonly retry: 'upload' | 'poll' = 'upload', readonly ambiguous = false) { super(message) }
 }
 
 function responseReason(body: unknown, fallback: string): string {
@@ -36,19 +37,36 @@ export function uploadFile(file: File, signal: AbortSignal, onProgress: (fractio
       let body: unknown
       try { body = JSON.parse(xhr.responseText) } catch { /* Proxies can return HTML. */ }
       if (xhr.status < 200 || xhr.status >= 300) {
-        finish(new UploadError(responseReason(body, xhr.status === 413 ? 'This file is too large for the server. Try a smaller file.' : `Upload failed (${xhr.status}). Please try again.`)))
+        finish(new UploadError(responseReason(body, xhr.status === 413 ? 'This file is too large for the server. Try a smaller file.' : `Upload failed (${xhr.status}). Please try again.`), 'upload', xhr.status >= 500))
       } else if (!body || typeof body !== 'object' || !('doc_id' in body) || typeof body.doc_id !== 'string' || !body.doc_id) {
         finish(new UploadError('The server did not return a document ID. Please try again.'))
       } else finish(undefined, body as UploadReceipt)
     }
-    xhr.onerror = () => finish(new UploadError('The upload could not reach the server. Check your connection and try again.'))
-    xhr.ontimeout = () => finish(new UploadError('The upload timed out. Try again or choose a smaller file.'))
+    xhr.onerror = () => finish(new UploadError('The upload could not reach the server. Check your connection and try again.', 'upload', true))
+    xhr.ontimeout = () => finish(new UploadError('The upload timed out. Try again or choose a smaller file.', 'upload', true))
     xhr.onabort = () => finish(new DOMException('Upload cancelled.', 'AbortError'))
     signal.addEventListener('abort', abort, { once: true })
     const body = new FormData()
     body.append('file', file)
     xhr.send(body)
   })
+}
+
+/**
+ * After an ambiguous failure, ask the server whether the file was in fact stored. If so the upload succeeded and only
+ * processing remains; telling the user to retry would create a duplicate.
+ */
+export async function findPersistedUpload(file: File, startedAt: number, transport: typeof fetch = fetch): Promise<UploadReceipt | null> {
+  try {
+    const response = await transport('/api/docs')
+    if (!response.ok) return null
+    const body = await response.json() as { sources?: { docs?: { doc_id: string; title?: string; size?: number; updated_at?: string }[] }[] }
+    const stem = file.name.replace(/\.[^.]+$/, '')
+    const hit = (body.sources ?? []).flatMap((source) => source.docs ?? []).filter((doc) => doc.doc_id.startsWith('uploads__') && doc.title === stem
+      && (doc.size == null || doc.size === file.size) && (!doc.updated_at || Date.parse(doc.updated_at) >= startedAt - 5000))
+      .sort((a, b) => Date.parse(b.updated_at ?? '') - Date.parse(a.updated_at ?? ''))[0]
+    return hit ? { doc_id: hit.doc_id, status: 'ingesting' } as UploadReceipt : null
+  } catch { return null }
 }
 
 const stageNames: Record<string, string> = {

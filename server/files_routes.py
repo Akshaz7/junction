@@ -188,7 +188,10 @@ async def upload(file: UploadFile = File(...)):
         "insert into documents (doc_id, source, title, kind, formats, pages, credit, files) "
         "values ($1,'uploads',$2,$3,$4,1,$5,$6::jsonb)",
         doc_id, doc["title"], kind, [fmt], doc["credit"], json.dumps(doc["files"]))
-    await publish({"type": "doc.new", "doc_id": doc_id})
+    try:  # the file is stored: a notify hiccup must never turn this into a failed upload
+        await publish({"type": "doc.new", "doc_id": doc_id})
+    except Exception as e:  # noqa: BLE001
+        print("doc.new publish failed:", repr(e)[:200])
     try:  # keep the original now: the container disk is ephemeral
         await artifact_store.save_doc(pool, doc_id)
     except Exception as e:  # noqa: BLE001

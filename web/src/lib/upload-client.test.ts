@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { uploadFile, waitForUpload } from './upload-client'
+import { findPersistedUpload, uploadFile, waitForUpload } from './upload-client'
 
 const file = new File(['drawing'], 'plan.png', { type: 'image/png' })
 const doc = { doc_id: 'uploads__plan', kind: 'raster', title: 'Plan', pages: 1 }
@@ -189,5 +189,17 @@ describe('ingest monitoring', () => {
     await vi.advanceTimersByTimeAsync(10_000)
     expect(transport).toHaveBeenCalledTimes(1)
     await expect(waitForUpload(doc.doc_id, { signal: controller().signal, transport, onProgress: vi.fn(), timeoutMs: 0 })).rejects.toMatchObject({ retry: 'poll', message: expect.stringContaining('longer than expected') })
+  })
+})
+
+describe('findPersistedUpload', () => {
+  const file = new File(['abc'], 'plan.pdf', { type: 'application/pdf' })
+  const listing = (docs: unknown[]) => (async () => new Response(JSON.stringify({ sources: [{ docs }] }))) as unknown as typeof fetch
+  it('recognises a stored upload after an ambiguous failure', async () => {
+    const found = await findPersistedUpload(file, Date.now(), listing([{ doc_id: 'uploads__plan-1', title: 'plan', size: 3, updated_at: new Date().toISOString() }]))
+    expect(found?.doc_id).toBe('uploads__plan-1')
+  })
+  it('ignores older or different files', async () => {
+    expect(await findPersistedUpload(file, Date.now(), listing([{ doc_id: 'uploads__plan-0', title: 'plan', size: 3, updated_at: '2020-01-01T00:00:00Z' }, { doc_id: 'uploads__x', title: 'plan', size: 9, updated_at: new Date().toISOString() }]))).toBeNull()
   })
 })
