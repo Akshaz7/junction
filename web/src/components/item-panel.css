@@ -23,3 +23,8 @@
   .item-panel-sheet { position: fixed; z-index: 40; inset: auto 0 0; width: 100%; max-height: 65dvh; border: 1px solid var(--border); border-radius: 16px 16px 0 0; box-shadow: var(--shadow-card); padding-bottom: env(safe-area-inset-bottom); }
   .viewer-item-layout:has(.item-panel) { display: contents; }
 }
+.item-measured { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: 12px; }
+.item-measured > div { margin-bottom: 10px; }
+.item-measured dd { font-variant-numeric: tabular-nums; font-weight: 500; }
+.item-panel-content p.item-provenance { margin: 2px 0 8px; font-size: var(--text-caption, 12px); line-height: 1.4; }
+.item-ask { display: inline-block; margin: 8px 8px 0 0; color: inherit; text-underline-offset: 3px; font-size: var(--text-caption, 12px); }

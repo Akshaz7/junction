@@ -99,3 +99,9 @@
 .room-labels { position: absolute; inset: 0; overflow: visible; pointer-events: none; }
 .room-label { fill: #4b5563; font-weight: 400; paint-order: stroke; stroke: rgba(255,255,255,.85); stroke-width: .12em; }
 .room-label-detail { fill: #6b7280; }
+
+/* Click-to-inspect: outline of the plan item under the pointer, and of the one whose details are open. */
+.drawing-stage[data-tool="pan"][data-pickable="true"] { cursor: pointer; }
+.plan-pick { color: var(--kind-color, var(--info-text)); pointer-events: none; }
+.plan-pick polygon, .plan-pick rect { fill: currentColor; fill-opacity: .12; stroke: currentColor; stroke-width: 2; }
+.plan-pick.is-selected polygon, .plan-pick.is-selected rect { fill-opacity: .2; stroke-width: 3; }

@@ -121,7 +121,8 @@ export interface PlanMap {
   doc_id: string
   page: number
   regions?: { view_id?: string; bbox: Bbox; title?: string | null; view_type?: 'plan' | 'elevation' | 'section' | 'detail' | 'site' | 'unknown'; scale?: { ratio?: number; unverified_printed_ratio?: number; m_per_px?: number | null } }[]
-  items: { item_id: string; bbox_px: Bbox | null; tag?: string; props?: { tag?: string } }[]
+  scale?: { m_per_px?: number | null; method?: string; source?: string; confidence?: number } | null
+  items: { item_id: string; kind?: string; label?: string | null; bbox_px: Bbox | null; polygon_px?: [number, number][] | null; tag?: string; props?: { tag?: string; role?: string; [key: string]: unknown } }[]
 }
 
 export interface SavedChat {
