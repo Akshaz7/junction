@@ -27,6 +27,11 @@ import type { FindingPinState } from './findings';
 import { qualitySummary } from '../lib/scene-quality';
 import { wallAskHref } from '../lib/wall-details';
 import './viewer3d.css';
+import { Measure3DOverlay, measure3DStatus, useMeasure3D } from './Measure3D';
+import { Layers3D } from './Layers3D';
+import { PlanHoverTip } from '../components/viewer-tools/plan-hover-tip';
+import { planItemSummary, type PlanSummaryItem } from '../lib/plan-item-summary';
+import { workspaceApi } from '../lib/api';
 
 interface ViewerOptions {
   chat_id?: string;
@@ -92,7 +97,25 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
   const [walkMessage, setWalkMessage] = useState('');
   const [storeys, setStoreys] = useState<string[]>([]);
   const [picked, setPicked] = useState<string | null>(null);
+  const measure3d = useMeasure3D();
   const [manifest, setManifest] = useState<SceneManifest | null>(null);
+  // Hover summary (same one-liner as the 2D tooltip), from the drawing's plan map: same item ids as the scene.
+  const [planSummaries, setPlanSummaries] = useState<{ items: Map<string, PlanSummaryItem>; mPerPx: number | null }>({ items: new Map(), mPerPx: null });
+  const [hoverTip, setHoverTip] = useState<{ text: string; x: number; y: number } | null>(null);
+  const summaryDoc = doc_id ?? manifest?.doc_id ?? null;
+  useEffect(() => {
+    setPlanSummaries({ items: new Map(), mPerPx: null }); setHoverTip(null);
+    if (!summaryDoc) return;
+    const controller = new AbortController();
+    workspaceApi.getPlanMap(summaryDoc, 1, controller.signal).then((pm) => {
+      if (controller.signal.aborted) return;
+      const items = new Map<string, PlanSummaryItem>();
+      for (const item of pm.items ?? []) if (item.bbox_px) items.set(item.item_id, { id: item.item_id, kind: item.kind ?? 'other', label: item.label ?? null, props: item.props ?? null, bbox: item.bbox_px });
+      setPlanSummaries({ items, mPerPx: typeof pm.scale?.m_per_px === 'number' ? pm.scale.m_per_px : null });
+    }).catch(() => {});
+    return () => controller.abort();
+  }, [summaryDoc]);
+  useEffect(() => { measure3d.stop(); }, [sceneUrl]); // eslint-disable-line react-hooks/exhaustive-deps
   const [editing, setEditing] = useState(false);
   const [hiddenIds, setHiddenIds] = useState<string[]>([]);
   const hiddenNow = hiddenIds.length;
@@ -345,6 +368,11 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
     // An orbit drag must not select the surface under the release point.
     if (!start || start.id !== event.pointerId
       || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return;
+    if (measure3d.mode) {
+      const point = viewerRef.current?.pickPoint(event.clientX, event.clientY);
+      if (point) measure3d.add(point);
+      return;
+    }
     if (viewerRef.current?.pickFinding(event.clientX, event.clientY)) return;
     const itemId = viewerRef.current?.pick(event.clientX, event.clientY) ?? null;
     selectItem(itemId);
@@ -409,6 +437,14 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
         cancelMove(); setPicked(null);
         if (viewerRef.current) clearViewerHighlights(viewerRef.current);
       }}>Clear highlights</button>
+      <button type="button" aria-label="Measure" aria-pressed={!!measure3d.mode} disabled={state !== 'ready'} title="Measure on the model: two points for a distance, or corners for an area"
+        onClick={() => { if (measure3d.mode) measure3d.stop(); else { cancelMove(); viewerRef.current?.setWalk(false); setEditing(false); closeDetails(); measure3d.start('distance'); } }}>Measure</button>
+      {measure3d.mode && <span className="viewer3d-measure-controls" role="status" aria-live="polite">
+        <span>{measure3DStatus(measure3d)}</span>
+        <button type="button" aria-pressed={measure3d.mode === 'distance'} onClick={() => measure3d.start('distance')}>Distance</button>
+        <button type="button" aria-pressed={measure3d.mode === 'area'} onClick={() => measure3d.start('area')}>Area</button>
+        <button type="button" onClick={measure3d.stop}>Done</button>
+      </span>}
       {(() => {
         const hasEdits = hiddenNow > 0 || Object.keys(edits.moveDelta ?? {}).length > 0;
         return <button type="button" className="viewer3d-revised-btn" aria-label="Revised plan"
@@ -438,9 +474,18 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
             viewerRef.current?.updateMove(event.clientX, event.clientY); return;
           }
           if (viewerRef.current?.walk().active || event.pointerType !== 'mouse' || event.buttons !== 0 || state !== 'ready') return;
-          setHover(viewerRef.current?.pick(event.clientX, event.clientY) ?? null, '3d');
+          if (measure3d.mode) { measure3d.move(viewerRef.current?.pickPoint(event.clientX, event.clientY) ?? null); if (hoverTip) setHoverTip(null); return; }
+          const hovered = viewerRef.current?.pick(event.clientX, event.clientY) ?? null;
+          setHover(hovered, '3d');
+          const summaryItem = hovered ? planSummaries.items.get(hovered) : undefined;
+          const rect = event.currentTarget.getBoundingClientRect();
+          const x = event.clientX - rect.left, y = event.clientY - rect.top;
+          const text = summaryItem ? planItemSummary(summaryItem, planSummaries.mPerPx) : null;
+          if (!text) { if (hoverTip) setHoverTip(null); }
+          else if (!hoverTip || hoverTip.text !== text || Math.hypot(hoverTip.x - x, hoverTip.y - y) > 2) setHoverTip({ text, x, y });
         }}
-        onPointerLeave={() => setHover(null, '3d')}
+        onDoubleClick={() => { if (measure3d.mode === 'area') measure3d.close(); }}
+        onPointerLeave={() => { setHover(null, '3d'); setHoverTip(null); }}
         onPointerUp={pick} onPointerCancel={() => { cancelMove(); pointerStart.current = null; setHover(null, '3d'); }}
         onLostPointerCapture={() => { if (dragPointer.current !== null) cancelMove(); }} />
       {state === 'loading' && <p className="viewer3d-message" role="status">
@@ -454,6 +499,9 @@ export function Viewer3D({ sceneUrl: sourceUrl, doc_id, chat_id, onPick, storey,
       {state === 'ready' && approximated && <p className="viewer3d-approx" data-testid="approx-note">3D approximated from the drawing{scaleNote && <span className="viewer3d-scale-note" data-testid="scale-note"> · {scaleNote}</span>}{quality && <span className="viewer3d-quality" data-testid="quality-badge" title={quality}>{quality}</span>}</p>}
       {state === 'ready' && answerKinds.length > 0 && <KindLegend className="kind-legend-3d" kinds={answerKinds} />}
       {picked && <output className="viewer3d-picked-overlay" aria-label="Picked item" aria-live="polite">{picked}</output>}
+      {state === 'ready' && <div className="viewer3d-layers"><Layers3D viewer={viewerRef.current} /></div>}
+      {state === 'ready' && <Measure3DOverlay viewer={viewerRef.current} measure={measure3d} />}
+      {state === 'ready' && !measure3d.mode && hoverTip && stage && <PlanHoverTip text={hoverTip.text} x={hoverTip.x} y={hoverTip.y} containerWidth={stage.clientWidth} containerHeight={stage.clientHeight} />}
       {walking && <WalkJoystick onMove={(x, y) => viewerRef.current?.setWalkJoystick(x, y)} />}
       {state === 'ready' && details && !editing && <ItemDetailsCard key={details.item_id} details={details}
         loading={detailsLoading} viewer={viewerRef.current} onClose={closeDetails}

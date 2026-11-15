@@ -16,6 +16,11 @@ const fmt = (v: number) => Number.isInteger(v) ? String(v) : v.toFixed(2)
 const withUnit = (v: number, unit: string) => `${v.toFixed(2)} ${UNIT[unit]}`
 const present = (v: unknown) => v !== null && v !== undefined && v !== '' && !(typeof v === 'number' && !Number.isFinite(v))
 
+/** Length and thickness are already in the wall details block; a wall with wall_details must not list them twice. */
+export function withoutWallDetailRows(rows: MeasuredRow[]): MeasuredRow[] {
+  return rows.filter((row) => !/^(length|thickness)(_|$)/.test(row.key.replace(/^quantity\./, '')))
+}
+
 function humanise(key: string) {
   const words = key.replace(UNIT_KEY, '').replace(/_/g, ' ').trim()
   return words ? words[0].toUpperCase() + words.slice(1) : key

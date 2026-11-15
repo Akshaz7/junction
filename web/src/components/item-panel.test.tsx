@@ -2,7 +2,7 @@
 import { act } from 'react'
 import { createRoot } from 'react-dom/client'
 import { afterEach, expect, it, vi } from 'vitest'
-import { ItemPanel } from './item-panel'
+import { ItemPanel, LinkedItemFacts } from './item-panel'
 import { linkedApi, type LinkedItem } from '../lib/linked'
 
 const measure = { from: 'pdf_vector', m_per_pt: 0.0352778, scale_source: 'printed 1:100',
@@ -40,5 +40,22 @@ it('keeps the wall ask link for walls', async () => {
   expect(new URLSearchParams(ask.getAttribute('href')!.split('?')[1]).get('question')).toContain('wall W2')
   expect(host.querySelector('.item-provenance')).toBeNull()
   expect(host.textContent).toContain('10.57 m')
+  await act(async () => root.unmount())
+})
+
+it('drops length and thickness for walls with wall details (shown there already)', async () => {
+  const wall = { ...door, kind: 'wall', tag: 'W2', props: { thickness_m: 0.268, length_m: 10.567, style: 'fill' }, quantities: { length_m: 10.567 },
+    wall_details: { estimate: true } } as unknown as LinkedItem
+  const get = vi.spyOn(linkedApi, 'get').mockResolvedValue(wall)
+  const host = document.createElement('div')
+  const root = createRoot(host)
+  await act(async () => root.render(<LinkedItemFacts docId="plan a" itemId="w" />))
+  expect(host.querySelector('[data-testid="linked-item-facts"]')).not.toBeNull()
+  expect(host.querySelector('[data-measure]')).toBeNull()
+  expect(host.querySelector('h3')).toBeNull()
+  get.mockResolvedValue({ ...wall, props: { ...wall.props, height_m: 2.7 } } as LinkedItem)
+  await act(async () => root.render(<LinkedItemFacts docId="plan a" itemId="w2" />))
+  expect([...host.querySelectorAll('[data-measure]')].map((n) => n.getAttribute('data-measure'))).toEqual(['height_m'])
+  expect(host.querySelector('h3')?.textContent).toBe('Measured')
   await act(async () => root.unmount())
 })

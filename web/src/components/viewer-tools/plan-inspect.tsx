@@ -8,7 +8,7 @@ import { workspaceApi } from '../../lib/api'
 import { pickPlanItem, type PlanPickItem } from '../../lib/pick-item'
 import { kindFromItemId, kindStyle } from '../../lib/kind-colors'
 import { planItemSummary } from '../../lib/plan-item-summary'
-import { snapPoint, formatM, formatM2, type Pt } from '../../lib/measure'
+import { makeSnapper, formatM, formatM2, type Pt } from '../../lib/measure'
 import { MeasureLayer, useMeasure } from './measure-layer'
 import { PlanLayerChips, PlanLayerShapes, usePlanLayers } from './plan-layers'
 import { PlanHoverTip } from './plan-hover-tip'
@@ -26,7 +26,7 @@ export function usePlanInspect(docId: string, page: number) {
   const measure = useMeasure(mPerPx)
   useEffect(() => {
     const controller = new AbortController()
-    setItems([]); setMPerPx(null); setHover(null); setSelected(null)
+    setItems([]); setMPerPx(null); setHover(null); setSelected(null); measure.stop()
     workspaceApi.getPlanMap(docId, page, controller.signal).then((pm) => {
       if (controller.signal.aborted) return
       setMPerPx(typeof pm.scale?.m_per_px === 'number' && pm.scale.m_per_px > 0 ? pm.scale.m_per_px : null)
@@ -36,7 +36,7 @@ export function usePlanInspect(docId: string, page: number) {
       }] : []))
     }).catch(() => {})
     return () => controller.abort()
-  }, [docId, page])
+  }, [docId, page]) // eslint-disable-line react-hooks/exhaustive-deps
   // Keyboard while measuring (capture phase, so the page's own Escape handling does not also close the document):
   // Esc cancels the measurement (distance or area), Enter closes an area, Backspace removes the last point.
   useEffect(() => {
@@ -81,6 +81,9 @@ export function PlanInspectOverlay({ state, image }: { state: PlanInspect; image
   const svg = useRef<SVGSVGElement>(null)
   const [tipAt, setTipAt] = useState<{ x: number; y: number; w: number; h: number } | null>(null)
   const down = useRef<{ x: number; y: number } | null>(null)
+  const lastCursor = useRef<Pt | null>(null)
+  const snap = useMemo(() => makeSnapper(items), [items])
+  useEffect(() => { lastCursor.current = null }, [measure.mode, items])
   function pagePoint(event: { clientX: number; clientY: number }): Pt | null {
     const el = svg.current, ctm = el?.getScreenCTM()
     if (!el || !ctm) return null
@@ -98,13 +101,21 @@ export function PlanInspectOverlay({ state, image }: { state: PlanInspect; image
   function onMove(event: ReactPointerEvent<SVGSVGElement>) {
     if (measure.mode) {
       const p = pagePoint(event)
-      measure.move(p ? snapPoint(p, items, 8 * unitsPerScreenPx()) : null)
+      const q = p ? snap(p, 8 * unitsPerScreenPx()) : null
+      const prev = lastCursor.current
+      if (q === prev || (q && prev && q[0] === prev[0] && q[1] === prev[1])) return
+      lastCursor.current = q
+      measure.move(q)
       return
     }
     const id = pickAt(event)
-    if (id !== hover) setHover(id)
+    const idChanged = id !== hover
+    if (idChanged) setHover(id)
     const box = svg.current?.parentElement?.getBoundingClientRect()
-    setTipAt(id && box ? { x: event.clientX - box.left, y: event.clientY - box.top, w: box.width, h: box.height } : null)
+    const next = id && box ? { x: event.clientX - box.left, y: event.clientY - box.top, w: box.width, h: box.height } : null
+    if (idChanged || !next || !tipAt || Math.hypot(next.x - tipAt.x, next.y - tipAt.y) > 2 || next.w !== tipAt.w || next.h !== tipAt.h) {
+      if (next || tipAt) setTipAt(next)
+    }
   }
   function onUp(event: ReactPointerEvent<SVGSVGElement>) {
     const start = down.current
@@ -112,7 +123,7 @@ export function PlanInspectOverlay({ state, image }: { state: PlanInspect; image
     if (!start || Math.hypot(event.clientX - start.x, event.clientY - start.y) > 5) return
     if (measure.mode) {
       const p = pagePoint(event)
-      if (p) measure.add(snapPoint(p, items, 8 * unitsPerScreenPx()))
+      if (p) measure.add(snap(p, 8 * unitsPerScreenPx()))
       return
     }
     const id = pickAt(event)
@@ -127,7 +138,7 @@ export function PlanInspectOverlay({ state, image }: { state: PlanInspect; image
       aria-label="Plan items. Click an item for its details."
       onPointerDown={(event) => { down.current = { x: event.clientX, y: event.clientY } }}
       onPointerMove={onMove} onPointerUp={onUp}
-      onPointerLeave={() => { setHover(null); setTipAt(null); if (measure.mode) measure.move(null) }}
+      onPointerLeave={() => { setHover(null); setTipAt(null); lastCursor.current = null; if (measure.mode) measure.move(null) }}
       onDoubleClick={() => { if (measure.mode === 'area') measure.close() }}>
       <PlanLayerShapes items={items} shown={layers.shown} selectedId={selected} />
       {!measure.mode && outlined.map((item) => {
