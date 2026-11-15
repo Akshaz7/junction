@@ -2,8 +2,8 @@
 
 One bounded Claude call (task explain_claims, through engine.models.call) splits the finished answer into claims and
 points each at evidence ids that WE supplied (OCR words, plan-map items, title-block fields). Code then validates the
-output: unknown ids are dropped, a claim without valid evidence is "inferred", and a claim is only "verified" when its
-evidence really exists. The result is reasoning.calc kind "claims" plus confidence factors (schema fixed by the lead).
+output: unknown ids are dropped and quoted labels must match literal source text to be "verified". Missing text stays
+"read_only"; layout interpretations stay "inferred". The result is reasoning.calc kind "claims" plus confidence factors.
 """
 from __future__ import annotations
 
@@ -13,6 +13,7 @@ import os
 import re
 from collections import Counter
 from pathlib import Path
+from engine import claim_sources as sources
 
 DESCRIPTIVE = re.compile(
     r"\b(what\s+is\s+(this|the)\s+(file|drawing|plan|document|sheet|model|building)|what('?s|\s+is)\s+in\s+(this|the)|describe|summari[sz]e|"
@@ -43,9 +44,11 @@ SCHEMA = {
 }
 PROMPT = """You audit a finished answer about a construction drawing. Split the answer into at most 8 factual claims.
 For each claim give: text (short), evidence_ids (ONLY ids from the lists below that support it), status, check (one line).
-status: "verified" = a listed OCR word / title-block field / plan-map item literally supports it (say which in check, and
+status: "verified" = a listed OCR word / title-block field / plan-map label literally supports it (say which in check, and
 use the room vocabulary for translations); "read_only" = supported only by the model's reading of the picture, no listed id;
-"inferred" = a conclusion, not directly written on the drawing. Never invent ids or vocabulary. STRICT JSON only:
+"inferred" = a conclusion, not directly written on the drawing (studio apartment, layout/function interpretations).
+Quote each printed label in its own short claim; separate interpretations from literal labels. Do not add facts absent
+from ANSWER. Merely having an item of a class does not verify prose about it. Never invent ids or vocabulary. STRICT JSON only:
 {{"claims":[{{"text":"","evidence_ids":[""],"status":"verified","check":""}}]}}
 
 ANSWER:
@@ -95,19 +98,29 @@ def _inputs(res: dict, root: Path):
             page_n = page
     except Exception:  # noqa: BLE001 - missing text layer just means fewer verifiable claims
         pass
+    # Include every available sidecar, rather than just the reader's preferred
+    # text layer. Its OCR and plan-map labels often complement one another.
+    extra = sources.collect(doc_id, root) if doc_id else {}
+    missing = [term for term in sources.terms((res.get('answer') or {}).get('text_md', ''), ROOM_VOCAB)
+               if not sources.match(term, {**wmap, **extra})]
+    extra.update(sources.recover_rotated_labels(doc, root, missing))
+    wmap.update(extra)
+    words = [f'{key}: {row["text"]}' for key, row in wmap.items()]
     items, imap, by_kind = [], {}, {}
     for it in (doc.items if doc else []):
-        imap[it.item_id] = {"doc_id": doc_id, "page": it.page, "item_id": it.item_id, "bbox": it.bbox_px, "crop": None, "text": it.label or it.name or it.kind}
+        label = ' / '.join(dict.fromkeys(t for t in (it.label, it.name, it.type_name) if t))
+        imap[it.item_id] = {"doc_id": doc_id, "page": it.page, "item_id": it.item_id, "bbox": it.bbox_px, "crop": None, "text": label or it.kind, "literal": bool(label)}
         by_kind.setdefault(it.kind, []).append(it.item_id)
     for kind, ids in sorted(by_kind.items(), key=lambda kv: -len(kv[1])):
         items.append(f"{kind}: {len(ids)}; ids {', '.join(ids[:6])}{' ...' if len(ids) > 6 else ''}")
+    items += [f'{key}: {row["text"]}' for key, row in imap.items() if row['literal']][:100]
     fields, fmap = [], {}
     for k, v in sorted(((doc.meta if doc else None) or {}).items())[:8]:
         if isinstance(v, (str, int, float)) and str(v).strip():
             fid = f"tb-{k}"
             fmap[fid] = {"doc_id": doc_id, "page": 1, "item_id": fid, "bbox": None, "crop": None, "text": f"{k} = {v}"}
             fields.append(f"{fid}: {k} = {str(v)[:80]}")
-    if doc and doc.title:
+    if doc and doc.title and doc.title != doc.doc_id:
         fmap["tb-title"] = {"doc_id": doc_id, "page": 1, "item_id": "tb-title", "bbox": None, "crop": None, "text": f"title = {doc.title}"}
         fields.append(f"tb-title: title = {doc.title[:80]}")
     return doc, wmap, imap, fmap, by_kind, {"words": words, "items": items, "fields": fields}, page_n
@@ -116,9 +129,10 @@ def _inputs(res: dict, root: Path):
 def _vocab_for(words: list[str]) -> dict:
     out = {}
     for line in words:
-        t = line.split(": ", 1)[-1].casefold().strip(".,")
-        if t in ROOM_VOCAB:
-            out[t] = ROOM_VOCAB[t]
+        t = sources.norm(line.split(": ", 1)[-1])
+        for key in ROOM_VOCAB:
+            if f' {sources.norm(key)} ' in f' {t} ':
+                out[key] = ROOM_VOCAB[key]
     return out
 
 
@@ -136,13 +150,14 @@ def _fake(answer: str, wmap: dict, imap: dict, fmap: dict) -> dict:
         for k, ids in kinds.items():
             if re.search(rf"\b{re.escape(k)}s?\b", low) and len(ev) < 3:
                 ev.append(ids[0])
-        claims.append({"text": s[:160], "evidence_ids": ev, "status": "verified" if ev else "inferred",
+        claims.append({"text": s[:240], "evidence_ids": ev, "status": "verified" if ev else "read_only",
                        "check": "fake provider: matched OCR/title text in the sentence" if ev else "fake provider: no matching text"})
     return {"claims": claims}
 
 
 def validate(raw, wmap, imap, fmap, cite_for_id) -> list[dict]:
     allowed = {**imap, **wmap, **fmap}
+    literal = {i: row for i, row in allowed.items() if row.get('literal', True)}
     out = []
     for c in (raw.get("claims") if isinstance(raw, dict) else None) or []:
         if not isinstance(c, dict) or not str(c.get("text") or "").strip():
@@ -150,12 +165,31 @@ def validate(raw, wmap, imap, fmap, cite_for_id) -> list[dict]:
         ids = [i for i in (c.get("evidence_ids") or []) if isinstance(i, str) and i in allowed]
         status = c.get("status") if c.get("status") in STATUSES else "inferred"
         check = str(c.get("check") or "").strip()[:240]
-        if not ids:
-            if status == "verified":
-                check = (check + " " if check else "") + "No supplied evidence id supports this, downgraded."
-            status = "inferred" if status == "verified" else status
-            if status == "read_only" and not check:
-                check = "Model read of the image only."
+        text = str(c['text']).strip()[:240]
+        terms = sources.terms(text, ROOM_VOCAB)
+        matches = [sources.match(term, literal) for term in terms]
+        prose = sources.QUOTES.sub('', text)
+        interpretation = bool(re.search(r'\b(studio|likely|probably|appears|suggests|seems|inferred|open.plan)\b', prose, re.I))
+        if terms and all(matches) and not interpretation:
+            ids = list(dict.fromkeys(i for hit in matches for i in hit))
+            status = 'verified'
+            check = 'Source text matches: ' + '; '.join(terms) + '.'
+        elif interpretation:
+            status = 'inferred'
+            check = 'Interpretation of the drawing; not stated by its source text.'
+        elif terms:
+            # A partial match cannot verify a claim quoting multiple labels.
+            ids = list(dict.fromkeys(i for hit in matches for i in hit))
+            status = 'inferred' if status == 'inferred' else 'read_only'
+            check = 'No source text match for: ' + '; '.join(term for term, hit in zip(terms, matches) if not hit) + '.'
+        elif status == 'verified':
+            supporting = [i for i in ids if i in literal and len(sources.norm(literal[i]['text']).split()) >= 3
+                          and sources.match(literal[i]['text'], {'claim': {'text': text}})]
+            status = 'verified' if supporting else 'read_only'
+            ids = supporting
+            check = 'Literal source phrase matched.' if supporting else 'Model read only; no literal source phrase matched.'
+        if not ids and status == 'read_only' and not check:
+            check = 'Model read of the image only.'
         out.append({"text": str(c["text"]).strip()[:240], "ids": ids, "status": status, "check": check or "No check recorded.",
                     "cite": next((cite_for_id[i] for i in ids if i in cite_for_id), None)})
         if len(out) >= 8:
@@ -182,22 +216,23 @@ def build(res: dict, question: str, root: Path, on_event=None) -> dict | None:
     for c in res.get("citations") or []:
         for iid in c.get("item_ids") or []:
             cite_for_id.setdefault(iid, c.get("n"))
-    vocab = _vocab_for(blocks["words"])
+    vocab = _vocab_for(blocks["words"] + blocks['items'])
     prompt = PROMPT.format(answer=answer[:1800], words="; ".join(blocks["words"][:120]) or "(none)",
                            items="\n".join(blocks["items"][:14]) or "(none)", fields="\n".join(blocks["fields"]) or "(none)",
                            vocab="; ".join(f"{k} = {v}" for k, v in vocab.items()) or "(none needed)")
-    key = hashlib.sha256((prompt).encode()).hexdigest()[:20]
-    cdir = Path(os.environ.get("ARTIFACTS_DIR") or root) / (res.get("doc_ids") or ["_"])[0] / "claims-cache"
+    key = hashlib.sha256(('claimverify-v2\n' + prompt).encode()).hexdigest()[:20]
+    cdir = Path(os.environ.get('CLAIMS_CACHE_DIR') or os.environ.get("ARTIFACTS_DIR") or root) / (res.get("doc_ids") or ["_"])[0] / "claims-cache"
     cached = None
+    fake = os.environ.get("MODELS_FAKE", "").strip().lower() in ("1", "true", "yes")
     try:
-        cached = json.loads((cdir / f"{key}.json").read_text())
+        if not fake:
+            cached = json.loads((cdir / f"{key}.json").read_text())
     except (OSError, ValueError):
         pass
     model_info = {"provider": "cache", "model": None, "cost_usd": 0.0, "input_tokens": 0, "output_tokens": 0}
     if cached is not None:
         raw = cached
     else:
-        fake = os.environ.get("MODELS_FAKE", "").strip().lower() in ("1", "true", "yes")
         try:
             r = call("explain_claims", prompt, schema=SCHEMA)
             raw = r.json if isinstance(r.json, dict) else json.loads(r.text)
@@ -218,6 +253,27 @@ def build(res: dict, question: str, root: Path, on_event=None) -> dict | None:
     if not claims:
         return None
     allowed = {**imap, **wmap, **fmap}
+    # Newly matched words need real citations too, so the card's status chips
+    # open the same source boxes shown in the calculation panel.
+    citations = res.setdefault('citations', [])
+    boxes = res.setdefault('evidence', {}).setdefault('boxes', [])
+    next_n = max((c.get('n', 0) for c in citations), default=0) + 1
+    for claim in claims:
+        if not claim['ids'] or claim['cite'] is not None:
+            continue
+        rows = [allowed[i] for i in claim['ids']]
+        first = rows[0]
+        same_page = [r for r in rows if r['page'] == first['page']]
+        bs = [r['bbox'] for r in same_page if r.get('bbox')]
+        bbox = [min(b[0] for b in bs), min(b[1] for b in bs), max(b[2] for b in bs), max(b[3] for b in bs)] if bs else None
+        citations.append({'n': next_n, 'doc_id': first['doc_id'], 'page': first['page'], 'kind': 'text',
+                          'bbox_px': bbox, 'item_ids': [r['item_id'] for r in same_page],
+                          'quote': ' / '.join(r['text'] for r in same_page)})
+        for row in rows:
+            if row.get('bbox'):
+                boxes.append({'item_id': row['item_id'], 'page': row['page'], 'bbox_px': row['bbox'], 'label': str(next_n), 'kind': 'text'})
+        claim['cite'] = next_n
+        next_n += 1
     counts = Counter(c["status"] for c in claims)
     counts = {s: counts.get(s, 0) for s in STATUSES}
     steps = []
@@ -258,10 +314,18 @@ def attach(res: dict, question: str, root: Path, on_event=None) -> dict:
         if not isinstance(reasoning, dict):
             reasoning = res["reasoning"] = {"steps": []}
         reasoning["calc"] = out["calc"]
+        reasoning.pop('based_on', None)
+        reasoning.pop('margin', None)
+        # Also replace legacy inventory steps for older clients/exports.
+        reasoning['steps'] = [{'title': s['status'].replace('_', ' ').title(), 'text': s['label'],
+                               'cite': s.get('cite'), 'kind': 'claim'}
+                              for s in out['calc']['steps'] if s['section'] == 'claim']
         conf = reasoning.get("confidence")
         if not isinstance(conf, dict):
             conf = reasoning["confidence"] = {"label": "Estimate", "pct": None}
         conf["factors"] = out["factors"]
+        conf.update(label='Estimate', pct=None)
+        conf.pop('calibration', None)
         c = out["calc"]["result"]
         conf["reason"] = (f"{c['verified']} of {c['claims_total']} claims verified by source text, {c['read_only']} read only, "
                           f"{c['inferred']} inferred. No measured accuracy is available for descriptive answers.")

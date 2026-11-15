@@ -1,0 +1,47 @@
+{
+  "comparison": "Same six representative claims and real source evidence; audit model omits evidence IDs. Old validator leaves read-only labels unchanged; new validator independently finds all labels.",
+  "before": "0 of 6 claims verified by source text, 4 read only, 2 inferred.",
+  "after": "4 of 6 claims verified by source text, 0 read only, 2 inferred.",
+  "before_counts": {
+    "inferred": 2,
+    "read_only": 4
+  },
+  "after_counts": {
+    "inferred": 2,
+    "verified": 4
+  },
+  "tests": {
+    "targeted": 62,
+    "passed": 62
+  },
+  "files_changed": [
+    "engine/claim_sources.py",
+    "engine/descriptive_claims.py",
+    "engine/tests/test_descriptive_claims.py"
+  ],
+  "web_change_needed": false,
+  "live_cost_usd": 0.007626,
+  "sample200": {
+    "fake": true,
+    "questions": 200,
+    "before": {
+      "questions": 200,
+      "of": 200,
+      "stopped_by_max_usd": false,
+      "cost_usd": 0.0,
+      "wall_s": 17.8
+    },
+    "after": {
+      "questions": 200,
+      "of": 200,
+      "stopped_by_max_usd": false,
+      "cost_usd": 0.0,
+      "wall_s": 15.81
+    },
+    "correct_before": 149,
+    "correct_after": 149,
+    "correct_to_wrong": 0,
+    "correct_to_noncorrect": [],
+    "outcome_changes": []
+  }
+}
