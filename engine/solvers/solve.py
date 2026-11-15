@@ -861,7 +861,15 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         top = sorted(have, key=lambda iv: -iv[1])[:10]
         text += " Per room: " + "; ".join(f"{(i.label or i.name or i.item_id)}{' (' + i.storey + ')' if i.storey else ''} {_fmt(v, 'area')} m²" for i, v in top) \
             + (f"; and {len(have) - len(top)} more" if len(have) > len(top) else "") + "."
-    text += scale_note
+    printed = [i for i, _ in have if kind == "room" and p.type == "area" and i.props.get("area_label_source") == "printed dimensions"]
+    if len(have) == 1 and printed:
+        pr = printed[0].props
+        text += (f" Dimensions used: **{pr['printed_width_m']:g} m × {pr['printed_depth_m']:g} m** as printed on the drawing"
+                 f" ({pr['printed_width_m']:g} × {pr['printed_depth_m']:g} = {total:.2f} m²).")
+        trace.append(_step("printed-dimensions", f"room sized from printed dimensions {pr['printed_width_m']:g} x {pr['printed_depth_m']:g} m, not from the scale"))
+        conf = max(conf, 0.9)
+    else:
+        text += scale_note
     res = _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)
     if doc.mode == "ifc" and kind == "room" and p.type == "area":
         res["measurement_coverage"] = {"requested": len(items), "available": len(have), "missing": missing}
