@@ -306,6 +306,25 @@ def reconcile_cost(res: dict) -> dict:
     return res
 
 
+_TEACH = re.compile(r"^\s*(?:please\s+)?tell stoa\b|\bremember (?:this|that|the|my|it)\b|\bshould be (?:called|named)\b|\b(?:rename|relabel)\b[^?]{0,60}\bto\b", re.I)
+_ASKING = re.compile(r"^\s*(?:how|what|which|where|when|why|who|list|show|count|is|are|does|do|can|could)\b|\?\s*$", re.I)
+
+
+def _teach_in_chat(question: str, doc_ids, trace, t0):
+    """A naming correction typed into chat ("Tell Stoa: the left bedroom should be called Bedroom West. Remember this").
+    Chat has no store for it, so say exactly that and point to the control that does save things; never claim it will be remembered."""
+    q = question.strip()
+    if not _TEACH.search(q) or (_ASKING.search(q) and not re.match(r"\s*(?:please\s+)?tell stoa\b", q, re.I)):
+        return None
+    text = ("**I have not saved this.** Chat corrections and names are not stored, so later answers will not use the new name. "
+            "To teach Stoa what an item is, open the drawing, drag a box around it and use **Tell Stoa** there: it saves the item "
+            "and counts it in every answer, the 3D model and reports.")
+    from engine.solvers.solve import _answer_obj
+    return _answer_obj(question, list(doc_ids), text, None, None, 1.0, True, [], [],
+                       {"doc_id": (doc_ids or [""])[0], "highlight_item_ids": [], "camera_target_item_id": None},
+                       trace + [_step("route", "naming correction typed in chat: not stored, said so honestly, no model")], "index", t0)
+
+
 @document_scope
 def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, *, scene_state: dict | None = None,
            history: list[dict] | None = None, _split: bool | None = None) -> dict:
@@ -547,6 +566,8 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                 _lines.append(f"- Source: {_meta['source']}")
             return _answer_obj(question, doc_ids, "\n".join(_lines), None, None, 0.95, False, [], [], {"doc_id": doc_ids[0], "highlight_item_ids": [], "camera_target_item_id": None}, trace, "index", t0)
     try:
+        if (question or "").strip() and (res := _teach_in_chat(question, doc_ids, trace, t0)) is not None:   # F-TELLCHAT: never claim a chat correction was remembered
+            return res
         if (question or "").strip() and not os.environ.get("TASKS_OFF"):
             from engine.tasks import detect, run_task   # Stoa starters: Draft claim, Meeting prep, Plan work phase, Review contract
             _task = detect(question)
