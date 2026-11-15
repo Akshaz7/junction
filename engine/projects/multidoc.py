@@ -186,8 +186,8 @@ def _cross_checks(c: Combined, kind: str, rows: list) -> list:
                 continue
             info = c.infos[did]
             ids, used_ids = st[kind].get("ids") or [], r.docs[used][kind].get("ids") or []
-            if ids and set(map(str, ids)) <= set(map(str, used_ids)):
-                continue    # the same element ids (an MEP sheet's model built on the architect plan): a copy, not a check
+            if ids and set(map(str, ids)) == set(map(str, used_ids)):
+                continue    # identical element ids (an MEP sheet's model built on the architect plan): a copy, not a check
             if st[kind]["n"] or info.role == "model":
                 notes.append((did, used, r, st[kind]["n"], r.docs[used][kind]["n"]))
     return notes

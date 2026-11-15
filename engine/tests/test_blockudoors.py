@@ -22,3 +22,8 @@ def test_own_ids_still_cross_check():
     c, row = _case(["x", "y", "z", "w"])
     notes = _cross_checks(c, "door", [row])
     assert [(n[0], n[3], n[4]) for n in notes] == [("vent", 4, 3)]
+
+
+def test_subset_of_ids_is_still_a_check():
+    c, row = _case(["a", "b"])
+    assert len(_cross_checks(c, "door", [row])) == 1
