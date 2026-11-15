@@ -134,7 +134,7 @@ export function CalculationPanel({ reasoning, title, onClose, onFocus, docTitle 
       {calc?.formula && <div className="calc-formula" data-testid="calc-formula">
         <code>{calc.formula}</code>
         {result && typeof result.value === 'number' && <p className="calc-result"><span>=</span> <b>{rounding ? `${rounding.value.toLocaleString('en-GB', { maximumFractionDigits: rounding.places })}${unitText(result.unit) ? ` ${unitText(result.unit)}` : ''}` : withUnit(result.value, result.unit)}</b>{rounding ? (rounding.places > 0 && <small>rounded to {rounding.places} dp</small>) : result.rounded_as && <small>rounded to {result.rounded_as}</small>}</p>}
-        {result && typeof result.value !== 'number' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
+        {result && result.value != null && typeof result.value === 'object' && <p className="calc-result">{Object.entries(result.value).map(([k, v]) => <span key={k}><b>{fmt(v)}</b> <small>{k}</small> </span>)}</p>}
       </div>}
       {method && <div className="calc-method" data-testid="calc-method">
         <p><strong>Method:</strong> {method.label}</p>

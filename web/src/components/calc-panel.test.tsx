@@ -3,6 +3,7 @@ import { act } from 'react'
 import { createRoot, type Root } from 'react-dom/client'
 import { afterEach, beforeEach, expect, it, vi } from 'vitest'
 import { CalculationPanel } from './calc-panel'
+import { ErrorBoundary } from './error-boundary'
 import { EvidenceCard } from './evidence-card'
 import { scanReasoning } from '../lib/__fixtures__/calc-fixture'
 import type { Answer } from '../lib/types'
@@ -143,4 +144,22 @@ it('stepRows drops no-op rounding and repeated method text, and folds repeated s
 })
 it('meaningfulPath ignores the trivial page → method chain', () => {
   expect(meaningfulPath([{ label: 'Cited source page', relation: 'source of answer evidence' }, { label: 'Count', kind: 'calculation', relation: 'method used for this answer' }])).toHaveLength(0)
+})
+
+it('does not crash on a null result value or sparse steps (door answer payload)', async () => {
+  const bad = { formula: 'doors = count', result: { value: null, unit: 'count' }, steps: [{ id: 's1', label: 'Count', value: null }], rows: [{ id: 'r', values: null }], checks: null } as unknown as Calculation
+  const errors: unknown[] = []
+  const spy = vi.spyOn(console, 'error').mockImplementation((e) => { errors.push(e) })
+  await act(async () => root.render(<CalculationPanel reasoning={{ ...scanReasoning, calc: bad, graph_path: undefined }} onClose={() => {}} />))
+  spy.mockRestore()
+  expect(host.querySelector('[data-testid="calc-formula"]')).toBeTruthy()
+  expect(errors.filter((e) => !String(e).includes('unique "key"'))).toEqual([])
+})
+
+it('error boundary shows a fallback instead of blanking the app', async () => {
+  const Boom = (): never => { throw new Error('Cannot convert undefined or null to object') }
+  const spy = vi.spyOn(console, 'error').mockImplementation(() => {})
+  await act(async () => root.render(<ErrorBoundary fallback={<p>Could not render this calculation</p>}><Boom /></ErrorBoundary>))
+  spy.mockRestore()
+  expect(host.textContent).toContain('Could not render this calculation')
 })
