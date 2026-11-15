@@ -1,0 +1,43 @@
+[
+ {
+  "question": "How many linear metres of baseboard are needed for all the rooms on the ground floor of unit A, leaving out the door openings?",
+  "gold": 63.859,
+  "actual": null,
+  "outcome": "abstained",
+  "source_class": "IfcSpace",
+  "class_count": 21,
+  "semantic_kinds": {
+   "room": 21
+  },
+  "rooms_with_group_assignments": 0,
+  "interpretation": "No verified room-to-unit assignment exists; identifier prefixes are not treated as assignments."
+ },
+ {
+  "question": "How many valves or dampers are there?",
+  "gold": 14,
+  "actual": 8,
+  "outcome": "wrong",
+  "source_class": "IfcFlowController",
+  "class_count": 14,
+  "semantic_kinds": {
+   "valve": 8,
+   "control": 6
+  },
+  "rooms_with_group_assignments": null,
+  "interpretation": "Gold counts the entire broad class, including smoke-detector controls."
+ },
+ {
+  "question": "How many pipe fittings (elbows, tees, couplings) are there?",
+  "gold": 358,
+  "actual": 356,
+  "outcome": "wrong",
+  "source_class": "IfcFlowFitting",
+  "class_count": 358,
+  "semantic_kinds": {
+   "pipe_fitting": 356,
+   "duct_fitting": 2
+  },
+  "rooms_with_group_assignments": null,
+  "interpretation": "Gold counts the entire broad class, including duct fittings."
+ }
+]
