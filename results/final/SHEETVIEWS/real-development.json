@@ -1,0 +1,507 @@
+[
+  {
+    "doc_id": "finna__hka-139877668752900-168422869617700",
+    "source_image": "artifacts/finna__hka-139877668752900-168422869617700/page-1.png",
+    "image": [
+      3000,
+      2312
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 15
+    },
+    "before_scale": {
+      "m_per_px": 0.015000000000000001,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 60px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 26,
+      "window": 22,
+      "room": 22
+    },
+    "after_counts": {
+      "door": 26,
+      "window": 22,
+      "room": 22
+    },
+    "cost_usd": 0.040564,
+    "elapsed_s": 36.19,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139878174949000-145250688788000",
+    "source_image": "artifacts/finna__hka-139878174949000-145250688788000/page-1.png",
+    "image": [
+      2064,
+      3000
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 2,
+      "room": 3
+    },
+    "before_scale": {
+      "m_per_px": 0.015000000000000001,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 60px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 7,
+      "window": 5,
+      "room": 7
+    },
+    "after_counts": {
+      "door": 7,
+      "window": 5,
+      "room": 7
+    },
+    "cost_usd": 0.01596,
+    "elapsed_s": 14.61,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139878174949000-150366720269000",
+    "source_image": "artifacts/finna__hka-139878174949000-150366720269000/page-1.png",
+    "image": [
+      2878,
+      3000
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 1,
+      "room": 8
+    },
+    "before_scale": {
+      "m_per_px": null,
+      "method": "none",
+      "confidence": 0.0
+    },
+    "new_unfiltered_counts": {
+      "door": 7,
+      "window": 1,
+      "room": 10
+    },
+    "after_counts": {
+      "door": 7,
+      "window": 1,
+      "room": 10
+    },
+    "cost_usd": 0.017376,
+    "elapsed_s": 16.58,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139879309684900-154961504220600",
+    "source_image": "artifacts/finna__hka-139879309684900-154961504220600/page-1.png",
+    "image": [
+      2295,
+      3000
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 1,
+      "room": 4
+    },
+    "before_scale": {
+      "m_per_px": 0.026470588235294117,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 34px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 8,
+      "window": 5,
+      "room": 11
+    },
+    "after_counts": {
+      "door": 8,
+      "window": 5,
+      "room": 11
+    },
+    "cost_usd": 0.020344,
+    "elapsed_s": 17.15,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139879309684900-154962122901100",
+    "source_image": "artifacts/finna__hka-139879309684900-154962122901100/page-1.png",
+    "image": [
+      2313,
+      3000
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 1,
+      "room": 10
+    },
+    "before_scale": {
+      "m_per_px": 0.013333333333333334,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 68px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 3,
+      "window": 3,
+      "room": 3
+    },
+    "after_counts": {
+      "door": 3,
+      "window": 3,
+      "room": 3
+    },
+    "cost_usd": 0.010604,
+    "elapsed_s": 10.73,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139879309684900-154962222514200",
+    "source_image": "artifacts/finna__hka-139879309684900-154962222514200/page-1.png",
+    "image": [
+      3000,
+      1962
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 5
+    },
+    "before_scale": {
+      "m_per_px": null,
+      "method": "none",
+      "confidence": 0.0
+    },
+    "new_unfiltered_counts": {
+      "door": 1,
+      "window": 2,
+      "room": 1
+    },
+    "after_counts": {
+      "door": 1,
+      "window": 2,
+      "room": 1
+    },
+    "cost_usd": 0.008774,
+    "elapsed_s": 8.43,
+    "manual_check": null
+  },
+  {
+    "doc_id": "habs__de0117-sheet-00005",
+    "source_image": "artifacts/habs__de0117-sheet-00005/page-1.png",
+    "image": [
+      3000,
+      2294
+    ],
+    "dpi": null,
+    "is_plan": false,
+    "before_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 13
+    },
+    "before_scale": {
+      "m_per_px": 0.025714285714285714,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 35px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 0
+    },
+    "after_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 0
+    },
+    "cost_usd": 0.006424,
+    "elapsed_s": 8.98,
+    "manual_check": null
+  },
+  {
+    "doc_id": "habs__ia0042-sheet-00004",
+    "source_image": "artifacts/habs__ia0042-sheet-00004/page-1.png",
+    "image": [
+      3000,
+      2375
+    ],
+    "dpi": null,
+    "is_plan": false,
+    "before_counts": {
+      "door": 0,
+      "window": 3,
+      "room": 11
+    },
+    "before_scale": {
+      "m_per_px": null,
+      "method": "none",
+      "confidence": 0.0
+    },
+    "new_unfiltered_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 0
+    },
+    "after_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 0
+    },
+    "cost_usd": 0.013676,
+    "elapsed_s": 11.54,
+    "manual_check": null
+  },
+  {
+    "doc_id": "habs__mt0124-sheet-00002",
+    "source_image": "artifacts/habs__mt0124-sheet-00002/page-1.png",
+    "image": [
+      3000,
+      1995
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 6,
+      "window": 16,
+      "room": 9
+    },
+    "before_scale": {
+      "m_per_px": 0.01956521739130435,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 46px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 6,
+      "window": 32,
+      "room": 8
+    },
+    "after_counts": {
+      "door": 6,
+      "window": 32,
+      "room": 8
+    },
+    "cost_usd": 0.029254,
+    "elapsed_s": 33.48,
+    "manual_check": null
+  },
+  {
+    "doc_id": "wikimedia__23288749",
+    "source_image": "artifacts/wikimedia__23288749/page-1.png",
+    "image": [
+      1105,
+      1676
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 1,
+      "room": 6
+    },
+    "before_scale": {
+      "m_per_px": 0.037327207528790894,
+      "method": "dimension",
+      "confidence": 0.4,
+      "evidence": "area text, no door check"
+    },
+    "new_unfiltered_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 26
+    },
+    "after_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 26
+    },
+    "cost_usd": 0.014444,
+    "elapsed_s": 11.91,
+    "manual_check": null
+  },
+  {
+    "doc_id": "wikimedia__24018750",
+    "source_image": "artifacts/wikimedia__24018750/page-1.png",
+    "image": [
+      580,
+      800
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 3,
+      "room": 4
+    },
+    "before_scale": {
+      "m_per_px": 0.1,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 9px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 0,
+      "window": 6,
+      "room": 6
+    },
+    "after_counts": {
+      "door": 0,
+      "window": 6,
+      "room": 6
+    },
+    "cost_usd": 0.017504,
+    "elapsed_s": 20.11,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139879309684900-155058531210000",
+    "source_image": "artifacts/finna__hka-139879309684900-155058531210000/page-1.png",
+    "image": [
+      3000,
+      2660
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 5
+    },
+    "before_scale": {
+      "m_per_px": 0.01818181818181818,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 50px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 5,
+      "window": 6,
+      "room": 14
+    },
+    "after_counts": {
+      "door": 5,
+      "window": 6,
+      "room": 14
+    },
+    "cost_usd": 0.02117,
+    "elapsed_s": 21.85,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139879309684900-155058737003700",
+    "source_image": "artifacts/finna__hka-139879309684900-155058737003700/page-1.png",
+    "image": [
+      3000,
+      1982
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 9
+    },
+    "before_scale": {
+      "m_per_px": 0.023376623376623377,
+      "method": "door-prior",
+      "confidence": 0.3,
+      "evidence": "median door icon 38px = 0.9 m"
+    },
+    "new_unfiltered_counts": {
+      "door": 9,
+      "window": 6,
+      "room": 8
+    },
+    "after_counts": {
+      "door": 9,
+      "window": 6,
+      "room": 8
+    },
+    "cost_usd": 0.018154,
+    "elapsed_s": 16.9,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139879309684900-161226144595300",
+    "source_image": "artifacts/finna__hka-139879309684900-161226144595300/page-1.png",
+    "image": [
+      2070,
+      3000
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 1,
+      "room": 5
+    },
+    "before_scale": {
+      "m_per_px": null,
+      "method": "none",
+      "confidence": 0.0
+    },
+    "new_unfiltered_counts": {
+      "door": 5,
+      "window": 3,
+      "room": 7
+    },
+    "after_counts": {
+      "door": 5,
+      "window": 3,
+      "room": 7
+    },
+    "cost_usd": 0.01503,
+    "elapsed_s": 15.19,
+    "manual_check": null
+  },
+  {
+    "doc_id": "finna__hka-139880068219800-169332104793400",
+    "source_image": "artifacts/finna__hka-139880068219800-169332104793400/page-1.png",
+    "image": [
+      1950,
+      3000
+    ],
+    "dpi": null,
+    "is_plan": true,
+    "before_counts": {
+      "door": 0,
+      "window": 0,
+      "room": 6
+    },
+    "before_scale": {
+      "m_per_px": null,
+      "method": "none",
+      "confidence": 0.0
+    },
+    "new_unfiltered_counts": {
+      "door": 4,
+      "window": 2,
+      "room": 4
+    },
+    "after_counts": {
+      "door": 4,
+      "window": 2,
+      "room": 4
+    },
+    "cost_usd": 0.015952,
+    "elapsed_s": 15.44,
+    "manual_check": null
+  }
+]

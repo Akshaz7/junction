@@ -1,0 +1,46 @@
+{
+  "fixture": "data/full/junction-dataset/data/swiss_dwellings/site1142_bldg2293_floor10589.dxf",
+  "receipt": {
+    "doc_id": "uploads__e2e-1794690955116-site1142-bldg2293-floor10589-c2c5a0",
+    "status": "ingesting",
+    "detail": "poll GET /api/docs/{doc_id}/ingest until status is not running; doc.new fires again when it ends"
+  },
+  "state": {
+    "status": "ready",
+    "stages": [
+      {
+        "stage": "pages",
+        "ok": true,
+        "s": 0.3
+      },
+      {
+        "stage": "text",
+        "ok": true,
+        "s": 0
+      },
+      {
+        "stage": "dxf_planmap",
+        "ok": true,
+        "s": 0.1
+      },
+      {
+        "stage": "extrude",
+        "ok": true,
+        "s": 2.3
+      },
+      {
+        "stage": "usdz",
+        "ok": true,
+        "s": 1.8
+      }
+    ],
+    "detail": "plan map on page(s) [1]",
+    "mode": "full",
+    "started_at": 1794690956.312779,
+    "step": "usdz",
+    "readable": true,
+    "progress": 1,
+    "cost_usd": 0,
+    "updated": "2026-11-14T23:16:00+0200"
+  }
+}

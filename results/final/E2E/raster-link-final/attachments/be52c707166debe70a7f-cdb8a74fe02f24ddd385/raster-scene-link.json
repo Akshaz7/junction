@@ -1,0 +1,21 @@
+{
+  "doc_id": "cubicasa5k__colorful-10052",
+  "answer_id": "0a9d8edb3644439d9da27475b13006a0",
+  "expected": [
+    "vision-door-01",
+    "vision-door-02",
+    "vision-door-03",
+    "vision-door-04",
+    "vision-door-05",
+    "vision-door-06"
+  ],
+  "unresolved": [
+    "vision-door-01",
+    "vision-door-02",
+    "vision-door-03",
+    "vision-door-04",
+    "vision-door-05",
+    "vision-door-06"
+  ],
+  "actual": []
+}

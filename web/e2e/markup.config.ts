@@ -1,0 +1,3 @@
+import { defineConfig } from '@playwright/test'
+const port = Number(process.env.MARKUP_WEB_PORT || 5387)
+export default defineConfig({ testDir: '.', testMatch: 'markup.spec.ts', workers: 1, fullyParallel: false, timeout: 60_000, use: { baseURL: `http://127.0.0.1:${port}`, headless: true, viewport: { width: 1500, height: 1000 }, channel: 'chromium', launchOptions: { args: ['--use-angle=metal', '--ignore-gpu-blocklist', '--enable-gpu'] } }, webServer: { command: `VITE_USE_MOCK=false npm run dev -- --config e2e/markup.vite.config.ts --host 127.0.0.1 --port ${port} --strictPort`, url: `http://127.0.0.1:${port}`, reuseExistingServer: false } })

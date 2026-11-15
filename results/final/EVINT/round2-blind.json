@@ -1,0 +1,8 @@
+{
+  "doc_id": "ext_cvcfp__9",
+  "selected_before_final_method_fix": true,
+  "prior_blind_doc_id": "ext_resplan__plan-2832",
+  "prior_blind_checks_passed": 4,
+  "why_new_blind": "Direct vision trace classification was corrected after the first blind audit; reserve a fresh unseen scan before that correction.",
+  "selection_note": "Choose a known scan-source family, without reading its files; an IFC-derived candidate was discarded before opening."
+}

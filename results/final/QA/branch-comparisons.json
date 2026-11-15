@@ -1,0 +1,711 @@
+{
+  "runs": [
+    {
+      "branch": "final/mep",
+      "commit": "5018513d3a1af17ae4163e6a5438eddded26c9ba",
+      "created": "2026-11-14T21:13:02+00:00",
+      "case_ids": [
+        "ifc_bench__sixty5-arc:pipe",
+        "ifc_bench__sixty5-arc:duct",
+        "ifc_bench__sixty5-plumbing:duct",
+        "ifc_bench__sixty5-plumbing:light",
+        "ifc_bench__sixty5-ventilation:pipe",
+        "ifc_bench__sixty5-ventilation:duct",
+        "ifc_bench__sixty5-ventilation:light",
+        "ifc_bench__sixty5-electrical:pipe",
+        "ifc_bench__sixty5-electrical:duct",
+        "ifc_bench__sixty5-electrical:light",
+        "ifc_bench__dental-clinic-str:pipe",
+        "ifc_bench__dental-clinic-str:duct",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:pipe",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:duct",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:light",
+        "swiss_dwellings__site961-bldg2019-floor8945:services",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:services",
+        "wikimedia__79521417:services",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:services",
+        "ifc_models__bimspeed-vitoria-ald26-before:pipe",
+        "ifc_models__bimspeed-vitoria-ald26-before:light",
+        "ifc_models__bimspeed-vitoria-ald26-project:pipe",
+        "ifc_models__bimspeed-vitoria-ald26-project:duct",
+        "ifc_models__bimspeed-vitoria-ald26-project:light"
+      ],
+      "scope": "Services questions; existing indexed artifacts, not ingestion.",
+      "report": "run-20261114T211300328625Z.json",
+      "summaries": {
+        "public": {
+          "questions": 24,
+          "statuses": {
+            "incorrect": 20,
+            "honest-abstain": 4
+          },
+          "numeric_questions": 20,
+          "numeric_correct": 3,
+          "behaviour_only_questions": 4,
+          "issues": {
+            "wrong_value": 16,
+            "no_source_citations": 4,
+            "no_reasoning_card": 1,
+            "no_confidence_label": 1,
+            "headline_not_bold": 8,
+            "unexplained_abstention": 1,
+            "engine_timeout": 1,
+            "source_item_set_mismatch": 12
+          },
+          "timeouts": 1,
+          "latency_ms_median": 3444,
+          "latency_ms_max": 20029,
+          "model_requests_blocked": 105,
+          "exact_evidence_checked": 19,
+          "exact_evidence_matches": 7
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 9,
+        "same_case_numeric_branch": 3,
+        "numeric_cases": 20,
+        "improved_ids": [],
+        "regressed_ids": [
+          "ifc_bench__sixty5-arc:pipe",
+          "ifc_bench__sixty5-ventilation:pipe",
+          "ifc_bench__sixty5-electrical:pipe",
+          "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:pipe",
+          "ifc_models__bimspeed-vitoria-ald26-before:pipe",
+          "ifc_models__bimspeed-vitoria-ald26-project:pipe"
+        ],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/props",
+      "commit": "a5a44093822e0587e59e0f03da52492fff0167e5",
+      "created": "2026-11-14T21:14:50+00:00",
+      "case_ids": [
+        "ifc_bench__sixty5-arc:door",
+        "ifc_bench__sixty5-arc:window",
+        "ifc_bench__sixty5-arc:column",
+        "ifc_bench__sixty5-arc:beam",
+        "ifc_bench__sixty5-arc:width",
+        "ifc_bench__sixty5-arc:fire",
+        "ifc_bench__sixty5-plumbing:door",
+        "ifc_bench__sixty5-plumbing:window",
+        "ifc_bench__sixty5-plumbing:column",
+        "ifc_bench__sixty5-plumbing:beam",
+        "ifc_bench__sixty5-plumbing:width",
+        "ifc_bench__sixty5-plumbing:fire",
+        "ifc_bench__sixty5-ventilation:window",
+        "ifc_bench__sixty5-ventilation:column",
+        "ifc_bench__sixty5-ventilation:beam",
+        "ifc_bench__sixty5-ventilation:width",
+        "ifc_bench__sixty5-electrical:door",
+        "ifc_bench__sixty5-electrical:width",
+        "ifc_bench__sixty5-electrical:fire",
+        "ifc_bench__dental-clinic-str:door",
+        "ifc_bench__dental-clinic-str:window",
+        "ifc_bench__dental-clinic-str:beam",
+        "ifc_bench__dental-clinic-str:fire",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:column",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:beam",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:width",
+        "swiss_dwellings__site961-bldg2019-floor8945:schedule",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:schedule",
+        "ifc_models__bimspeed-vitoria-ald26-before:door",
+        "ifc_models__bimspeed-vitoria-ald26-before:column",
+        "ifc_models__bimspeed-vitoria-ald26-before:beam",
+        "ifc_models__bimspeed-vitoria-ald26-before:width",
+        "ifc_models__bimspeed-vitoria-ald26-project:door",
+        "ifc_models__bimspeed-vitoria-ald26-project:window",
+        "ifc_models__bimspeed-vitoria-ald26-project:column",
+        "ifc_models__bimspeed-vitoria-ald26-project:beam",
+        "ifc_models__bimspeed-vitoria-ald26-project:fire"
+      ],
+      "scope": "Property and structural count questions.",
+      "report": "run-20261114T211448354072Z.json",
+      "summaries": {
+        "public": {
+          "questions": 37,
+          "statuses": {
+            "correct": 6,
+            "incorrect": 27,
+            "honest-abstain": 4
+          },
+          "numeric_questions": 35,
+          "numeric_correct": 24,
+          "behaviour_only_questions": 2,
+          "issues": {
+            "no_source_citations": 18,
+            "answerable_abstention": 2,
+            "source_item_set_mismatch": 3,
+            "wrong_value": 9,
+            "headline_not_bold": 9
+          },
+          "timeouts": 0,
+          "latency_ms_median": 1425,
+          "latency_ms_max": 11440,
+          "model_requests_blocked": 69,
+          "exact_evidence_checked": 35,
+          "exact_evidence_matches": 32
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 33,
+        "same_case_numeric_branch": 24,
+        "numeric_cases": 35,
+        "improved_ids": [],
+        "regressed_ids": [
+          "ifc_bench__sixty5-plumbing:width",
+          "ifc_bench__sixty5-plumbing:fire",
+          "ifc_bench__sixty5-ventilation:width",
+          "ifc_bench__sixty5-electrical:width",
+          "ifc_bench__sixty5-electrical:fire",
+          "ifc_bench__dental-clinic-str:fire",
+          "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:width",
+          "ifc_models__bimspeed-vitoria-ald26-before:width",
+          "ifc_models__bimspeed-vitoria-ald26-project:fire"
+        ],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/proj-engine",
+      "commit": "c6c37806f3f06f9d0eabda3c0a3e9f72b2c65c5a",
+      "created": "2026-11-14T21:16:18+00:00",
+      "case_ids": [
+        "ifc_bench__sixty5-arc:storey",
+        "ifc_bench__sixty5-plumbing:storey",
+        "ifc_bench__sixty5-ventilation:storey",
+        "ifc_bench__sixty5-electrical:storey",
+        "ifc_bench__dental-clinic-str:storey",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:storey",
+        "swiss_dwellings__site961-bldg2019-floor8945:storeys",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:storeys",
+        "cubicasa5k__high-quality-architectural-1269:storeys",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:storeys",
+        "project:pipe-total"
+      ],
+      "scope": "Per-storey and cross-model questions.",
+      "report": "run-20261114T211616062241Z.json",
+      "summaries": {
+        "public": {
+          "questions": 11,
+          "statuses": {
+            "correct": 6,
+            "incorrect": 3,
+            "honest-abstain": 2
+          },
+          "numeric_questions": 7,
+          "numeric_correct": 4,
+          "behaviour_only_questions": 4,
+          "issues": {
+            "wrong_value": 2,
+            "source_item_set_mismatch": 1,
+            "headline_not_bold": 1,
+            "engine_timeout": 1
+          },
+          "timeouts": 1,
+          "latency_ms_median": 1238,
+          "latency_ms_max": 20019,
+          "model_requests_blocked": 62,
+          "exact_evidence_checked": 6,
+          "exact_evidence_matches": 5
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 4,
+        "same_case_numeric_branch": 4,
+        "numeric_cases": 7,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/changes",
+      "commit": "faae60b314822253036dbb4bc52a46945fbfa130",
+      "created": "2026-11-14T21:17:07+00:00",
+      "case_ids": [
+        "revision:window-change"
+      ],
+      "scope": "Before/project raw-count differences.",
+      "report": "run-20261114T211706298780Z.json",
+      "summaries": {
+        "public": {
+          "questions": 1,
+          "statuses": {
+            "incorrect": 1
+          },
+          "numeric_questions": 1,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 0,
+          "issues": {
+            "wrong_value": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 29,
+          "latency_ms_max": 29,
+          "model_requests_blocked": 0,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 0,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 1,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/order",
+      "commit": "f2df35d0715252e6aeb613e502d25e606e803c04",
+      "created": "2026-11-14T21:17:09+00:00",
+      "case_ids": [
+        "ifc_bench__sixty5-arc:volume",
+        "ifc_bench__sixty5-arc:order",
+        "ifc_bench__sixty5-plumbing:volume",
+        "ifc_bench__sixty5-plumbing:order",
+        "ifc_bench__sixty5-ventilation:volume",
+        "ifc_bench__sixty5-ventilation:order",
+        "ifc_bench__sixty5-electrical:volume",
+        "ifc_bench__sixty5-electrical:order",
+        "ifc_bench__dental-clinic-str:volume",
+        "ifc_bench__dental-clinic-str:order",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:volume",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:order",
+        "swiss_dwellings__site961-bldg2019-floor8945:order",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:order",
+        "cubicasa5k__high-quality-architectural-1269:order",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:order",
+        "ifc_models__bimspeed-vitoria-ald26-before:volume",
+        "ifc_models__bimspeed-vitoria-ald26-before:order",
+        "ifc_models__bimspeed-vitoria-ald26-project:volume",
+        "ifc_models__bimspeed-vitoria-ald26-project:order"
+      ],
+      "scope": "Requested allowances and ordering completeness.",
+      "report": "run-20261114T211707722217Z.json",
+      "summaries": {
+        "public": {
+          "questions": 20,
+          "statuses": {
+            "correct": 5,
+            "honest-abstain": 14,
+            "incorrect": 1
+          },
+          "numeric_questions": 8,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 12,
+          "issues": {
+            "answerable_abstention": 8,
+            "headline_not_bold": 2
+          },
+          "timeouts": 0,
+          "latency_ms_median": 184,
+          "latency_ms_max": 1104,
+          "model_requests_blocked": 44,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 5,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 8,
+        "improved_ids": [],
+        "regressed_ids": [
+          "ifc_bench__sixty5-plumbing:order",
+          "ifc_bench__sixty5-ventilation:order",
+          "ifc_bench__sixty5-electrical:order",
+          "ifc_bench__dental-clinic-str:order",
+          "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:order"
+        ],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/scales",
+      "commit": "1906d78cdfa9ac81a3a9a0b93e300c2f2c99a612",
+      "created": "2026-11-14T21:17:17+00:00",
+      "case_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945:area",
+        "swiss_dwellings__site961-bldg2019-floor8945:width",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:area",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:width",
+        "cubicasa5k__high-quality-architectural-1269:area",
+        "cubicasa5k__high-quality-architectural-1269:width",
+        "wikimedia__79521417:area",
+        "wikimedia__79521417:width",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:area"
+      ],
+      "scope": "Scale and width questions; existing artifacts, not fresh ingest.",
+      "report": "run-20261114T211716835573Z.json",
+      "summaries": {
+        "public": {
+          "questions": 9,
+          "statuses": {
+            "correct": 1,
+            "honest-abstain": 6,
+            "incorrect": 2
+          },
+          "numeric_questions": 0,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 9,
+          "issues": {
+            "headline_not_bold": 7,
+            "no_source_citations": 1,
+            "no_reasoning_card": 1,
+            "no_confidence_label": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 933,
+          "latency_ms_max": 10732,
+          "model_requests_blocked": 168,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 0,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 0,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/scansym",
+      "commit": "b965344e5ec5294ea60d3f05f1101044538497fa",
+      "created": "2026-11-14T21:17:40+00:00",
+      "case_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945:doors",
+        "swiss_dwellings__site961-bldg2019-floor8945:windows",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:doors",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+        "cubicasa5k__high-quality-architectural-1269:doors",
+        "cubicasa5k__high-quality-architectural-1269:windows",
+        "wikimedia__79521417:doors",
+        "wikimedia__79521417:windows",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows"
+      ],
+      "scope": "Scan/DXF behaviour only; no numeric oracle or fresh-ingest check.",
+      "report": "run-20261114T211738750280Z.json",
+      "summaries": {
+        "public": {
+          "questions": 9,
+          "statuses": {
+            "correct": 3,
+            "honest-abstain": 4,
+            "incorrect": 2
+          },
+          "numeric_questions": 0,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 9,
+          "issues": {
+            "headline_not_bold": 5,
+            "no_source_citations": 1,
+            "no_reasoning_card": 1,
+            "no_confidence_label": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 523,
+          "latency_ms_max": 11477,
+          "model_requests_blocked": 177,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 0,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 0,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/mistakes",
+      "commit": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+      "created": "2026-11-14T21:18:00+00:00",
+      "case_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945:mistakes",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:mistakes",
+        "cubicasa5k__high-quality-architectural-1269:mistakes",
+        "wikimedia__79521417:mistakes",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:mistakes"
+      ],
+      "scope": "Missing/conflicting data behaviour; no numeric oracle.",
+      "report": "run-20261114T211758869473Z.json",
+      "summaries": {
+        "public": {
+          "questions": 5,
+          "statuses": {
+            "correct": 1,
+            "honest-abstain": 3,
+            "incorrect": 1
+          },
+          "numeric_questions": 0,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 5,
+          "issues": {
+            "more_than_four_bullets": 1,
+            "no_source_citations": 1,
+            "headline_not_bold": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 78,
+          "latency_ms_max": 1935,
+          "model_requests_blocked": 86,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 0,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 0,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/perf",
+      "commit": "872cf77bea0ddb2dda30b058d353ad20039cbfad",
+      "created": "2026-11-14T21:18:05+00:00",
+      "case_ids": [
+        "ifc_bench__sixty5-arc:window",
+        "ifc_bench__sixty5-plumbing:window",
+        "ifc_bench__sixty5-ventilation:column",
+        "ifc_bench__sixty5-electrical:pipe",
+        "ifc_bench__dental-clinic-str:window",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:beam",
+        "swiss_dwellings__site961-bldg2019-floor8945:windows",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+        "cubicasa5k__high-quality-architectural-1269:doors",
+        "wikimedia__79521417:doors",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows",
+        "ifc_models__bimspeed-vitoria-ald26-before:column",
+        "ifc_models__bimspeed-vitoria-ald26-project:window"
+      ],
+      "scope": "One fixed-seed public control per file; latency smoke, not full performance certification.",
+      "report": "run-20261114T211804617909Z.json",
+      "summaries": {
+        "public": {
+          "questions": 13,
+          "statuses": {
+            "correct": 7,
+            "incorrect": 4,
+            "honest-abstain": 2
+          },
+          "numeric_questions": 8,
+          "numeric_correct": 8,
+          "behaviour_only_questions": 5,
+          "issues": {
+            "no_source_citations": 4,
+            "headline_not_bold": 2,
+            "no_reasoning_card": 1,
+            "no_confidence_label": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 111,
+          "latency_ms_max": 8914,
+          "model_requests_blocked": 42,
+          "exact_evidence_checked": 8,
+          "exact_evidence_matches": 8
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 8,
+        "same_case_numeric_branch": 8,
+        "numeric_cases": 8,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/robust",
+      "commit": "9a08558542b6454e9f97546b3dc2ed7e1b8743d5",
+      "created": "2026-11-14T21:18:21+00:00",
+      "case_ids": [
+        "ifc_bench__sixty5-arc:window",
+        "ifc_bench__sixty5-plumbing:window",
+        "ifc_bench__sixty5-ventilation:column",
+        "ifc_bench__sixty5-electrical:pipe",
+        "ifc_bench__dental-clinic-str:window",
+        "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:beam",
+        "swiss_dwellings__site961-bldg2019-floor8945:windows",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+        "cubicasa5k__high-quality-architectural-1269:doors",
+        "wikimedia__79521417:doors",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows",
+        "ifc_models__bimspeed-vitoria-ald26-before:column",
+        "ifc_models__bimspeed-vitoria-ald26-project:window"
+      ],
+      "scope": "One fixed-seed public control per file; answer stability, not upload-ingestion validation.",
+      "report": "run-20261114T211819953240Z.json",
+      "summaries": {
+        "public": {
+          "questions": 13,
+          "statuses": {
+            "correct": 7,
+            "incorrect": 4,
+            "honest-abstain": 2
+          },
+          "numeric_questions": 8,
+          "numeric_correct": 8,
+          "behaviour_only_questions": 5,
+          "issues": {
+            "no_source_citations": 4,
+            "headline_not_bold": 2,
+            "no_reasoning_card": 1,
+            "no_confidence_label": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 1335,
+          "latency_ms_max": 6322,
+          "model_requests_blocked": 102,
+          "exact_evidence_checked": 8,
+          "exact_evidence_matches": 8
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 8,
+        "same_case_numeric_branch": 8,
+        "numeric_cases": 8,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, shared evolving model cache, provider dispatch blocked, 20-second timeouts. Compare numeric and exact-evidence fields; passing-check totals use different grading versions. No causal attribution."
+      }
+    },
+    {
+      "branch": "final/changes",
+      "commit": "56833570e6a7856f447c2051210f23cd5aeb436a",
+      "created": "2026-11-14T21:30:09+00:00",
+      "case_ids": [
+        "revision:window-change"
+      ],
+      "scope": "Before/project raw-count differences.",
+      "report": "run-20261114T213008865490Z.json",
+      "summaries": {
+        "public": {
+          "questions": 1,
+          "statuses": {
+            "incorrect": 1
+          },
+          "numeric_questions": 1,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 0,
+          "issues": {
+            "wrong_value": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 25,
+          "latency_ms_max": 25,
+          "model_requests_blocked": 0,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 0,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 1,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, evolving private model cache, provider dispatch blocked, 20-second timeouts; no causal attribution."
+      }
+    },
+    {
+      "branch": "final/scansym",
+      "commit": "afd48acc7e026de7d7fbc0e7332998f8432b5a24",
+      "created": "2026-11-14T21:30:10+00:00",
+      "case_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945:doors",
+        "swiss_dwellings__site961-bldg2019-floor8945:windows",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:doors",
+        "opening_design__crema-cafe-models-crema-cafe-6-blend:windows",
+        "cubicasa5k__high-quality-architectural-1269:doors",
+        "cubicasa5k__high-quality-architectural-1269:windows",
+        "wikimedia__79521417:doors",
+        "wikimedia__79521417:windows",
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:windows"
+      ],
+      "scope": "Scan/DXF behaviour only; no numeric oracle or fresh-ingest check.",
+      "report": "run-20261114T213010120339Z.json",
+      "summaries": {
+        "public": {
+          "questions": 9,
+          "statuses": {
+            "correct": 4,
+            "honest-abstain": 4,
+            "incorrect": 1
+          },
+          "numeric_questions": 0,
+          "numeric_correct": 0,
+          "behaviour_only_questions": 9,
+          "issues": {
+            "headline_not_bold": 4,
+            "no_source_citations": 1,
+            "no_reasoning_card": 1,
+            "no_confidence_label": 1
+          },
+          "timeouts": 0,
+          "latency_ms_median": 548,
+          "latency_ms_max": 4276,
+          "model_requests_blocked": 105,
+          "exact_evidence_checked": 0,
+          "exact_evidence_matches": 0
+        }
+      },
+      "mode": "code",
+      "comparison_to_main_code_run": {
+        "report": "run-20261114T211048162334Z.json",
+        "same_case_numeric_main": 0,
+        "same_case_numeric_branch": 0,
+        "numeric_cases": 0,
+        "improved_ids": [],
+        "regressed_ids": [],
+        "identical_artifact_json": true,
+        "limits": "Different source commits, evolving private model cache, provider dispatch blocked, 20-second timeouts; no causal attribution."
+      }
+    }
+  ],
+  "updated": "2026-11-14T21:20:17Z"
+}

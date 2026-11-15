@@ -1,0 +1,10 @@
+{
+  "run": "raster-link-final",
+  "base_url": "http://127.0.0.1:5174",
+  "status": "failed",
+  "startTime": "2026-11-14T21:18:40.965Z",
+  "duration": 13386.396999999999,
+  "counts": {
+    "failed": 1
+  }
+}

@@ -57,7 +57,7 @@ class SolverUnsupported(Exception):
 
 
 def _plural(kind: str, n: int) -> str:
-    w = NOUN.get(kind, kind)
+    w = NOUN.get(kind, kind.removeprefix("custom:"))
     if n == 1:
         return w
     if w.endswith("y") and not w.endswith("ey"):
@@ -194,17 +194,24 @@ def _cite_label(doc: Doc, its: list[Item], page: int) -> str:
 def _evidence(doc: Doc, items: list[Item]):
     items = _reading_order(items)
     boxes, cites = [], []
+    if not items:
+        cites.append({"n": 1, "doc_id": doc.doc_id, "page": 1,
+                      "kind": "element" if doc.mode == "ifc" else "region", "bbox_px": None,
+                      "item_ids": [], "quote": "Checked the stored model inventory; no items match the requested scope."
+                      if doc.mode == "ifc" else "Checked the stored drawing detections; no items match the requested scope. Undetected objects may still be present.",
+                      "inventory_check": True})
     if doc.mode == "planmap":
-        by_page: dict[int, list[Item]] = {}
+        by_page: dict[tuple, list[Item]] = {}
         for i in items:
-            by_page.setdefault(i.page, []).append(i)
+            by_page.setdefault((i.page, i.props.get("view_id") or ""), []).append(i)
         n = 0
-        for pg, its in sorted(by_page.items()):
+        for (pg, _view), its in sorted(by_page.items()):
             n += 1
             xs = [i.bbox_px for i in its if i.bbox_px]
             union = [min(b[0] for b in xs), min(b[1] for b in xs), max(b[2] for b in xs), max(b[3] for b in xs)] if xs else None
             cites.append({"n": n, "doc_id": doc.doc_id, "page": pg, "kind": "region", "bbox_px": union,
-                          "item_ids": [i.item_id for i in its], "quote": None, "label": _cite_label(doc, its, pg)})
+                          "item_ids": [i.item_id for i in its], "quote": None,
+                          "label": (its[0].props.get("view_title") + " · " if its[0].props.get("view_title") else "") + _cite_label(doc, its, pg)})
         for k, i in enumerate(items[:MAX_BOXES], 1):
             if i.bbox_px:
                 boxes.append({"item_id": i.item_id, "page": i.page, "bbox_px": i.bbox_px, "label": str(k)})
@@ -289,8 +296,7 @@ def _pip(pt, poly) -> bool:
 
 
 def _apartments(question, doc, p, trace, route, t0):
-    """Swiss-dwellings DXF plan maps carry apartment outlines as items with props.role == 'unit' (label 'App. A').
-    count = number of units; area of apartment X = sum of rooms whose centre lies in the unit, outdoor rooms left out."""
+    """Count explicit unit outlines; sum their assigned indoor rooms for a named apartment."""
     units = [i for i in doc.items if i.props.get("role") == "unit" and i.conf >= MIN_CONF]
     if not units:
         return None
@@ -301,32 +307,41 @@ def _apartments(question, doc, p, trace, route, t0):
         boxes, cites, scene = _evidence(doc, units)
         text = f"There {'is' if n == 1 else 'are'} **{n} {'apartment' if n == 1 else 'apartments'}** on this floor plan. {_cite_marks(cites)}"
         return _answer_obj(question, [doc_id], text, n, "count", 0.9, False, boxes, cites, scene, trace, route, t0)
-    m = re.search(r"\bapartment\s+([A-Za-z0-9]{1,3})\b", question)
+    m = re.search(r"\b(?:apartment|flat|dwelling|unit)\s+#?([A-Za-z0-9]+(?:[-.][A-Za-z0-9]+)*)\b", question, re.I)
     if not m:
         return None
     key = m.group(1).casefold()
-    unit = next((u for u in units if (u.label or "").casefold().replace(".", " ").split()[-1:] == [key]), None)
-    if unit is None:
+    from pipeline.dxf_units import unit_key
+    matched = [u for u in units if (u.props.get("unit_key") or unit_key(u.label)) == key]
+    if not matched:
         return _abstain(question, doc_id, f"I could not find apartment {m.group(1)} on this plan.", trace, route, t0)
+    if len(matched) != 1:
+        return _abstain(question, doc_id, f"More than one outline is labelled apartment {m.group(1)}; please specify the floor.", trace, route, t0)
+    unit = matched[0]
     poly = [tuple(pt) for pt in (unit.polygon_px or [])]
     return None if not poly else _apt_area(question, doc, unit, poly, trace, route, t0)
 
 
 def _apt_area(question, doc, unit, poly, trace, route, t0):
-    rooms = []
-    for r in doc.items:
-        if r.kind != "room" or not r.bbox_px or r.conf < MIN_CONF:
-            continue
-        c = ((r.bbox_px[0] + r.bbox_px[2]) / 2, (r.bbox_px[1] + r.bbox_px[3]) / 2)
-        if _pip(c, poly) and not OUTDOOR_RE.search(r.label or "") and r.q.get("area_m2") is not None:
-            rooms.append(r)
+    from .apartment import indoor_rooms, uncertain_hint
+    rooms, missing = indoor_rooms(doc, unit)
+    if missing:
+        return _abstain(question, doc.doc_id, f"{len(missing)} indoor rooms in {unit.label} have no reliable area; I cannot verify the full apartment total.", trace, "planmap", t0)
     if not rooms:
         return _abstain(question, doc.doc_id, "I could not match rooms to that apartment.", trace, "planmap", t0)
+    if any(r.q.get("area_m2") is None for r in rooms):
+        return _abstain(question, doc.doc_id, "Some indoor rooms in that apartment have no area recorded, so I cannot verify the full sum.", trace, "planmap", t0)
     total = sum(r.q["area_m2"] for r in rooms)
-    trace.append(_step("area", f"{len(rooms)} indoor rooms inside {unit.label} = {total:.2f} m2"))
+    trace.append(_step("area", f"{len(rooms)} indoor rooms assigned to {unit.label} = {total:.2f} m2; outdoor rooms excluded"))
     boxes, cites, scene = _evidence(doc, rooms)
     text = f"The net floor area of **{unit.label}** is **{_fmt(total, 'area')} m²** across {len(rooms)} indoor rooms. {_cite_marks(cites)}"
-    return _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+    hint = uncertain_hint(rooms, total)
+    if hint:
+        text += " " + hint["reason"]
+    result = _answer_obj(question, [doc.doc_id], text, round(total, 4), "m²", 0.4 if hint else 0.9, False, boxes, cites, scene, trace, "planmap", t0)
+    if hint:
+        result["reasoning_hint"] = hint
+    return result
 
 
 FIXTURE_RX = {
@@ -394,6 +409,10 @@ def _solve_multi(question, doc_id, p: Parsed, root, page, hidden, t0) -> dict:
     if sm:
         where = f"on **{sm.group(1)}**" + (" (ground floor)" if sm.group(1).strip().lower() == "erdgeschoss" else "")
     text = f"There {'is' if sum(counts.values()) == 1 else 'are'} " + (", ".join(parts[:-1]) + " and " + parts[-1]) + f" {where}. " + _cite_marks(cites)
+    from pipeline.sheet_views import multi_count_note
+    doc = load_doc(doc_id, Path(root))
+    if doc is not None:
+        text += multi_count_note(doc, subs)
     scene = {"doc_id": doc_id, "highlight_item_ids": ids, "camera_target_item_id": ids[0] if ids else None, "item_kinds": item_kinds}
     return _answer_obj(question, [doc_id], text, counts, "count", min(confs), False, boxes, cites, scene, trace, subs[0][1]["route"], t0)
 
@@ -426,6 +445,14 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 filtered["answer"]["text_md"] += " (with " + ", ".join(hidden.values()) + " hidden)"
             return filtered
     kind = p.kind
+    if doc.mode == "planmap" and doc.meta.get("view_regions"):
+        relevant = [r for r in doc.meta["view_regions"] if not page or r["page"] == page]
+        if relevant and not any(r.get("view_type") == "plan" for r in relevant):
+            trace.append(_step("view_scope", "no identifiable floor-plan view; other views cannot supply plan quantities"))
+            res = _abstain(question, doc_id, "No floor-plan view could be identified on this sheet. Elevations, sections and unresolved views cannot supply a plan count.", trace, route, t0)
+            res["citations"] = [{"n": n, "doc_id": doc_id, "page": r["page"], "kind": "region", "bbox_px": r["bbox"],
+                                 "item_ids": [], "quote": r.get("title")} for n, r in enumerate(relevant, 1)]
+            return res
     if kind == "apartment" and doc.mode == "planmap" and p.type in ("count", "area"):
         res = _apartments(question, doc, p, trace, route, t0)
         if res is not None:
@@ -443,8 +470,26 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         extra = n > max(1, doc.pages)
         text = (f"This drawing shows **{n} {'floor' if n == 1 else 'floors'}** "
                 + ("(separate floor plans drawn on the sheet)." if extra else "(one per plan page)."))
-        return _answer_obj(question, [doc_id], text, n, "count", 0.6, False, [], [], {"doc_id": doc_id, "highlight_item_ids": [],
-                           "camera_target_item_id": None}, trace, route, t0)
+        proof = [i for i in doc.items if i.kind == "text" and i.label and any(rx.search(i.label) for rx, _ in _storeys.LABEL_RES)]
+        if proof:
+            text += " Printed floor labels: " + ", ".join(dict.fromkeys(i.label for i in proof)) + "."
+        else:
+            for pg, f in enumerate(found, 1):
+                for block in f["blocks"]:
+                    b = block["bbox_px"]
+                    representative = next((i for i in doc.items if i.page == pg and i.kind in _storeys.STRUCT and i.bbox_px
+                                           and b[0] <= (i.bbox_px[0]+i.bbox_px[2])/2 <= b[2]
+                                           and b[1] <= (i.bbox_px[1]+i.bbox_px[3])/2 <= b[3]), None)
+                    if representative:
+                        proof.append(representative)
+        boxes, cites, scene = _evidence(doc, proof)
+        text += " " + _cite_marks(cites)
+        result = _answer_obj(question, [doc_id], text, n, "count", 0.6, False, boxes, cites, scene, trace, route, t0)
+        result["reasoning_hint"] = {"steps":[{"kind":"found","title":"Found","text":f"{n} floor-plan groups or distinct printed floor labels","cite":cites[0]["n"] if cites else None,"ok":None}],
+                                    "pct_cap":70,"reason":"The floor count uses plan layout and printed labels; confirm it on the marked drawing.",
+                                    "improve":"Check the marked floor labels and separate plans on the sheet."}
+        from engine.calc_routes import storeys
+        return storeys(result, doc, detected=found)
 
     if doc.mode == "ifc" and kind == "storey" and p.type == "count" and not page:
         sts = sorted(doc.storeys, key=lambda s: s.get("elevation_m", 0))
@@ -463,7 +508,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         listing = ", ".join(f"{s_['name']} ({s_.get('elevation_m', 0):+.1f} m)" for s_ in sts)
         _, cites, scene = _evidence(doc, rep)
         text = f"The model has **{n} {'storey' if n == 1 else 'storeys'}**, from lowest to highest: {listing}. {_cite_marks(cites)}"
-        return _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)
+        res = _answer_obj(question, [doc_id], text, n, "count", 1.0, False, [], cites, scene, trace, route, t0)
+        from engine.calc_routes import storeys
+        return storeys(res, doc, declared=sts)
 
     kinds = {kind}
     kind_note = ""
@@ -473,7 +520,11 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         unknown = [i for i in doc.items if i.source == "dxf" and i.kind == "other"
                    and i.props.get("role") == "fixture" and i.conf >= MIN_CONF
                    and (not page or i.page == page) and i.item_id not in (hidden or {})]
-        if unknown:
+        classified = [i for i in doc.items if i.kind in kinds and i.source == "dxf" and i.conf >= MIN_CONF
+                      and (not page or i.page == page) and i.item_id not in (hidden or {})]
+        if unknown and classified:   # classified symbols exist: answer, and state the unclassified ones in the trace
+            trace.append(_step("load", f"{len(unknown)} other DXF fixture symbols have no fixture type and are not counted"))
+        elif unknown:
             trace.append(_step("load", f"{len(unknown)} DXF fixture symbols have no fixture type"))
             return _abstain(question, doc_id,
                             f"The DXF contains unclassified fixture symbols, so I cannot give a reliable {_plural(kind, 1)} count.",
@@ -491,6 +542,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         low = [i for i in items if i.conf < MIN_CONF]
         items = [i for i in items if i.conf >= MIN_CONF]
         trace.append(_step("load", f"plan map: {len(items)} {kind} items (conf >= {MIN_CONF}; {len(low)} below ignored)"))
+        trace[-1]['data'] = {'method': 'score_filter', 'kind': kind, 'score_threshold': MIN_CONF,
+                             'before': len(items) + len(low), 'retained': len(items), 'rejected': len(low)}
     else:
         trace.append(_step("load", f"{len(items)} {kind} elements of {len(doc.items)} in the model"))
 
@@ -533,6 +586,7 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     # --- room / label filters
     subject = None
     sub_name = None
+    weak = []
     if kind == "room" and doc.mode == "ifc":
         from .filters import room_filter, missing_room_text
         selected = room_filter(question, items)
@@ -660,7 +714,24 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         else:
             verb = "is" if n == 1 else "are"
             text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"
-        return _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
+        from pipeline.sheet_views import count_note
+        text += count_note(doc, items, kind, page)
+        if weak:
+            text += f" {len(weak)} additional possible {_plural(kind, len(weak))} have uncertain room types and are excluded; this is a confirmed-detection count, not a verified total."
+            conf = min(conf, .5)
+        result = _answer_obj(question, [doc_id], text, n, "count", conf, False, boxes, cites, scene, trace, route, t0)
+        if weak:
+            result["reasoning_hint"] = {
+                "steps": [{"kind": "found", "title": "Found", "text": f"{n} confident detections and {len(weak)} additional candidates with uncertain room types", "cite": cites[0]["n"] if cites else None, "ok": None},
+                          {"kind": "checked", "title": "Checked", "text": "Uncertain classifications were excluded; the complete total needs a drawing check", "cite": None, "ok": False}],
+                "pct_cap": 70, "reason": "Some detected rooms could not be confidently classified; this count may be incomplete.",
+                "improve": "Check the room labels on the drawing to confirm the total."}
+        from engine.taught_items import evidence_step
+        manual = evidence_step(items)
+        if manual:
+            result["answer"]["text_md"] = (result["answer"].get("text_md") or "") + '\n\n- ' + manual['text']
+            result["trace"].append(_step('user_label', manual['text']))
+        return result
 
     vals = [(i, _qty(i, kind, p.type)) for i in items]
     if doc.mode == "ifc" and kind == "room" and p.type == "area" and len(items) <= 400 and any(v is None for _, v in vals):
@@ -692,7 +763,9 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
                 return _abstain(question, doc_id, "This plan has no scale I can trust, so I cannot give areas in square metres.", trace, route, t0)
             conf = float(sc.get("confidence") or 0.3)
             if conf < 0.5:
-                scale_note = " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate."
+                scale_note = (" A scale ratio is printed, but image DPI or a verified paper size is missing; these areas still use a door-size estimate."
+                              if sc.get("unverified_printed_ratio") else
+                              " Areas are estimated from door sizes because no printed scale was found, so treat them as approximate.")
             elif sc.get("method") in ("scalebar", "ratio-dpi", "ratio-sheet"):
                 scale_note = scale_note or " Sized from the scale printed on the drawing."
         else:
@@ -718,4 +791,6 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
         text += " Per room: " + "; ".join(f"{(i.label or i.name or i.item_id)}{' (' + i.storey + ')' if i.storey else ''} {_fmt(v, 'area')} m²" for i, v in top) \
             + (f"; and {len(have) - len(top)} more" if len(have) > len(top) else "") + "."
     text += scale_note
-    return _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)
+    res = _answer_obj(question, [doc_id], text, round(total, 4), unit, conf, False, boxes, cites, scene, trace, route, t0)
+    from engine.calc import record_items
+    return record_items(res, doc, have, note="Missing quantities are excluded as stated in the answer; mesh-derived quantities use scene.glb when no stored quantity exists.")

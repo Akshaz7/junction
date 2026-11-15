@@ -1,0 +1,182 @@
+{
+  "models_fake": true,
+  "live_spend_usd": 0,
+  "before_source_commit": "dbad97f4cec4ff9ae1ea6da4c93a21e993032261",
+  "after_source_commit": "094920f8be108e9dd844cacee47c102fd4dcafaa",
+  "splits": {
+    "sample200": {
+      "n": 200,
+      "before": {
+        "wrong": 30,
+        "correct": 138,
+        "abstained": 19,
+        "unscored": 13
+      },
+      "after": {
+        "wrong": 31,
+        "correct": 139,
+        "abstained": 17,
+        "unscored": 13
+      },
+      "correct_to_wrong": 0,
+      "correct_to_abstained": 0
+    },
+    "categories": {
+      "n": 156,
+      "before": {
+        "correct": 74,
+        "abstained": 71,
+        "wrong": 11
+      },
+      "after": {
+        "correct": 118,
+        "abstained": 23,
+        "wrong": 15
+      },
+      "correct_to_wrong": 0,
+      "correct_to_abstained": 0
+    }
+  },
+  "source_origins": [
+    "cubicasa5k",
+    "ifc_bench",
+    "ifc_models",
+    "opening_design",
+    "swiss_dwellings"
+  ],
+  "categories": {
+    "apartment_area": {
+      "before": {
+        "abstained": 36,
+        "correct": 13,
+        "wrong": 1
+      },
+      "after": {
+        "correct": 46,
+        "wrong": 4
+      }
+    },
+    "mep_count": {
+      "before": {
+        "wrong": 3,
+        "abstained": 5,
+        "correct": 7
+      },
+      "after": {
+        "wrong": 3,
+        "abstained": 5,
+        "correct": 7
+      }
+    },
+    "rooms_spaces": {
+      "before": {
+        "abstained": 27,
+        "correct": 52,
+        "wrong": 7
+      },
+      "after": {
+        "correct": 63,
+        "wrong": 8,
+        "abstained": 15
+      }
+    },
+    "zero_count": {
+      "before": {
+        "correct": 2,
+        "abstained": 3
+      },
+      "after": {
+        "correct": 2,
+        "abstained": 3
+      }
+    }
+  },
+  "limitations": [
+    "Fake providers do not reproduce successful live-reader sauna interpretations; zero-count field recovery is covered by generated fixtures and final source-consistency probes.",
+    "Remaining room/outline membership and fixture classification errors are not repaired by numeric-field safeguards.",
+    "The independent forbidden benchmark and live-provider gate remain with the integrator."
+  ],
+  "verification": {
+    "pytest_passed": 77,
+    "source_consistency": {
+      "purpose": "source consistency, not independent gold accuracy",
+      "injected_answer_data": "generated for demo",
+      "results": [
+        {
+          "doc_id": "cubicasa5k__high-quality-architectural-5507",
+          "source": "cubicasa5k",
+          "blind": false,
+          "mode": "planmap",
+          "stored_items": 72,
+          "solver_room_count": 17,
+          "reader_inventory_count": 17,
+          "public_room_count": 17,
+          "checks": [
+            "public answer with reasoning",
+            "wrong-measurement retry",
+            "missing reader value recovery with citation"
+          ],
+          "passed": true
+        },
+        {
+          "doc_id": "ifc_models__bsc-duplex-duplex-a-20110907",
+          "source": "ifc_models",
+          "blind": false,
+          "mode": "ifc",
+          "stored_items": 240,
+          "solver_room_count": 21,
+          "reader_inventory_count": 21,
+          "public_room_count": 21,
+          "checks": [
+            "public answer with reasoning",
+            "wrong-measurement retry",
+            "missing reader value recovery with citation"
+          ],
+          "passed": true
+        },
+        {
+          "doc_id": "swiss_dwellings__site28-bldg259-floor47941",
+          "source": "swiss_dwellings",
+          "blind": false,
+          "mode": "planmap",
+          "stored_items": 211,
+          "solver_room_count": 30,
+          "reader_inventory_count": 30,
+          "public_room_count": 30,
+          "checks": [
+            "public answer with reasoning",
+            "wrong-measurement retry",
+            "missing reader value recovery with citation"
+          ],
+          "passed": true
+        },
+        {
+          "doc_id": "swiss_dwellings__site695-bldg1470-floor6424",
+          "source": "swiss_dwellings",
+          "blind": true,
+          "mode": "planmap",
+          "stored_items": 113,
+          "solver_room_count": 19,
+          "reader_inventory_count": 19,
+          "public_room_count": 19,
+          "checks": [
+            "public answer with reasoning",
+            "wrong-measurement retry",
+            "missing reader value recovery with citation"
+          ],
+          "passed": true
+        }
+      ],
+      "checks_passed": 12
+    },
+    "structured_artifacts_checked": 745,
+    "files_modified_since_baseline_started": 0,
+    "after_fingerprints_still_match": true
+  },
+  "benchmark_hygiene": {
+    "forbidden_documents_accessed": 0,
+    "live_model_calls": 0,
+    "new_fitted_numeric_constants": 0,
+    "baseline_fingerprints": "Not recorded; file modification times checked against baseline start, after-run SHA256 fingerprints recorded."
+  }
+}

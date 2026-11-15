@@ -1,0 +1,82 @@
+[
+  {
+    "title": " > chromium > final-projects.spec.ts > [PROJECTS] Project list and seeded demo open in the real browser",
+    "owner": "PROJECTS",
+    "status": "passed",
+    "duration_ms": 5178,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-4b7c20c791f9b36fd5d3/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-projects.spec.ts > [PROJECTS] Create, attach, classify, edit metadata, overview, project chat, remove and delete",
+    "owner": "PROJECTS",
+    "status": "passed",
+    "duration_ms": 10080,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "project-overview.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-2fb6a35b38720f46044e/project-overview.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "answer.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-2fb6a35b38720f46044e/answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-2fb6a35b38720f46044e/loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-2fb6a35b38720f46044e/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-projects.spec.ts > [PROJECTS] Upload a real file directly to a project and show ingestion status",
+    "owner": "PROJECTS",
+    "status": "passed",
+    "duration_ms": 12023,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "ingest.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-0b9b4af965f901037fcc/ingest.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-0b9b4af965f901037fcc/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-projects.spec.ts > [PROJECTS] Phone keeps Projects, files, overview and project chat within 390x844",
+    "owner": "PROJECTS",
+    "status": "passed",
+    "duration_ms": 948,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "network-and-browser.json",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/projects-final/attachments/e96a8b924e506e8389d3-c5b9754c35fc48ec5a8f/network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  }
+]

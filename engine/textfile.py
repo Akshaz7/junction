@@ -184,7 +184,7 @@ def _notes(question, doc_id, pts, t0):
                 return None   # a named room or element ('ESIK (58-2)'): its own record may carry the value, so let the element path answer
             if noun in ("area", "perimeter"):
                 what = "areas" if noun == "area" else "perimeters"
-                text = (f"**This file does not show {what}.** Its printed text has no room table or note with {what}. "
+                text = (f"**This file does not show {what}.** Verified {what} are not available: its printed text has no room table or note with {what}. "
                         f"Upload the plan with its room table, or ask about what the sheet does list.")
             else:
                 text = (f"**Not shown in this file.** Its printed text has no {noun} note"

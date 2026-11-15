@@ -1,0 +1,171 @@
+[
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real drawing; selection stays reachable",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 17322,
+    "errors": [
+      "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-doc-id=\"swiss_dwellings__site1000-bldg2082-floor9385\"]').locator('.data-open-file')\n    - locator resolved to <button type=\"button\" aria-expanded=\"true\" class=\"data-open-file\" aria-label=\"Open site1000_bldg2082_floor9385\">…</button>\n  - attempting click action (trial run)\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n      - waiting 100ms\n    29 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action (trial run)\n       - waiting 500ms\n"
+    ],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "swiss_dwellings__site1000-bldg2082-floor9385 (swiss_dwellings)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-41252-g-selection-stays-reachable-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-41252-g-selection-stays-reachable-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-41252-g-selection-stays-reachable-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real model; selection stays reachable",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 15907,
+    "errors": [
+      "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-doc-id=\"ifc_bench__ac20-arc\"]').locator('.data-open-file')\n    - locator resolved to <button type=\"button\" aria-expanded=\"true\" class=\"data-open-file\" aria-label=\"Open AC20 Institute / Phantasy Office Building - arc\">…</button>\n  - attempting click action (trial run)\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n      - waiting 100ms\n    29 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action (trial run)\n       - waiting 500ms\n"
+    ],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "ifc_bench__ac20-arc (ifc_bench)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-ccbc4-l-selection-stays-reachable-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-ccbc4-l-selection-stays-reachable-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-ccbc4-l-selection-stays-reachable-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Library browses, searches and opens a real scan; selection stays reachable",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 17302,
+    "errors": [
+      "TimeoutError: locator.click: Timeout 15000ms exceeded.\nCall log:\n  - waiting for locator('[data-doc-id=\"cubicasa5k__colorful-11397\"]').locator('.data-open-file')\n    - locator resolved to <button type=\"button\" aria-expanded=\"true\" class=\"data-open-file\" aria-label=\"Open colorful-11397\">…</button>\n  - attempting click action (trial run)\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n    - waiting 20ms\n    2 × waiting for element to be visible, enabled and stable\n      - element is not visible\n    - retrying click action (trial run)\n      - waiting 100ms\n    29 × waiting for element to be visible, enabled and stable\n       - element is not visible\n     - retrying click action (trial run)\n       - waiting 500ms\n"
+    ],
+    "annotations": [
+      {
+        "type": "document",
+        "description": "cubicasa5k__colorful-11397 (cubicasa5k)"
+      }
+    ],
+    "attachments": [
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-c19d4-n-selection-stays-reachable-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-c19d4-n-selection-stays-reachable-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Library-b-c19d4-n-selection-stays-reachable-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [ENGINE] Chat shows live status, bold answer, citations, evidence steps and confidence",
+    "owner": "ENGINE",
+    "status": "passed",
+    "duration_ms": 4867,
+    "errors": [],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      }
+    ]
+  },
+  {
+    "title": " > chromium > final-judge.spec.ts > [WEB] Export report prepares source evidence; Take-off sheet downloads a cited CSV",
+    "owner": "WEB",
+    "status": "failed",
+    "duration_ms": 9391,
+    "errors": [
+      "Error: expect(locator).toContainText(expected) failed\n\nLocator: locator('iframe[title=\"Site report preview\"]').contentFrame().locator('body')\nTimeout: 5000ms\nExpected pattern: /source|evidence/i\nReceived string:  \"HologramSite reportGenerated: 2026-11-14T20:16:56.047ZChat: 97e0b994-eabc-48cc-bb76-cc2c0a0f5fee\n    QuestionHow many doors are there?AnswerThere are 77 doors in this model. [1][2][3][4]·····\n    Answer cost: $0 USD\n    Where it is set out[1] AC20 Institute / Phantasy Office Building - arc · Page 1Items: 3NTkL25Pb8Y8HEKKJUt_B_, 17n0YjYkvEshOmsrIPLGOb, 31Gx3VvgP1fvwL2I0a9YtY, 0Xbk1qGZnCY9arQDkkuJ8L, 0_flqizUv5_A_EGt7DzP3T, 3qloCPnZDEQBom1ZjBlwJP, 2pe3RqZ0j8ogoAvp7iGUAH, 3sXEZFiePFsxi_o7909$c3, 123VQUHCn26ei6whtqvtKu, 2$tv64Cn5DZx8YisuS365o, 0Ti0dr3tHAq8uzw2luJtyI, 1nDSxVMDT3hh2Ql2HEz6Lg, 2MHPtmLzv5OhZf$6Z1Y75J, 29qQ5ECrL6nQEhooPP__BH, 3rmqVs9ZL3qgw1cva2u9Fv, 1lf5dxZ1LE_xJj$eJu8Rhu[2] AC20 Institute / Phantasy Office Building - arc · Page 2Items: 2pX0sc7rf06usjFMq1TsGs, 0YIVuBlyXF3PI_fXw2b_vJ, 1njbY3IMb4IedX5fLGTCRc, 1_hrYGMATEmeNbEHgfoKxd, 31UFds84f5oAxxal4G6S8P, 2ZDRA4lYXAawe3WLk$RpXy, 3c7FFURCHAIuL_Uqfwogkh, 20nncC0vDDp9h64AX6XevC, 3QI0Za4AD7g9EDuOxKtL4z, 3nS8Xe8c5BpfdWxU$cBkvz, 0p1Mt3h7nDeQ1Q4N9eEl9H, 2d24khq3H2EhLI7osiekrD, 0nixpH$hD2$xLwip3vL96O, 2SfY7UTIz1E82rEMOUSWux, 2FYBB$DerEng8G$eISvGgZ, 1FCKjvOWnEAv7x1dg2f7BI, 2k6vBG3yn9hRJUYx$GK5vo, 18PQUIFELEARLM4c0brquf[3] AC20 Institute / Phantasy Office Building - arc · Page 3Items: 2dmNSROS54DQzD5NyEFXm$, 2VGdy0IID6LxPfFQdDE_rz, 36$lV978n70fzaOS1aGkQb, 2ezLa6k3r22f7kZrwjKNLO, 37NUOXsmX3z9p4Kk0VJikq, 17HzXMa29CgeqdGTriCwwh, 1p4YfqvYLCyfRRiNruiahD, 1MlsdMSb17ygNfEs7N22qC, 32UdM49pfAMxiX5WyXhCuy, 35jd8lu1fDJAuZoKl4ldDk, 00RjztLorCQgcGEHv7fY3g, 2tu8_KoLfDpho5M9F1jtqL, 3ZJxNn9Nz6HQakewV2F393, 2sSHD6n39BZQnSaHjLYpnc, 0vTIWG60z84eKitb_eWAIR, 3qz8vRMKXCHubRHdl$maGl, 08uaDJHLH3FAZ6Hg9FwzkG, 0aFvTq1m96zgWbjq4TXV_5, 1gw9pvArXFYfZkbYdrwJwh, 1d9QvK4Qv1Iem3fiUhniQB, 1BWbpTElb4dAcW2J6oyRrZ, 0JdG5rMQr10RkgztM3HqwA[4] AC20 Institute / Phantasy Office Building - arc · Page 4Items: 2VJpmvlMLEvOKD0Mb9hAiw, 3KiAVCT1D1t8Xn0nRB8nld, 2ijDjejvTCZvZnfGVKFht6, 0WVkDf7jjAGhdceJ18iI2g, 3UcRuggsrAXPWkQpXc3dLn, 2GIKSl4yvD7wO8pi7zg$sQ, 3XIgDIN6vBjxvjdvI7ngjF, 2N6esOMjP29AvhRLQ1Jz3$, 2wCVZFSRnBZ8YJ5Ri$bwG7, 0CFMpIkEzADxWz$xDSGgek, 3uYK2H0E52Qhz8bK3APcca, 24UZuOfCf3JhP_9U8SWMuK, 3mQi89EHb4rOWufyKZfZhB, 1ufhCZbhH2Ifud2RWdYCPS, 1EjnchXi9Esx$bY6vHG2RD, 0o6iTaAHzAQ9cd4xHGAaOG, 1uDQb3wH95JQTlYH_Y617r, 2rfNFYnCT2WAXMkqZ5PiDc, 0HthpQNkzAiuSXm9HWsQaw, 2h5A513TXAAhxsa3$Armxt, 2$R4rUG1nFkBAylN9aGNhb\n    AC20 Institute / Phantasy Office Building - arcLicence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_Examples\n    AC20 Institute / Phantasy Office Building - arc · Page 1Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_ExamplesAC20 Institute / Phantasy Office Building - arc · Page 2Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_ExamplesAC20 Institute / Phantasy Office Building - arc · Page 3Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_ExamplesAC20 Institute / Phantasy Office Building - arc · Page 4Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_Examples\n  AI can make mistakes. Verify important information.\"\n\nCall log:\n  - Expect \"toContainText\" locator('iframe[title=\"Site report preview\"]').contentFrame().locator('body') with timeout 5000ms\n  - waiting for locator('iframe[title=\"Site report preview\"]').contentFrame().locator('body')\n    14 × locator resolved to <body class=\"site-report\">…</body>\n       - unexpected value \"HologramSite reportGenerated: 2026-11-14T20:16:56.047ZChat: 97e0b994-eabc-48cc-bb76-cc2c0a0f5fee\n    QuestionHow many doors are there?AnswerThere are 77 doors in this model. [1][2][3][4]\n    \n    Answer cost: $0 USD\n    Where it is set out[1] AC20 Institute / Phantasy Office Building - arc · Page 1Items: 3NTkL25Pb8Y8HEKKJUt_B_, 17n0YjYkvEshOmsrIPLGOb, 31Gx3VvgP1fvwL2I0a9YtY, 0Xbk1qGZnCY9arQDkkuJ8L, 0_flqizUv5_A_EGt7DzP3T, 3qloCPnZDEQBom1ZjBlwJP, 2pe3RqZ0j8ogoAvp7iGUAH, 3sXEZFiePFsxi_o7909$c3, 123VQUHCn26ei6whtqvtKu, 2$tv64Cn5DZx8YisuS365o, 0Ti0dr3tHAq8uzw2luJtyI, 1nDSxVMDT3hh2Ql2HEz6Lg, 2MHPtmLzv5OhZf$6Z1Y75J, 29qQ5ECrL6nQEhooPP__BH, 3rmqVs9ZL3qgw1cva2u9Fv, 1lf5dxZ1LE_xJj$eJu8Rhu[2] AC20 Institute / Phantasy Office Building - arc · Page 2Items: 2pX0sc7rf06usjFMq1TsGs, 0YIVuBlyXF3PI_fXw2b_vJ, 1njbY3IMb4IedX5fLGTCRc, 1_hrYGMATEmeNbEHgfoKxd, 31UFds84f5oAxxal4G6S8P, 2ZDRA4lYXAawe3WLk$RpXy, 3c7FFURCHAIuL_Uqfwogkh, 20nncC0vDDp9h64AX6XevC, 3QI0Za4AD7g9EDuOxKtL4z, 3nS8Xe8c5BpfdWxU$cBkvz, 0p1Mt3h7nDeQ1Q4N9eEl9H, 2d24khq3H2EhLI7osiekrD, 0nixpH$hD2$xLwip3vL96O, 2SfY7UTIz1E82rEMOUSWux, 2FYBB$DerEng8G$eISvGgZ, 1FCKjvOWnEAv7x1dg2f7BI, 2k6vBG3yn9hRJUYx$GK5vo, 18PQUIFELEARLM4c0brquf[3] AC20 Institute / Phantasy Office Building - arc · Page 3Items: 2dmNSROS54DQzD5NyEFXm$, 2VGdy0IID6LxPfFQdDE_rz, 36$lV978n70fzaOS1aGkQb, 2ezLa6k3r22f7kZrwjKNLO, 37NUOXsmX3z9p4Kk0VJikq, 17HzXMa29CgeqdGTriCwwh, 1p4YfqvYLCyfRRiNruiahD, 1MlsdMSb17ygNfEs7N22qC, 32UdM49pfAMxiX5WyXhCuy, 35jd8lu1fDJAuZoKl4ldDk, 00RjztLorCQgcGEHv7fY3g, 2tu8_KoLfDpho5M9F1jtqL, 3ZJxNn9Nz6HQakewV2F393, 2sSHD6n39BZQnSaHjLYpnc, 0vTIWG60z84eKitb_eWAIR, 3qz8vRMKXCHubRHdl$maGl, 08uaDJHLH3FAZ6Hg9FwzkG, 0aFvTq1m96zgWbjq4TXV_5, 1gw9pvArXFYfZkbYdrwJwh, 1d9QvK4Qv1Iem3fiUhniQB, 1BWbpTElb4dAcW2J6oyRrZ, 0JdG5rMQr10RkgztM3HqwA[4] AC20 Institute / Phantasy Office Building - arc · Page 4Items: 2VJpmvlMLEvOKD0Mb9hAiw, 3KiAVCT1D1t8Xn0nRB8nld, 2ijDjejvTCZvZnfGVKFht6, 0WVkDf7jjAGhdceJ18iI2g, 3UcRuggsrAXPWkQpXc3dLn, 2GIKSl4yvD7wO8pi7zg$sQ, 3XIgDIN6vBjxvjdvI7ngjF, 2N6esOMjP29AvhRLQ1Jz3$, 2wCVZFSRnBZ8YJ5Ri$bwG7, 0CFMpIkEzADxWz$xDSGgek, 3uYK2H0E52Qhz8bK3APcca, 24UZuOfCf3JhP_9U8SWMuK, 3mQi89EHb4rOWufyKZfZhB, 1ufhCZbhH2Ifud2RWdYCPS, 1EjnchXi9Esx$bY6vHG2RD, 0o6iTaAHzAQ9cd4xHGAaOG, 1uDQb3wH95JQTlYH_Y617r, 2rfNFYnCT2WAXMkqZ5PiDc, 0HthpQNkzAiuSXm9HWsQaw, 2h5A513TXAAhxsa3$Armxt, 2$R4rUG1nFkBAylN9aGNhb\n    AC20 Institute / Phantasy Office Building - arcLicence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_Examples\n    AC20 Institute / Phantasy Office Building - arc · Page 1Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_ExamplesAC20 Institute / Phantasy Office Building - arc · Page 2Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_ExamplesAC20 Institute / Phantasy Office Building - arc · Page 3Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_ExamplesAC20 Institute / Phantasy Office Building - arc · Page 4Licence: LicenseRef-KIT-unrestricted · Credit: Institute for Automation and Applied Informatics (IAI) / Karlsruhe Institute of Technology (KIT) - KIT IFC Examples, https://www.ifcwiki.org/index.php?title=KIT_IFC_Examples\n  AI can make mistakes. Verify important information.\"\n"
+    ],
+    "annotations": [],
+    "attachments": [
+      {
+        "name": "answer.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "loading.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "screenshot",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Export-re-e493e-sheet-downloads-a-cited-CSV-chromium/test-failed-1.png",
+        "contentType": "image/png"
+      },
+      {
+        "name": "network-and-browser.json",
+        "contentType": "application/json"
+      },
+      {
+        "name": "error-context",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Export-re-e493e-sheet-downloads-a-cited-CSV-chromium/error-context.md",
+        "contentType": "text/markdown"
+      },
+      {
+        "name": "trace",
+        "path": "/Users/akshatthapa/Workspace/wt/e2e/results/final/E2E/local-browser-1/artifacts/final-judge--WEB-Export-re-e493e-sheet-downloads-a-cited-CSV-chromium/trace.zip",
+        "contentType": "application/zip"
+      }
+    ]
+  }
+]

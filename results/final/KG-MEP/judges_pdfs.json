@@ -1,0 +1,13 @@
+{
+  "pdf_reader_installed": false,
+  "sources": [
+    "ARK-103-03_floor_plan_3rd_floor.pdf",
+    "L30301_ventilation_3rd_floor_block_U.pdf"
+  ],
+  "status": "skipped_optional_reader_missing",
+  "service_count": null,
+  "notes": [
+    "Vector-PDF services skipped: optional pipeline.pdf_mep is not installed; no services or alignment inferred."
+  ],
+  "limitation": "No vector extraction claimed without pipeline.pdf_mep; no PDF or drawing copied or committed."
+}

@@ -55,6 +55,9 @@ def _number(*values):
 
 def _scale(doc, room, root):
     # A multi-sheet drawing may have a different scale on every sheet.
+    selected = (doc.meta.get("page_scales") or {}).get(room.page)
+    if selected is not None:
+        return _number(selected.get("m_per_px")) if selected.get("method") not in (None, "none") else None
     sc = doc.scale or {}
     if root is not None:
         try:
@@ -116,6 +119,8 @@ def _selection(question, doc):
                 if st:
                     target = re.sub(re.escape(st), "", target, flags=re.I)
                 target = re.sub(r"\b(?:on|in|of|the)\b", "", target, flags=re.I).strip()
+                if re.fullmatch(r"(?:recorded\s+)?(?:door|window)s?\s+count", target, re.I):
+                    target = ""  # The source quantity is the basis, not a room name.
                 if target and not re.fullmatch(r"(?:all |whole |entire )*(?:rooms?|building|model|plan|floor)", target, re.I):
                     return [], [], "The requested rooms cannot be identified in this file; no other rooms were substituted."
     excluded = re.split(r"\b(?:excluding|except|not counting|without)\b", question, maxsplit=1, flags=re.I)
@@ -143,35 +148,45 @@ def _selection(question, doc):
     return items, rooms, None
 
 
-def _skirting(rooms, items, doc, root):
+def _skirting(rooms, items, doc, root, audit=None):
     """Use source net lengths or actual polygons and explicitly associated door widths."""
     values, used = [], []
     for r in rooms:
         net = _number(r.q.get("net_skirting_length_m"), r.props.get("net_skirting_length_m"))
+        measured = {"room": r, "basis": "recorded net length", "doors": []}
         if net is None:
             if "door_ids" not in r.props:
-                return _skirting_geometry(rooms, items, doc, root)
+                if audit is not None: audit.clear()
+                return _skirting_geometry(rooms, items, doc, root, audit)
             doors = [i for i in items if i.item_id in r.props["door_ids"]]
             widths = [_number(d.q.get("width_m"), d.props.get("width_m")) for d in doors]
             if len(doors) != len(r.props["door_ids"]) or any(w is None for w in widths):
                 return None, [], "Some associated door widths are missing."
             per = _number(r.q.get("perimeter_m"), r.props.get("perimeter_m"))
+            measured.update(basis="recorded perimeter", doors=list(zip(doors, widths)))
             scale, poly = _scale(doc, r, root), r.polygon_px
             if per is None and scale and poly and len(poly) >= 3:
                 per = sum(math.dist(a, b) for a, b in zip(poly, poly[1:] + poly[:1])) * scale
+                measured.update(basis="room polygon", polygon=poly, scale=scale)
             if per is None:
                 return None, [], "A measured room perimeter is needed."
             net = per - sum(widths)
+            measured["perimeter"] = per
             if net < 0:
                 return None, [], "Door widths exceed the recorded room perimeter; check the source."
             used.extend(doors)
         values.append(net)
+        if audit is not None: audit.append({**measured, "net": net})
         used.append(r)
     return (sum(values), used, "Room perimeters minus associated door widths.") if values else (None, [], "No room perimeters are recorded.")
 
 
-def _skirting_geometry(rooms, items, doc, root):
+def _skirting_geometry(rooms, items, doc, root, audit=None):
     """Geometric best effort, labelled as such; uses outlines before rectangles."""
+    if doc.mode != "ifc":
+        from engine.honesty import room_boundary_problem
+        if problem := room_boundary_problem(rooms):
+            return None, [], problem
     from engine.analytics import DOOR_BAND, _foot
     total, used, rectangular = 0.0, [], False
     for r in rooms:
@@ -188,6 +203,7 @@ def _skirting_geometry(rooms, items, doc, root):
             poly = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
             rectangular = True
         edges = list(zip(poly, poly[1:] + poly[:1]))
+        associated = []
         per = sum(math.dist(a, b) for a, b in edges) * scale
         deduction = 0.0
         for d in items:
@@ -207,10 +223,15 @@ def _skirting_geometry(rooms, items, doc, root):
                 if width is None:
                     return None, [], "A nearby door has no measured width; its opening cannot be deducted."
                 deduction += width
+                associated.append((d, width))
                 used.append(d)
         if deduction > per:
             return None, [], "Detected door openings exceed the room perimeter; check the drawing."
         total += per - deduction
+        if audit is not None:
+            audit.append({"room": r, "net": per - deduction, "perimeter": per, "doors": associated,
+                          "polygon": poly, "scale": scale, "basis": "room polygon" if r.polygon_px and doc.mode != "ifc" else "bounding rectangle",
+                          "association_band_m": DOOR_BAND})
         used.append(r)
     how = "Estimated room rectangles minus nearby door widths." if rectangular else "Room outlines minus nearby door widths; check opening associations."
     return (total, used, how) if rooms else (None, [], "Room outlines are missing.")
@@ -255,15 +276,17 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
     if doc.mode == "planmap" and (doc.scale or {}).get("method") == "door-prior":
         notes.append("The drawing scale is estimated from door widths; verify sizes before ordering.")
     rows, cites, boxes, highlights, values, calculations = [], [], [], [], {}, []
+    calc_parts = []
     incomplete = bool(error)
     estimated = False
     for label, typ in materials:
+        measurements = []
         unit = "count" if typ == "count" else "m" if typ == "length" else "m2"
         measured, used, how = None, [], "No matching measurements in this file."
         if not error and typ == "count":
             kind = "door" if label == "Doors" else "window"
             used = [i for i in items if i.kind == kind]
-            if used:
+            if used or doc.mode == "ifc":
                 measured, how = len(used), "Counted the cited elements."
         elif not error and typ == "floor":
             areas = [_floor_area(r, doc, root) for r in rooms]
@@ -289,12 +312,12 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
             if label == "Plasterboard":
                 notes.append("Plasterboard is listed as one layer of coverage; sheets need board dimensions and layer count.")
         elif not error and typ == "length":
-            measured, used, how = _skirting(rooms, doc.items, doc, root)
+            measured, used, how = _skirting(rooms, doc.items, doc, root, measurements)
             estimated |= measured is not None and ("Estimated" in how or "nearby" in how)
         if measured is not None and not math.isfinite(measured * (1 + pct / 100) * 100):
             measured, used, how = None, [], "The recorded quantity or allowance is too large to calculate reliably."
         src = ""
-        if used and measured is not None:
+        if measured is not None and (used or measured == 0):
             bx, cs, _ = _evidence(doc, used)
             offset = len(cites)
             for c in cs:
@@ -314,6 +337,8 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
             # Counts are whole items; area/length rounded upward to avoid under-ordering.
             need = math.ceil(need - 1e-9) if typ == "count" else math.ceil(need * 100 - 1e-9) / 100
             values[label] = need
+            from engine.order_calc import quantity
+            calc_parts.append(quantity(doc, label, typ, used, measured, need, pct, question, root, measurements=measurements))
             quantity = str(need) if typ == "count" else f"{need:.2f}".rstrip("0").rstrip(".")
             calculations.append(f"{label}: {str(measured).removesuffix('.0')} {unit} × (1 + {pct:g}%) = {quantity} {unit}" + (", rounded up to whole items" if typ == "count" else ", rounded up to 0.01"))
         rows.append(f"| {label} | {quantity} | {unit if measured is not None else ''} | {pct:g}% | {how} | {src} |")
@@ -329,5 +354,7 @@ def answer_order(question: str, doc: Doc, t0=None, *, root=None) -> dict | None:
              *[_step("order_compute", c) for c in calculations]]
     scene = {"doc_id": doc.doc_id, "highlight_item_ids": highlights, "camera_target_item_id": highlights[0] if highlights else None}
     conf = 0.5 if incomplete or estimated or (doc.mode == "planmap" and (doc.scale or {}).get("confidence", 0) < 0.5) else 0.9
-    return _answer_obj(question, [doc.doc_id], text, value, unit if len(materials) == 1 else "quantities", conf, False,
+    res = _answer_obj(question, [doc.doc_id], text, value, unit if len(materials) == 1 else "quantities", conf, False,
                        boxes, cites, scene, trace, "index" if doc.mode == "ifc" else "planmap", t0)
+    from engine.order_calc import attach
+    return attach(res, calc_parts)

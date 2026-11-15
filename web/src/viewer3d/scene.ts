@@ -2,6 +2,7 @@ import { Object3D, Texture, type Material, type Mesh } from 'three';
 import { GLTFLoader, type GLTF } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { indexElements, type IFCElement } from './identify';
 import { loadGLTF, type SceneLoadOptions } from './loadGLTF';
+import type { SceneQuality } from '../lib/scene-quality';
 
 export type Vec3 = [number, number, number];
 export type Storey = string | { name: string; elevation_m?: number };
@@ -31,6 +32,8 @@ export interface SceneManifest {
   origin_offset_m: Vec3;
   storeys: Storey[];
   plan_image?: SceneAsset | null;
+  /** Written by the PDF-to-3D pipeline; `summary` is a plain-words accuracy note. */
+  quality?: SceneQuality | null;
   items: Record<string, SceneItem>;
 }
 
@@ -94,8 +97,8 @@ export function documentFileUrl(manifestUrl: string | URL, name: string): string
 }
 
 export class SceneLoadError extends Error {
-  constructor(readonly status: number) {
-    super(`Could not load scene manifest (${status})`);
+  constructor(readonly status: number, readonly detail?: string) {
+    super(detail || `Could not load scene manifest (${status})`);
   }
 }
 
@@ -105,7 +108,12 @@ export async function loadScene(manifestUrl: string | URL, options?: SceneLoadOp
   const url = new URL(manifestUrl, base);
   options?.onProgress?.({ phase: 'manifest' });
   const response = await fetch(url, options ? { signal: options.signal } : undefined);
-  if (!response.ok) throw new SceneLoadError(response.status);
+  if (!response.ok) {
+    let body: unknown;
+    try { body = await response.json(); } catch { /* A proxy may return HTML or an empty body. */ }
+    const detail = body && typeof body === 'object' && 'detail' in body && typeof body.detail === 'string' ? body.detail : undefined;
+    throw new SceneLoadError(response.status, detail);
+  }
   const manifest = await response.json() as SceneManifest;
   if (manifest.units !== 'm' || manifest.up !== 'Y' || !manifest.items) {
     throw new Error('Scene must use CONTRACT 5.5: metres, Y up, and an items map');

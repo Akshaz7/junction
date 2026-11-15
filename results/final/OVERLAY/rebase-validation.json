@@ -1,0 +1,39 @@
+{
+  "baseline_commit": "5accd026b40efdff4199131d20ac2a3eac1bc32f",
+  "branch": "final/overlay",
+  "resolution": "Merged main; retained its shared SheetCompare, scale selector and confidence implementation. Kept unique overlay entry points, registration engine and API.",
+  "integration_changes": [
+    "Overlay page adapter uses common scale selection and rejects door priors/conflicting page scales for millimetre residuals.",
+    "Overlay evidence reports anchor counts with unknown accuracy percentage; anchor agreement is not accuracy."
+  ],
+  "checks": {
+    "typescript": "pass",
+    "engine_pytest": 42,
+    "server_pytest": 11,
+    "vitest_passed": 91,
+    "vitest_existing_skipped": 3,
+    "playwright": 3,
+    "main_implementations_preserved_byte_for_byte": 8,
+    "overlay_diff_whitespace": "pass"
+  },
+  "sample200": {
+    "baseline_commit": "5accd026b40efdff4199131d20ac2a3eac1bc32f",
+    "fake_models": true,
+    "questions_before": 200,
+    "questions_after": 200,
+    "correct_before": 138,
+    "correct_after": 138,
+    "correct_to_wrong": 0,
+    "regressions": [],
+    "cost_usd": 0.0
+  },
+  "browser": "scripts/heavy.sh npx playwright test --config=playwright.overlay.config.ts --reporter=list; isolated HTTP fixtures with real judges images and engine-computed registration; one browser, port 5367",
+  "cross_file": [
+    "server/app.py",
+    "server/sheet_align_routes.py",
+    "server/tests/test_sheet_align_routes.py",
+    "web/src/components/chat-screen.tsx",
+    "web/src/components/document-viewer.tsx"
+  ],
+  "model_spend_usd": 0
+}

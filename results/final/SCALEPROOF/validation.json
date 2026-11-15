@@ -1,0 +1,41 @@
+{
+  "worker": "F-SCALEPROOF",
+  "implementation_commit": "efbb1b6",
+  "engine_pipeline_tests": {
+    "passed": 150,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q engine/tests/test_scale_proof.py pipeline/tests/test_scale_provenance.py engine/tests/test_scale_text.py engine/tests/test_reasoning_margin.py engine/tests/test_reasoning_measured.py engine/tests/test_reasoning_confidence.py engine/tests/test_reasoning_checked.py engine/tests/test_reasoning_found.py engine/tests/test_solvers.py engine/tests/test_analytics.py"
+  },
+  "server_tests": {
+    "passed": 3,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest -q server/tests/test_scale_evidence.py"
+  },
+  "real_file_audit": {
+    "command": "scripts/heavy.sh /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pipeline.scaleproof_audit",
+    "passed": 13,
+    "report": "results/final/SCALEPROOF/report.json"
+  },
+  "checks": [
+    "git diff --check passed",
+    "ruff passed for all new modules and their tests",
+    "py_compile passed for scale, provenance, reasoning hook, audit, crop transport and vision modules"
+  ],
+  "schema_extensions": {
+    "reasoning.margin.method_spread": "Optional list of {source, scale_pct, value, unit, formula, why}; observed method sensitivity only, not a physical error bound.",
+    "calc_input_source": "Supports source file + JSON pointer, IFC entity/assignment, DXF header, assumption/definition, and crop artifact path; derived inputs can reference calc_step or answer_field."
+  },
+  "crop_endpoint": "GET /api/docs/{doc_id}/evidence/{name}; source.crop is {doc_id}/evidence/{name}",
+  "limitations": [
+    "No OCR, models or PDF ingest were run or changed. Existing cached scale-bearing text is read; absent evidence stays unknown.",
+    "Three archival raster scans have no usable extracted scale evidence. This validates honest unknown handling, not scale accuracy.",
+    "Door-icon spread does not bound real door-width uncertainty.",
+    "Legacy IFC projection scales rounded to six decimals may not exactly match 1/ppm; both values and differences are exposed without silently changing the measured quantities.",
+    "New IFC ingestion captures the native unit assignment. Existing elements.json without it must be regenerated to expose native-unit provenance at runtime.",
+    "Printed dimensions require an explicit dimension-line association; no nearest-text guess is made. Scale-bar endpoints are inferred label centres and explicitly labelled as such.",
+    "Real IFC files covered IFC2X3 and IFC4; IFC4X3 is covered by generated unit fixtures only."
+  ],
+  "pdf_hook": {
+    "function": "engine.scale_proof.dimensions(pm: dict) -> list[dict]",
+    "input": "Plan-map dimension items with bbox_px for the printed text; props.dimension_line_px=[[x0,y0],[x1,y1]], props.printed_length (original string with units), optional props.dimension_unit for bare strings.",
+    "return": "Source-linked candidates containing method, m_per_px, formula, inputs and note. Works without PDF support."
+  }
+}

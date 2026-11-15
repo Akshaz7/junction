@@ -3,6 +3,7 @@ import { ArrowUp, ChevronRight, Ellipsis, Plus } from 'lucide-react'
 import { Button } from './ui'
 import { ErrorLine, Skeleton, TypeTag } from './project-parts'
 import { AddFilesDialog, FilesTab, useUploads } from './project-files'
+import { GraphTab } from './project-graph'
 import { OverviewTab, summary, useOverview } from './project-overview'
 import { useProjectViewer } from './project-viewer'
 import { ProjectList } from './project-list'
@@ -10,13 +11,13 @@ import { projectChatHref, projectsApi, type Project, type ProjectChat } from '..
 import { docTitle, fileCount, isReading, relativeTime } from '../lib/projects-format'
 import type { Document } from '../lib/types'
 
-type Tab = 'chats' | 'files' | 'overview'
-const tabs: { id: Tab; label: string }[] = [{ id: 'chats', label: 'Chats' }, { id: 'files', label: 'Files' }, { id: 'overview', label: 'Overview' }]
+type Tab = 'chats' | 'files' | 'graph' | 'overview'
+const tabs: { id: Tab; label: string }[] = [{ id: 'chats', label: 'Chats' }, { id: 'files', label: 'Files' }, { id: 'graph', label: 'Graph' }, { id: 'overview', label: 'Overview' }]
 
 function hashState() {
   const params = new URLSearchParams(window.location.hash.split('?')[1] ?? '')
   const tab = params.get('tab')
-  return { id: params.get('id'), tab: (tabs.some((item) => item.id === tab) ? tab : 'chats') as Tab }
+  return { id: params.get('id'), focus: (params.get('focus') ?? '').split('|').filter(Boolean), tab: (tabs.some((item) => item.id === tab) ? tab : 'chats') as Tab }
 }
 function useHashState() {
   const [state, setState] = useState(hashState)
@@ -84,8 +85,7 @@ function ProjectMenu({ project, onRenamed }: { project: Project; onRenamed: (pro
   </div>
 }
 
-function AskBox({ project }: { project: Project }) {
-  const [text, setText] = useState('')
+function AskBox({ project, text, setText }: { project: Project; text: string; setText: (value: string) => void }) {
   const ready = project.docs.length > 0
   function send() { if (text.trim() && ready) window.location.hash = projectChatHref(project.id, undefined, text.trim()).slice(1) }
   return <form className="pj-ask" onSubmit={(event) => { event.preventDefault(); send() }}>
@@ -122,7 +122,8 @@ function Panel({ title, description, action, onClick, children }: { title: strin
   </section>
 }
 
-export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Document[] }) {
+export function ProjectPage({ id, tab, docs, focus = [] }: { id: string; tab: Tab; docs: Document[]; focus?: string[] }) {
+  const [asking, setAsking] = useState('')
   const { project, error, setProject, retry } = useProject(id)
   const [adding, setAdding] = useState(false)
   const overview = useOverview(project ?? { id, name: '', demo: false, created_at: '', docs: [] })
@@ -139,13 +140,14 @@ export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Doc
       <header className="pj-head"><h1 className="pj-title">{project.name}</h1>
         <p>{fileCount(project.docs.length + waiting)}{project.demo && ' · Demo project'}{relativeTime(project.created_at) && ` · Created ${relativeTime(project.created_at).toLowerCase()}`}</p></header>
       {viewer.error && <ErrorLine message={viewer.error} />}
-      <div className="pj-columns">
+      <div className="pj-columns" data-tab={tab}>
         <div className="pj-main">
-          <AskBox project={project} />
+          <AskBox project={project} text={asking} setText={setAsking} />
           <div className="pj-tabs" role="tablist" aria-label="Project sections">{tabs.map((item) => <button key={item.id} type="button" role="tab" id={`pj-tab-${item.id}`} aria-selected={tab === item.id} aria-controls="pj-tabpanel" onClick={() => go(item.id)}>{item.label}</button>)}</div>
           <div id="pj-tabpanel" role="tabpanel" aria-labelledby={`pj-tab-${tab}`}>
             {tab === 'chats' && <ChatsTab project={project} />}
-            {tab === 'files' && <FilesTab project={project} pending={uploads.pending} onDismiss={uploads.dismiss} onProject={setProject} onAdd={() => setAdding(true)} />}
+            {tab === 'files' && <FilesTab project={project} docs={docs} onUpload={uploads.add} pending={uploads.pending} onDismiss={uploads.dismiss} onProject={setProject} onAdd={() => setAdding(true)} />}
+            {tab === 'graph' && <GraphTab project={project} focus={focus} onShow={viewer.open} onAsk={(text) => { setAsking(text); requestAnimationFrame(() => { const box = document.getElementById('project-question'); box?.scrollIntoView({ block: 'center' }); box?.focus() }) }} />}
             {tab === 'overview' && <OverviewTab project={project} overview={overview} onShow={viewer.open} showBusy={viewer.busy} />}
           </div>
         </div>
@@ -153,7 +155,8 @@ export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Doc
           <Panel title="Files" description={project.docs.length ? fileCount(project.docs.length) : 'Plans, models, scans and PDFs'} onClick={() => go('files')}
             action={<Button variant="ghost" size="icon-sm" aria-label="Add files" onClick={() => setAdding(true)}><Plus size={16} /></Button>}>
             {project.docs.length || uploads.pending.length ? <ul className="pj-mini">{shown.map((doc) => <li key={doc.doc_id}><button type="button" onClick={() => viewer.open(doc.doc_id)} disabled={isReading(doc)}><TypeTag doc={doc} /><span>{docTitle(doc)}</span></button></li>)}
-              {project.docs.length > shown.length && <li><button type="button" className="pj-more" onClick={() => go('files')}>and {project.docs.length - shown.length} more</button></li>}</ul>
+              {project.docs.length > shown.length && <li><span className="pj-more-text">and {project.docs.length - shown.length} more</span></li>}
+              {project.docs.length > 0 && <li><button type="button" className="pj-more" onClick={() => go('files')}>View all</button></li>}</ul>
               : <button type="button" className="pj-dashed" onClick={() => setAdding(true)}>Add plans, models, scans or PDFs for this building</button>}
           </Panel>
           <Panel title="Overview" description={overview.loading ? 'Reading the files…' : summary.totals(overview.data) || 'Totals and levels across all files'} onClick={() => go('overview')} />
@@ -168,6 +171,6 @@ export function ProjectPage({ id, tab, docs }: { id: string; tab: Tab; docs: Doc
 }
 
 export function ProjectsScreen({ docs }: { docs: Document[] }) {
-  const { id, tab } = useHashState()
-  return id ? <ProjectPage key={id} id={id} tab={tab} docs={docs} /> : <ProjectList docs={docs} />
+  const { id, tab, focus } = useHashState()
+  return id ? <ProjectPage key={id} id={id} tab={tab} docs={docs} focus={focus} /> : <ProjectList docs={docs} />
 }

@@ -151,3 +151,6 @@ Checked the declared packages in [web/package.json](../web/package.json), [pypro
 | **Bundled runtime exception to a blanket “no GPL anywhere” claim** | Local SciPy `1.18.1` metadata explicitly lists GCC `libgfortran`/`libgcc` as **GPL-3.0-or-later WITH GCC-exception-3.1**, and `libquadmath` as **LGPL-2.1-or-later**. Retain these notices; this is not a GPL-only application dependency. Shapely's GEOS native library is also LGPL. No dependency was changed for this row. |
 
 The npm lockfile has no GPL/AGPL licence entries. Python installed metadata does contain the SciPy runtime notices above, so **“no GPL/AGPL direct packages” must not be shortened to “all dependencies are MIT” or “no GPL text anywhere.”** The noncommercial/share-alike fine-tuned checkpoints and GPL-licensed HITOS data remain separate from the code dependency result.
+
+## Dependencies: knowledge graph view (F-KG-UI)
+- d3-force 3.0.0 (ISC licence, permissive) runs the force layout of the project Graph tab on a canvas. Types: @types/d3-force (MIT). No GPL/AGPL code.

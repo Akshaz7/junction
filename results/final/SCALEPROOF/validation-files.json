@@ -1,0 +1,20 @@
+{
+  "development_validation": [
+    "cubicasa5k__colorful-11397",
+    "cubicasa5k__colorful-11400",
+    "cubicasa5k__colorful-11960",
+    "swiss_dwellings__site1000-bldg2082-floor9385",
+    "swiss_dwellings__site1015-bldg2113-floor9557",
+    "swiss_dwellings__site1040-bldg2136-floor9659",
+    "ifc_bench__digital-hub-arc",
+    "ifc_bench__duplex-arc",
+    "ifc_bench__fantasy-office-building-3-arc",
+    "europeana__08535-item-227mgo6yepebmmwo6agjphlsat4ak4qu",
+    "finna__hka-139877703731200-160449953667200",
+    "habs__al1159-sheet-00001"
+  ],
+  "final_only": {
+    "path": "data/junction-dataset-preview/data/ifc_bench/ac20_arc.ifc",
+    "selection": "secrets.choice of sorted real IFC files, contents unopened until final validation"
+  }
+}

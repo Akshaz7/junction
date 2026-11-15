@@ -62,6 +62,22 @@ export function createEditLayer(scene: LoadedScene, commands: {
     else materials.set(id, choice);
   }
 
+  /** Metres from the original spot, X/Z, the same measure as `moveDelta`. */
+  function offsetOf(id: string): [number, number] {
+    const from = positions.get(id), now = scene.items.get(id)?.position;
+    return from && now ? [now.x - from.x, now.z - from.z] : [0, 0];
+  }
+  function setOffset(id: string, dx: number, dz: number) {
+    const object = scene.items.get(id);
+    if (!object) return;
+    const zero = Math.abs(dx) + Math.abs(dz) < 1e-6;
+    if (!positions.has(id)) { if (zero) return; positions.set(id, object.position.clone()); }
+    const from = positions.get(id)!;
+    object.position.set(from.x + dx, from.y, from.z + dz);
+    object.updateWorldMatrix(true, true);
+    if (zero) { object.position.copy(from); positions.delete(id); }
+  }
+
   const isHidden = (id: string) => commands.hidden().includes(id);
   const live = () => history.filter((entry) => !entry.stale?.());
   const state = (): EditState => ({ undoCount: live().length,
@@ -147,11 +163,12 @@ export function createEditLayer(scene: LoadedScene, commands: {
       object.updateWorldMatrix(true, true);
       if (!commit || (!x && !z)) return null;
       if (!positions.has(id)) positions.set(id, from.clone());
+      const to = object.position.clone();
       history.push({ undo: () => {
         object.position.copy(from);
         if (object.position.equals(positions.get(id)!)) positions.delete(id);
         return { op: 'move', item_ids: [id], detail: { undo: true, position_m: object.getWorldPosition(new Vector3()).toArray() } };
-      } });
+      }, stale: () => !object.position.equals(to) });
       return { op: 'move', item_ids: [id], detail: { delta_m: [x, 0, z], position_m: object.getWorldPosition(new Vector3()).toArray() } };
     },
     changeMaterial(id: string, choice: WallMaterial): ItemEdit | null {
@@ -162,8 +179,37 @@ export function createEditLayer(scene: LoadedScene, commands: {
       history.push({ undo: () => {
         material(id, previous);
         return { op: 'material', item_ids: [id], detail: { material: previous, undo: true } };
-      } });
+      }, stale: () => (materials.get(id) ?? null) !== choice });
       return { op: 'material', item_ids: [id], detail: { material: choice } };
+    },
+    /** Moves/materials from the chat's shared layer (chat "put it back", another client, saved state).
+     * Items not listed go back to the original. Each change joins Undo/Reset like a hide from the chat. */
+    applyShared(shared: { moved?: Readonly<Record<string, readonly [number, number]>>; materials?: Readonly<Record<string, string>> }) {
+      if (shared.moved) {
+        for (const id of new Set([...positions.keys(), ...Object.keys(shared.moved)])) {
+          const [dx, dz] = shared.moved[id] ?? [0, 0];
+          const [cx, cz] = offsetOf(id);
+          if (!scene.items.has(id) || !Number.isFinite(dx) || !Number.isFinite(dz) || Math.abs(dx - cx) + Math.abs(dz - cz) < 1e-6) continue;
+          setOffset(id, dx, dz);
+          history.push({ undo: () => {
+            setOffset(id, cx, cz);
+            return { op: 'move', item_ids: [id], detail: { undo: true, external: true } };
+          }, stale: () => { const [x, z] = offsetOf(id); return Math.abs(x - dx) + Math.abs(z - dz) > 1e-6; } });
+        }
+      }
+      if (shared.materials) {
+        for (const id of new Set([...materials.keys(), ...Object.keys(shared.materials)])) {
+          const raw = shared.materials[id] ?? null;
+          const choice = raw !== null && Object.hasOwn(WALL_MATERIALS, raw) ? raw as WallMaterial : null;
+          const previous = materials.get(id) ?? null;
+          if (!scene.items.has(id) || choice === previous) continue;
+          material(id, choice);
+          history.push({ undo: () => {
+            material(id, previous);
+            return { op: 'material', item_ids: [id], detail: { material: previous, undo: true, external: true } };
+          }, stale: () => (materials.get(id) ?? null) !== choice });
+        }
+      }
     },
     undo(): ItemEdit | null {
       while (history.length && history[history.length - 1].stale?.()) history.pop();
@@ -172,13 +218,17 @@ export function createEditLayer(scene: LoadedScene, commands: {
     /** Undo every move/material edit, then bring back everything hidden (by this panel or the chat). */
     reset(): ItemEdit | null {
       const hidden = commands.hidden();
-      if (!live().length && !hidden.length) { history.length = 0; return null; }
+      if (!live().length && !hidden.length && !positions.size && !materials.size) { history.length = 0; return null; }
       const affected = new Set<string>();
-      // Restore every base material before the visibility command rebuilds the
-      // highlight layers; otherwise their saved references resurrect old swaps.
+      // Back to the original spot and material (whoever moved or recoloured it), then
+      // restore base materials before the visibility command rebuilds the highlight
+      // layers; otherwise their saved references resurrect old swaps.
       const pending: SceneCommand[] = [];
       deferred = pending;
       try {
+        for (const id of [...positions.keys()]) { setOffset(id, 0, 0); affected.add(id); }
+        for (const id of [...materials.keys()]) { material(id, null); affected.add(id); }
+        // Then main's recorded scene-state entries (isolate/reset from outside); move/material entries are stale now.
         while (history.length) {
           const entry = history.pop()!;
           if (!entry.visibility && !entry.stale?.()) for (const id of entry.undo().item_ids) affected.add(id);

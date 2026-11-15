@@ -1,0 +1,87 @@
+{
+  "row": "KG-ANSWER round 2",
+  "branch": "final/kg-answer",
+  "baseline_commit": "f696ba03e4270c119a377191bf6dddb59d375ff0",
+  "questions_sha256": "1c00139b098cde2052c63189480983a89169dce61e7b58e949b9f26be290ee99",
+  "demo_before": {
+    "FZK": {
+      "passed": 4,
+      "total": 10
+    },
+    "AC20": {
+      "passed": 3,
+      "total": 15
+    }
+  },
+  "demo_after": {
+    "FZK": {
+      "passed": 10,
+      "total": 10,
+      "build_s": 0.393,
+      "slowest_question_s": 0.0173
+    },
+    "AC20": {
+      "passed": 15,
+      "total": 15,
+      "build_s": 12.797,
+      "slowest_question_s": 0.1401
+    }
+  },
+  "ui_cached_graphs": {
+    "FZK": {
+      "passed": 10,
+      "total": 10
+    },
+    "AC20": {
+      "passed": 15,
+      "total": 15
+    }
+  },
+  "focused_pytest": {
+    "passed": 127,
+    "command": "MODELS_FAKE=1 /Users/akshatthapa/Workspace/junction/.venv/bin/python -m pytest engine/tests/test_kg_answer.py engine/tests/test_kg_semantics.py engine/tests/test_kg_core.py engine/tests/test_kg_mep.py engine/kg/test_evaluation.py server/tests/test_kg_answer_chat.py server/tests/test_projects.py -q"
+  },
+  "random_unseen": {
+    "selection": {
+      "round": 2,
+      "random_unseen_path": "data/full/junction-dataset/data/ifc_models/resbim-146_model.ifc",
+      "note": "Selected by path only before round 2 development. Open only after fixes and demo evaluation."
+    },
+    "passed": 10,
+    "total": 10,
+    "schema": "IFC4",
+    "opened": "Only after development, final demo checks and focused tests passed; no subsequent product code changes."
+  },
+  "models": {
+    "calls": 0,
+    "cost_usd": 0
+  },
+  "changes": [
+    "Agreement routing accepts match, disagree and compare-across-file wording; existing multilingual floor aliases apply.",
+    "Missing count comparisons use source-index counts and on-floor same_as witnesses; all items count, including unmatched records. Missing extraction is not a zero.",
+    "Derived-model plan comparisons state their lack of independent evidence.",
+    "Repeated labels are grouped by same_as identity clusters, with every candidate listed by file/page; proposed dimensions cannot match room numbers.",
+    "General English/German/Finnish/Swedish room vocabulary resolves usage phrases. Repeated page records of one explicit IFC source element do not create false room ambiguity."
+  ],
+  "limits": [
+    "Code/source-relationship check pass rates, not a claim of perfect drawing or PDF extraction accuracy.",
+    "Equal counts do not establish per-item equality; missing links do not prove safety.",
+    "Transient computed rule paths focus existing graph node IDs; the persistent source graph is not changed."
+  ],
+  "cross_file": [
+    "engine/kg_comparison.py (new supporting module)"
+  ],
+  "needs_awais": [],
+  "previous_source_regression": [
+    {
+      "project": "kg-answer-dxf",
+      "passed": 10,
+      "total": 10
+    },
+    {
+      "project": "kg-answer-ifc_bench__sixty5-str",
+      "passed": 10,
+      "total": 10
+    }
+  ]
+}

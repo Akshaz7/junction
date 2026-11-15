@@ -1,0 +1,287 @@
+{
+  "created": "2026-11-14T21:18:00+00:00",
+  "revision": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+  "commit": "e61c1b40e0f8add3a93fc69dce7ff8b5b03cb2ac",
+  "mode": "code",
+  "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b",
+  "case_file_sha256": "7da72b5753d9bdc2aa7082c98326a3eb90c756f28bda26de5fecd37b6990c98b",
+  "selected_cases_sha256": "16218bba935f6c737695e6bef818050efcc3402c41d913ef9d32a9d3336b132b",
+  "selected_questions": 5,
+  "owners": null,
+  "question_timeout_s": 20.0,
+  "grading_version": 2,
+  "budget_cap_usd": 0.0,
+  "row_cap_usd": 3,
+  "artifact_json_hashes": {
+    "cubicasa5k__high-quality-architectural-1269": {
+      "scene.json": "b12e513072ab83014cd725f83eeb7d37ea205ca3c3d350fa8f1463d7736f1905",
+      "doc.json": "0b56621da625ded3210c4893ff8c4a5c3981aa66cef0bea52cfbb99be8662ec6",
+      "planmap-1.json": "b1fd3f2e8bb6123c0a96a6434ad691bca1ed42e1ad02ca683ec1a19f46790888",
+      "planmap-seg.json": "51c459822b864ac01dbcd61a95fd8023663d407875242ef3865bd6dc6200a9b0",
+      "pages.json": "93025394f0a162d740eadc13ede91e082f978e78f390c2ecd3a9a882ba01f55e"
+    },
+    "opening_design__crema-cafe-models-crema-cafe-6-blend": {
+      "doc.json": "f145e2bb6e0e2d68bbd8b929af457868f2e7559f492ee135a473e835a0c9fe4b",
+      "pages.json": "5b3e65a0e53027de055ec0ae3ff7c0729fab0e9e408a74d4f8014f93c82b6341"
+    },
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives": {
+      "doc.json": "9d106e2ca1a441fc500ad81291e48c5d75c2eed2b2d903d291ffd1035e900792"
+    },
+    "swiss_dwellings__site961-bldg2019-floor8945": {
+      "scene.json": "33efb8601f1bcd13a03dc5859ff88ef7ecfe398a97d321160c8df5eca3a11a24",
+      "doc.json": "8c3aab7f7a667c1c9dc8a790fcdf694aca530a8d1ecb7c1ef117812410dbfe91",
+      "planmap-1.json": "b8b0e4808d46e8ca81ad62ea112ea678bd4812e1001fcd18ee750a03c37b80e8",
+      "pages.json": "87bfe9c7f17fa6520e7dfd46823addd05d8e83e4f2fb8ae23c6b222cd385ee1e",
+      "text-1.json": "1f5db8651b860429387c9eca326a4c51ff275934c1b55851a13be2b3de555e87"
+    },
+    "wikimedia__79521417": {
+      "doc.json": "c29a6d1de1400d30c8fe854de0e8926dd26e8e6ec24f1faa25974c205a4e6c3b",
+      "pages.json": "eaa20b8a1868ce0a22ecd06cf75c5f42aba6a18b5d70fc72c08ecb8da4bcd47d"
+    }
+  },
+  "corpus_sha256": "e1d150b48ad168b491a9b4d6d793cf2c9dde53c67b971d4b7878f4ef1fefc928",
+  "worker_runner_sha256": "f36bc2c3773b9eb5e7d8225c1facb0edc6f57e1740c8d75d394c93d659d9e1df",
+  "sessions": [
+    {
+      "resumed_at": "2026-11-14T21:18:00+00:00",
+      "previously_completed": 0,
+      "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b"
+    }
+  ],
+  "run_id": "20261114T211758869473Z",
+  "wall_s": 4.101,
+  "latest_session_wall_s": 4.105,
+  "complete": true,
+  "budget": {
+    "accounted_usd": 0,
+    "reported_usd": 0,
+    "unsettled_reserve_usd": 0,
+    "requests": 0
+  },
+  "row_budget": {
+    "accounted_usd": 0.91923,
+    "reported_usd": 0.640718,
+    "unsettled_reserve_usd": 0.278512,
+    "requests": 271
+  },
+  "summaries": {
+    "public": {
+      "questions": 5,
+      "statuses": {
+        "correct": 1,
+        "honest-abstain": 3,
+        "incorrect": 1
+      },
+      "numeric_questions": 0,
+      "numeric_correct": 0,
+      "behaviour_only_questions": 5,
+      "issues": {
+        "more_than_four_bullets": 1,
+        "no_source_citations": 1,
+        "headline_not_bold": 1
+      },
+      "timeouts": 0,
+      "latency_ms_median": 78,
+      "latency_ms_max": 1935,
+      "model_requests_blocked": 86,
+      "exact_evidence_checked": 0,
+      "exact_evidence_matches": 0
+    }
+  },
+  "results": [
+    {
+      "status": "correct",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 3,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 3,
+      "cited_item_count": 3,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Verified",
+      "confidence_pct": 95,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 3,
+      "issues": [],
+      "answer_text": "**3 possible mistakes found.** The worst are listed first.\n\n- **1.** Couloir is labelled 32.4 m² but its outline measures 33.1 m² (2% more).\n- **2.** Couloir is labelled 40 m² but its outline measures 40.7 m² (2% more).\n- **3.** Couloir is labelled 32.9 m² but its outline measures 33.5 m² (2% more). [1] [2] [3]",
+      "answer_cost_usd": 0.0,
+      "route": "index",
+      "engine_latency_ms": 46,
+      "latency_ms": 78,
+      "blocked_model_requests": {
+        "code_only": 4
+      },
+      "id": "swiss_dwellings__site961-bldg2019-floor8945:mistakes",
+      "question": "Are there conflicting dimensions or duplicate room labels? Cite each issue, or say what cannot be checked.",
+      "doc_ids": [
+        "swiss_dwellings__site961-bldg2019-floor8945"
+      ],
+      "split": "public",
+      "owner": "MISTAKES",
+      "wall_latency_ms": 251,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 1,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Estimate",
+      "confidence_pct": 73,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 5,
+      "issues": [
+        "more_than_four_bullets"
+      ],
+      "answer_text": "**No conflicting dimensions or duplicate room labels can be checked on this sheet because it is a raster drawing with no readable text, dimensions, or room labels.**\n\n- The single page (p1) has no text layer; page_text returned no text.\n- A full-page view shows tables with chairs on the left and counters, cabinetry, and desks on the right, but no printed dimensions (e1).\n- The same full-page view shows no room labels or room names anywhere on the plan (e1).\n- Without dimension strings, conflicting dimensions cannot be detected.\n- Without room labels, duplicate room labels cannot be detected. [1]",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 1266,
+      "latency_ms": 1279,
+      "blocked_model_requests": {
+        "code_only": 19
+      },
+      "id": "opening_design__crema-cafe-models-crema-cafe-6-blend:mistakes",
+      "question": "Are there conflicting dimensions or duplicate room labels? Cite each issue, or say what cannot be checked.",
+      "doc_ids": [
+        "opening_design__crema-cafe-models-crema-cafe-6-blend"
+      ],
+      "split": "public",
+      "owner": "MISTAKES",
+      "wall_latency_ms": 1478,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "incorrect",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": 0,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Cross-checked",
+      "confidence_pct": 84,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 0,
+      "issues": [
+        "no_source_citations"
+      ],
+      "answer_text": "**No mistakes found** by the checks I can run on this file.\n\nI looked at 48 walls, 25 rooms, 11 doors: printed against drawn areas, duplicates, openings outside walls, missing storeys, missing values and clashes, wherever the file has the data. That does not prove the file is error free.",
+      "answer_cost_usd": 0.0,
+      "route": "index",
+      "engine_latency_ms": 8,
+      "latency_ms": 16,
+      "blocked_model_requests": {},
+      "id": "cubicasa5k__high-quality-architectural-1269:mistakes",
+      "question": "Are there conflicting dimensions or duplicate room labels? Cite each issue, or say what cannot be checked.",
+      "doc_ids": [
+        "cubicasa5k__high-quality-architectural-1269"
+      ],
+      "split": "public",
+      "owner": "MISTAKES",
+      "wall_latency_ms": 121,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": true,
+      "citation_count": 2,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": true,
+      "has_reasoning_label": true,
+      "confidence_label": "Estimate",
+      "confidence_pct": 59,
+      "jargon": [],
+      "bold_first_line": true,
+      "bullets": 4,
+      "issues": [],
+      "answer_text": "**No conflicting dimensions or duplicate room labels can be confirmed; only one room label is legible and the rest of the handwritten labels and all dimensions are too blurry to read.**\n\n- Only one room label is legible: \"Salle à Manger\" in the upper central area (e2).\n- Other room annotations are handwritten and too blurry to read, so duplicate labels cannot be ruled out (e1).\n- No dimension text is legible anywhere on the sheet, so conflicting dimensions cannot be checked (e1).\n- The text layer has no matches for \"Sala\" or \"Salle\", confirming the labels are not machine-readable (find_text results). [1][2]",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 1929,
+      "latency_ms": 1935,
+      "blocked_model_requests": {
+        "code_only": 43
+      },
+      "id": "wikimedia__79521417:mistakes",
+      "question": "Are there conflicting dimensions or duplicate room labels? Cite each issue, or say what cannot be checked.",
+      "doc_ids": [
+        "wikimedia__79521417"
+      ],
+      "split": "public",
+      "owner": "MISTAKES",
+      "wall_latency_ms": 2077,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    },
+    {
+      "status": "honest-abstain",
+      "grading_scope": "behaviour_only",
+      "numeric_correct": null,
+      "expected": null,
+      "actual": null,
+      "abstained": false,
+      "has_citations": false,
+      "citation_count": 0,
+      "cited_item_count": 0,
+      "exact_count_evidence": null,
+      "has_reasoning_card": false,
+      "has_reasoning_label": false,
+      "confidence_label": null,
+      "confidence_pct": null,
+      "jargon": [],
+      "bold_first_line": false,
+      "bullets": 0,
+      "issues": [
+        "headline_not_bold"
+      ],
+      "answer_text": "Conflicting dimensions and duplicate room labels cannot be checked because the visual content of sheet A-900 is not provided. Based on the sheet title \"A-900 - PERSPECTIVES\" for the exterior of a metal building, this sheet likely contains 3D exterior perspective views that typically omit detailed dimensional strings and interior room labels.",
+      "answer_cost_usd": 0.0,
+      "route": "hybrid",
+      "engine_latency_ms": 51,
+      "latency_ms": 60,
+      "blocked_model_requests": {
+        "code_only": 20
+      },
+      "id": "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:mistakes",
+      "question": "Are there conflicting dimensions or duplicate room labels? Cite each issue, or say what cannot be checked.",
+      "doc_ids": [
+        "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives"
+      ],
+      "split": "public",
+      "owner": "MISTAKES",
+      "wall_latency_ms": 174,
+      "question_reported_cost_usd": 0,
+      "question_accounted_cost_usd": 0
+    }
+  ]
+}

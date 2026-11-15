@@ -36,9 +36,9 @@
 .data-file-row:hover, .data-file-row[data-selected] { background: var(--ink-hover); }
 .data-open-file { display: flex; align-items: center; text-align: left; gap: 12px; border: 0; color: var(--foreground); background: transparent; flex: 1; min-width: 0; padding: 6px 0; }
 .data-open-file > span:last-child { min-width: 0; }
-.data-open-file h3 { font-size: var(--text-body-sm); font-weight: 500; overflow-wrap: anywhere; }
+.data-open-file h3 { font-size: var(--text-body-sm); font-weight: 500; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .data-file-meta { display: block; font-size: var(--text-caption); color: var(--muted-foreground); margin-top: 3px; }
-.data-open-file small { display: block; font-size: var(--text-micro); color: var(--muted-foreground); margin-top: 3px; overflow-wrap: anywhere; }
+.data-open-file small { display: block; font-size: var(--text-micro); color: var(--muted-foreground); margin-top: 3px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .data-thumbnail { width: 44px; height: 52px; flex-shrink: 0; background: var(--well, var(--ink-well)); border: 1px solid var(--border); border-radius: 4px; display: grid; place-items: center; color: var(--muted-foreground); overflow: hidden; }
 .data-thumbnail img { display: block; width: 100%; height: 100%; object-fit: contain; }
 .data-formats { display: flex; gap: 4px; flex-wrap: wrap; }

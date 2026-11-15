@@ -42,6 +42,9 @@ def _fmt(v: float) -> str:
 
 
 def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=None):
+    if doc.mode == "planmap" and unit == "count" and doc.meta.get("view_regions"):
+        from pipeline.sheet_views import count_note
+        text += count_note(doc, items, None)
     if doc.mode == "planmap" and unit == "m2":
         missing_scale = [i for i in items if "measurement_scale" in i.props and not i.props["measurement_scale"].get("m_per_px") and i.q.get("area_m2") is None]
         if missing_scale and len(missing_scale) == len(items):
@@ -51,19 +54,35 @@ def _done(question, doc, text, value, unit, items, trace, route="analytics", t0=
     boxes, cites, scene = _evidence(doc, items)
     route = "index" if doc.mode == "ifc" else "planmap"  # answer.schema.json route enum has no "analytics"
     marks = "".join(f"[{c['n']}]" for c in cites)
-    return _answer_obj(question, [doc.doc_id], scrub(text.replace("{marks}", marks)), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
-                       boxes, cites, scene, trace, route, t0 or time.perf_counter())
+    if doc.mode == "planmap" and unit == "m²":
+        unit = "m2"
+    res = _answer_obj(question, [doc.doc_id], scrub(text.replace("{marks}", marks)), value, unit, 1.0 if doc.mode == "ifc" else 0.85, False,
+                      boxes, cites, scene, trace, route, t0 or time.perf_counter())
+    if value is None and unit in ("m2", "m²") and items:
+        from engine.calc_routes import individual
+        individual(res, doc, items, {"area_m2": ("m2", lambda i: _qty(i, "room", "area"))})
+    return res
 
 
 def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     """Apply named rooms, area bounds, thickness and misspelled floor counts before broad totals."""
-    if doc.mode != "ifc":
-        return None
     from engine.solvers.filters import room_filter, room_name, missing_room_text, storey_requested
+    if doc.mode != "ifc":
+        # Quoted/labelled room lookups also recover text labels from within a
+        # polygon when another label names it. Preserve that existing path.
+        from engine.solvers.solve import _quoted
+        if _quoted(question) or re.search(r"\blabel(?:led|ed)\b", question, re.I):
+            return None
+        # Keep established detector count calibration. Named areas and explicit
+        # area bounds still need their full room filter on raster/CAD plans.
+        if re.search(r"\bhow many\b", question, re.I) and not re.search(r"\b(?:larger|smaller|bigger|between|over|under|at least|at most)\b", question, re.I):
+            return None
+        if not re.search(r"\b(?:area|size|how big|how large|m2|m²)\b", question, re.I):
+            return None
     from engine.solvers.solve import _abstain
     st = resolve_storey(question, doc.storeys)
     trace = [_step("route", "explicit filters -> code over IFC quantities, no model")]
-    if storey_requested(question) and st is None:
+    if doc.mode == "ifc" and storey_requested(question) and st is None:
         return _done(question, doc, "No matching floor was found. Storeys present: "
                      + ", ".join(s["name"] for s in doc.storeys) + ".", None, None, [], trace, t0=t0)
     q = question.lower()
@@ -95,6 +114,8 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return None
     rooms = _of_kind(doc, "room")
     selected = room_filter(question, rooms)
+    if doc.mode == "planmap" and (not selected or not selected[1]):
+        return None  # the map may not contain a printed name; allow the sheet reader to inspect it.
     bounds = re.search(r"\bbetween\s+(\d+(?:\.\d+)?)\s+and\s+(\d+(?:\.\d+)?)\s*(?:m2|m²|square met(?:er|re)s)\b", q)
     limit = re.search(r"\b(larger|bigger|smaller|greater|less|more|at least|at most|over|under|above|below)\s*(?:than\s+)?(\d+(?:\.\d+)?)\s*(?:m2|m²|square met(?:er|re)s)\b", q)
     area_q = bool(AREAQ.search(q) or re.search(r"\bhow (?:big|large)\b", q))
@@ -111,6 +132,9 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return _done(question, doc, missing_room_text(target, rooms)
                      + (f" Storey filter: {st}." if st else ""), None, None, [], trace, t0=t0)
     vals = [(r, _qty(r, "room", "area")) for r in hit]
+    if doc.mode == "planmap" and (not doc.scale or doc.scale.get("method") in (None, "none")):
+        if not all(r.props.get("area_m2_label") is not None for r in hit):
+            return _done(question, doc, "The matching rooms have no trusted drawing scale or printed area, so I cannot state an area.", None, None, hit, trace, t0=t0)
     if bounds or limit:
         known = [(r, v) for r, v in vals if v is not None]
         if not known:
@@ -130,7 +154,7 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         hit = [r for r, _ in vals]
     else:
         condition = ""
-    where = f"on **{st}**" if st else "in this model"
+    where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
     noun = target if len(hit) == 1 else (target + "s" if not target.endswith("s") else target)
     trace.append(_step("filter", f"{target}; {st or 'all storeys'}; {condition or 'no area bound'}: {len(hit)} matches"))
     if not hit:
@@ -138,7 +162,10 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
     have = [(r, v) for r, v in vals if v is not None]
     total = sum(v for _, v in have)
     # Keep the model's useful precision for individually named rooms.
-    per = "; ".join(f"{room_name(r)} ({r.name}, {r.storey}): {v:.2f} m²" for r, v in have[:10])
+    def listed(r, v):
+        position = ", ".join(str(x) for x in (r.name if doc.mode == "ifc" else None, r.storey) if x and str(x) != room_name(r))
+        return f"{room_name(r)}" + (f" ({position})" if position else "") + f": {v:.2f} m²"
+    per = "; ".join(listed(r, v) for r, v in have[:10])
     combined = bool(re.search(r"\b(?:total|combined|sum|together|all)\b", q))
     if count_q:
         text = f"**{len(hit)} {noun}** {where}" + (f" {condition}" if condition else "") + "."
@@ -147,6 +174,11 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         text += (f" {per}." if have and (bounds or limit or area_q) else "") + " {marks}"
         return _done(question, doc, text, len(hit), "count", hit, trace, t0=t0)
     if not have:
+        if doc.mode == "planmap":
+            res = _done(question, doc, f"The matching {noun} have no usable area recorded; missing measurements are not zero.", None, "m2", hit, trace, t0=t0)
+            res["needs_drawing_read"] = True
+            res["answer"]["confidence"] = .3
+            return res
         return _abstain(question, doc.doc_id, f"The matching {noun} have no area recorded.", trace, "index", t0)
     if len(hit) > 1 and not combined:
         areas = [v for _, v in have]
@@ -155,7 +187,12 @@ def filtered_question(question: str, doc: Doc, t0) -> dict | None:
         return _done(question, doc, text, None, "m²", hit, trace, t0=t0)
     if len(have) != len(hit):
         return _abstain(question, doc.doc_id, "Some matching rooms have no area recorded, so I cannot give their combined area.", trace, "index", t0)
-    text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+    if doc.mode == "planmap" and len(hit) == 1:
+        text = f"The area of the **{target}** is **{total:.2f} m²**. {{marks}}" + scale_note(doc)
+    else:
+        text = (f"The {'combined area' if len(hit) > 1 else 'area'} of **{target}** {where} is **{total:.2f} m²**. {per}. {{marks}}")
+        if doc.mode == "planmap":
+            text += scale_note(doc)
     return _done(question, doc, text, round(total, 4), "m²", hit, trace, t0=t0)
 
 
@@ -171,11 +208,22 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     def value(res):
         a = res.get("answer") or {}
         return a.get("value") if not a.get("abstained") and isinstance(a.get("value"), (int, float)) else None
-    def result(text, val, unit, parts):
+    def result(text, val, unit, parts, operation="sum", denominator=None, percent=False):
         ids = {i for r in parts for c in r.get("citations", []) for i in c.get("item_ids", [])}
         trace = [_step("route", "arithmetic -> independent solver results, no model"),
                  _step("calculate", "; ".join(f"{p['question']}: {value(p)}" for p in parts))]
-        return _done(question, doc, text + " {marks}", val, unit, [i for i in doc.items if i.item_id in ids], trace, t0=t0)
+        res = _done(question, doc, text + " {marks}", val, unit, [i for i in doc.items if i.item_id in ids], trace, t0=t0)
+        if val is not None:
+            from engine.calc import input_value, record_items
+            from engine.calc_routes import combine
+            for part in parts:
+                if not part.get("_calc"):
+                    selected = {iid for c in part.get("citations", []) for iid in c.get("item_ids", [])}
+                    pu = part["answer"].get("unit")
+                    record_items(part, doc, [(i, 1 if pu == "count" else _qty(i, i.kind, "area")) for i in doc.items if i.item_id in selected])
+            combine(res, parts, operation, "combine the independently cited source quantities", denominator=denominator,
+                    multiplier=input_value("percent factor", 100, "%/ratio", {"kind": "conversion", "text": "1 ratio = 100 percent"}) if percent else None)
+        return res
     def unavailable(parts):
         res = result("I cannot compute this comparison or ratio because an operand is missing, incomplete or the denominator is zero. No unfiltered count is substituted.", None, None, parts)
         res["answer"]["confidence"] = 0.5
@@ -191,7 +239,9 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
         correction = f"The model has **{n:g} {_noun(kind, n)}, not {premise[1]}**." if n != int(premise[1]) else f"The model has **{n:g} {_noun(kind, n)}**."
         if re.search(r"\baverage\b", q) and doc.storeys:
             avg = n / len(doc.storeys)
-            return result(f"{correction} Across the **{len(doc.storeys)} declared storeys**, the average is **{avg:.1f} per storey**, including storeys with zero.", round(avg, 4), "count", [total])
+            from engine.calc import input_value, source
+            return result(f"{correction} Across the **{len(doc.storeys)} declared storeys**, the average is **{avg:.1f} per storey**, including storeys with zero.", round(avg, 4), "count", [total], "divide",
+                          input_value("declared storeys", len(doc.storeys), "count", source(doc, field="storeys")))
         return result(correction, n, "count", [total])
     if re.search(r"\b(?:percentage|percent)\b", q) and kind and st:
         numerator, denominator = sub(kind), sub(kind, scoped=False)
@@ -199,14 +249,14 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
         if n is None or d is None or d == 0:
             return unavailable([numerator, denominator])
         pct = n / d * 100
-        return result(f"**{pct:.1f}%** of the {_noun(kind)} are on **{st}**: **{n:g} of {d:g}**.", round(pct, 1), "%", [numerator, denominator])
+        return result(f"**{pct:.1f}%** of the {_noun(kind)} are on **{st}**: **{n:g} of {d:g}**.", round(pct, 1), "%", [numerator, denominator], "divide", percent=True)
     if re.search(r"window[ -]to[ -]floor\s+area\s+ratio", q):
         numerator, denominator = sub("window", area=True), sub("room", area=True)
         n, d = value(numerator), value(denominator)
         if n is None or d is None or d == 0:
             return unavailable([numerator, denominator])
         pct = n / d * 100
-        return result(f"The window-to-floor area ratio{suffix} is **{pct:.1f}%**: **{n:.2f} m²** of windows ÷ **{d:.2f} m²** of net room floor area × 100.", round(pct, 1), "%", [numerator, denominator])
+        return result(f"The window-to-floor area ratio{suffix} is **{pct:.1f}%**: **{n:.2f} m²** of windows ÷ **{d:.2f} m²** of net room floor area × 100.", round(pct, 1), "%", [numerator, denominator], "divide", percent=True)
     pair = re.search(r"\b(more|fewer|less)\s+(windows?|doors?|walls?|rooms?)\s+than\s+(windows?|doors?|walls?|rooms?)\b", q)
     if pair:
         a, b = pair[2].rstrip("s"), pair[3].rstrip("s")
@@ -215,7 +265,7 @@ def arithmetic_question(question: str, doc: Doc, t0, solve_fn) -> dict | None:
         if n is None or d is None:
             return unavailable([left, right])
         yes = n > d if pair[1] == "more" else n < d
-        return result(f"**{'Yes' if yes else 'No'}**{suffix}: **{n:g} {_noun(a, n)}** vs **{d:g} {_noun(b, d)}**.", abs(n - d), "count", [left, right])
+        return result(f"**{'Yes' if yes else 'No'}**{suffix}: **{n:g} {_noun(a, n)}** vs **{d:g} {_noun(b, d)}**.", abs(n - d), "count", [left, right], "abs_difference")
     threshold = re.search(r"\b(?:are|is) there\s+(more than|fewer than|less than|at least|at most|over|under)\s+(\d+)\s+(doors?|windows?|walls?|rooms?)\b", q)
     if threshold:
         op, bound, kind = threshold[1], int(threshold[2]), threshold[3].rstrip("s")
@@ -296,7 +346,9 @@ def storey_compare(question: str, doc: Doc, t0) -> dict | None:
         lead = (f"**{pick}** has the {word} {what if not area else what}: **{_fmt(best) + ' m²' if area else best}**."
                 if len(ties) == 1 else f"**{' and '.join(ties)}** tie for the {word} {what}: **{_fmt(best) + ' m²' if area else best}** each.")
         text = f"{lead} Per floor: {parts}. {{marks}}"
-        return _done(question, doc, text, best, "m2" if area else "count", by[pick] if len(ties) == 1 else [i for k in ties for i in by[k]], trace, t0=t0)
+        res = _done(question, doc, text, best, "m2" if area else "count", by[pick] if len(ties) == 1 else [i for k in ties for i in by[k]], trace, t0=t0)
+        from engine.calc_routes import ranked_storeys
+        return ranked_storeys(res, doc, items, pick, score, area)
     if as_table:  # "compare door counts per storey in a table": one markdown row per storey, total last
         col = f"{_noun(kind).capitalize()} (area m²)" if area else f"{_noun(kind).capitalize()}"
         rows = [f"| {k} | {_fmt(score[k]) if area else score[k]} |" for k in order if k in score]
@@ -322,7 +374,15 @@ def total_and_storey(question: str, doc: Doc, t0) -> dict | None:
     on = [i for i in items if i.storey == st]
     trace = [_step("route", f"count / {kind} / total + storey -> code, no model"), _step("count", f"{len(items)} total, {len(on)} on {st}")]
     text = f"There are **{len(items)} {_noun(kind, len(items))}** in total in this model and **{len(on)}** on **{st}**. {{marks}}"
-    return _done(question, doc, text, len(items), "count", on or items, trace, t0=t0)
+    res = _done(question, doc, text, len(items), "count", on or items, trace, t0=t0)
+    from engine.calc import record_items
+    record_items(res, doc, [(i, 1) for i in items], note="The headline is the whole-building total; the citation also selects the requested storey.")
+    part = {"answer": {"value": len(on), "unit": "count"}}
+    record_items(part, doc, [(i, 1) for i in on])
+    from engine.calc_routes import append_calculation
+    append_calculation(res["_calc"], part["_calc"], "selected-floor-", include_rows=False)
+    res["_calc"]["result"]["additional"][-1]["label"] = st
+    return res
 
 
 
@@ -376,7 +436,9 @@ def storey_pair(question: str, doc: Doc, t0) -> dict | None:
     what = f"{kind} area" if area else _noun(kind)
     trace = [_step("route", f"storey pair / {kind} / {'area' if area else 'count'} -> code, no model"), _step("count", parts)]
     text = f"{verdict} By floor: {parts}. {{marks}}"
-    return _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
+    res = _done(question, doc, text, score[hi] - score[lo], "m2" if area else "count", items, trace, t0=t0)
+    from engine.calc_routes import difference_groups
+    return difference_groups(res, doc, items, hi, lo, area)
 
 
 def storey_table(question: str, doc: Doc, t0) -> dict | None:
@@ -401,7 +463,9 @@ def storey_table(question: str, doc: Doc, t0) -> dict | None:
     big = max(rows, key=lambda r: r[2])
     text = f"Comparison of {' and '.join(names)}:\n\n" + "\n".join(table) + f"\n\n**{big[0]}** has the larger room area ({_fmt(big[2])} m²). {{marks}}"
     trace = [_step("route", "storey table / rooms, area, doors, windows -> code, no model")]
-    return _done(question, doc, text, None, None, items, trace, t0=t0)
+    res = _done(question, doc, text, None, None, items, trace, t0=t0)
+    from engine.calc_routes import storey_schedule
+    return storey_schedule(res, doc, names)
 
 
 SAFE_Q = re.compile(r"\b(?:is|are|how)\b[^.?]*\b(?:safe|safety|fire[- ]safe|unsafe|dangerous)\b|\bsafe (?:to|for)\b|\bsafety (?:check|review|status)\b", re.I)
@@ -466,7 +530,9 @@ def kind_compare(question: str, doc: Doc, t0) -> dict | None:
         hi, lo = (a, b) if na > nb else (b, a)
         verdict = f"There are more **{_noun(hi)}**: **{max(na, nb)}** {_noun(hi)} vs **{min(na, nb)}** {_noun(lo)}."
     trace = [_step("route", f"kind comparison / {a} vs {b} -> code, no model"), _step("count", f"{na} {_noun(a)}, {nb} {_noun(b)}")]
-    return _done(question, doc, f"{verdict} {{marks}}", abs(na - nb), "count", counts[a] + counts[b], trace, t0=t0)
+    res = _done(question, doc, f"{verdict} {{marks}}", abs(na - nb), "count", counts[a] + counts[b], trace, t0=t0)
+    from engine.calc_routes import difference_groups
+    return difference_groups(res, doc, counts[a] + counts[b], a, b, False, by="kind")
 
 
 EXACT = re.compile(r"\bhow many\s+(?:of the\s+)?(?:\w+\s+)?(doors?|windows?)\b.*?\b(?:are|is|have|with|measuring|measure)?\s*(?:a\s+)?(?:width|height|clear width)?\s*(?:of\s+)?(?:exactly\s+|about\s+|around\s+)?(\d+(?:[.,]\d+)?)\s*(mm|cm|m|metres?|meters?)\s*(wide|high|tall|in width|in height)\b", re.I)
@@ -631,7 +697,13 @@ def named_rooms(question: str, doc: Doc, t0) -> dict | None:
     if not hit:
         return None
     vals = [_qty(r, "room", "area") for r in hit]
-    tot = round(sum(v for v in vals if v), 2)
+    if wants_area and not howmany and any(v is None for v in vals):
+        res = _done(question, doc, f"**The area of {word} is not recorded for every matching room.** A readable printed area or scaled outline is needed; missing quantities are not zero.",
+                    None, "m2", hit, [_step("route", "named room area: incomplete measurements")], t0=t0)
+        res["answer"]["confidence"] = .3
+        res["needs_drawing_read"] = True
+        return res
+    tot = round(sum(v for v in vals if v is not None), 2)
     where = f"on **{st}**" if st else ("in this model" if doc.mode == "ifc" else "on this floor plan")
     trace = [_step("route", f"count / room / named '{word}' -> code, no model"), _step("filter", f"{len(hit)} rooms match {word}")]
     plural = word + ("s" if not word.endswith("s") else "")
@@ -822,7 +894,10 @@ def room_list(question: str, doc: Doc, t0) -> dict | None:
     tot = round(sum(a for _l, a, _r in rows if a), 2)
     head = f"**{len(rows)} rooms**{f' on **{st}**' if st else ''}, total **{_fmt(tot)} m²**, largest first:"
     trace = [_step("route", "list rooms with areas -> room items sorted by area, no model"), _step("filter", f"{len(rows)} rooms")]
-    return _done(question, doc, head + "\n" + "\n".join(lines) + more + (("\n\n" + scale_note(doc).strip()) if scale_note(doc) else ""), tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+    res = _done(question, doc, head + "\n" + "\n".join(lines) + more + (("\n\n" + scale_note(doc).strip()) if scale_note(doc) else ""), tot, "m2", [r for _l, _a, r in rows], trace, t0=t0)
+    from engine.calc import record, row, summed
+    audit_rows = [row(doc, r, a if a is not None else 0, "m2", excluded_reason="Area missing; excluded from total" if a is None else "") for _l, a, r in rows]
+    return record(res, summed(res, audit_rows, note="Rows with no area contribute zero and explicitly say they are excluded. Bounding rectangle areas are approximations where stated."))
 
 
 # ------------------------------------------------------------------ E-52: baseboard / skirting in linear metres
@@ -887,10 +962,19 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
             return _answer_obj(question, [doc.doc_id], text, 0, "m", 0.7, False, [], [], {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None},
                                trace, "index" if ifc else "planmap", t0 or time.perf_counter())
     if not rooms:
-        return None
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**Baseboard length cannot be measured from this sheet.** No usable room outlines are recorded.", t0, doc=doc)
+    if not ifc and any(not r.polygon_px or len(r.polygon_px) < 3 for r in rooms):
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**Baseboard length cannot be measured reliably from this sheet.** Room detection boxes are not wall boundaries and can overlap; measured room outlines are needed.", t0, doc=doc, items=rooms)
+    if not ifc:
+        from engine.honesty import room_boundary_problem, unavailable
+        if problem := room_boundary_problem(rooms):
+            return unavailable(question, [doc.doc_id], "**Baseboard length is unavailable.** " + problem, t0, doc=doc, items=rooms)
     doors = [d for d in _of_kind(doc, "door") if _foot(d, ifc)]
     band = DOOR_BAND if ifc else DOOR_BAND / scale
     rows = []
+    calc_openings = {}
     for r in rooms:
         x0, y0, x1, y1 = _foot(r, ifc)
         from engine.scales import item_scale, positive
@@ -898,7 +982,12 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
         if not k:
             continue
         band = DOOR_BAND / k
-        per = 2 * ((x1 - x0) + (y1 - y0)) * k
+        import math
+        poly = r.polygon_px if not ifc else None
+        if not poly:
+            poly = [[x0, y0], [x1, y0], [x1, y1], [x0, y1]]
+        edges = list(zip(poly, poly[1:] + poly[:1]))
+        per = sum(math.dist(a, b) for a, b in edges) * k
         opening, n = 0.0, 0
         for d in doors:
             if not ifc and (d.page != r.page or item_scale(d, doc.scale) != item_scale(r, doc.scale)):
@@ -907,12 +996,16 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
                 continue
             f = _foot(d, ifc)
             cx, cy = (f[0] + f[2]) / 2, (f[1] + f[3]) / 2
-            inside = x0 - band <= cx <= x1 + band and y0 - band <= cy <= y1 + band
-            core = x0 + band * 0.4 < cx < x1 - band * 0.4 and y0 + band * 0.4 < cy < y1 - band * 0.4
-            if inside and not core:
-                w = d.q.get("width_m") if ifc else None
+            def distance(a, b):
+                vx, vy = b[0] - a[0], b[1] - a[1]
+                den = vx * vx + vy * vy
+                t = max(0., min(1., ((cx - a[0]) * vx + (cy - a[1]) * vy) / den)) if den else 0.
+                return math.dist((cx, cy), (a[0] + t * vx, a[1] + t * vy))
+            if min(distance(a, b) for a, b in edges) <= band:
+                w = d.q.get("width_m") or d.props.get("width_m")
                 w = float(w) if w else max(f[2] - f[0], f[3] - f[1]) * k
                 opening += min(w, 3.0)
+                calc_openings.setdefault(r.item_id, []).append((d, w, min(w, 3.0)))
                 n += 1
         rows.append((r, per, opening, n, max(per - opening, 0.0)))
     if not rows:
@@ -931,17 +1024,20 @@ def baseboard(question: str, doc: Doc, t0) -> dict | None:
         lines.append(f"- {(_room_label(r) or 'room')[:36]}{f' ({r.storey})' if ifc and not st else ''}: {_fmt(net)} m (outline {_fmt(per)} m, minus {n} door{'s' if n != 1 else ''} {_fmt(op)} m){tag}")
     more = f"\n- … and {len(rows) - 25} more rooms (all numbered on the drawing)" if len(rows) > 25 else ""
     what = (f"{word} room{'s' if len(rows) != 1 else ''}" if not word.endswith("room") else f"{word}{'s' if len(rows) != 1 else ''}") if word else "rooms"
-    how = ("from each room's footprint rectangle minus the IfcDoor widths in its walls" if ifc else
-           ("from each room's drawn box at its view's scale minus detected door widths" if any("measurement_scale" in r.props for r in rooms) else
-            (f"from each room's drawn box at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's drawn box minus the detected door widths")))
+    how = ("estimated from each room's footprint rectangle minus the recorded door widths" if ifc else
+           ("from each room's polygon at its view's scale minus detected door widths" if any("measurement_scale" in r.props for r in rooms) else
+            (f"from each room's polygon at the drawing's scale ({scale:.4f} m/px, {doc.scale.get('method')}) minus detected door widths" if not guessed else "from each room's polygon minus the detected door widths")))
     head = (f"**Baseboard: {_fmt(total)} linear metres** for {len(rows)} {what}{f' on **{st}**' if st else ''}, {how}. "
-            "Rooms are treated as rectangles and wall openings other than doors are not deducted, so L-shaped rooms are approximate.")
+            + ("IFC room boxes approximate the room outlines. " if ifc else "")
+            + "Shared partitions have a finish on each room side; open zones need separate verified boundaries.")
     trace = [_step("route", "baseboard -> room outline minus door openings, code, no model"), _step("filter", f"{len(rows)} rooms, {len(doors)} doors considered")]
     cav = ("\n\nLengths are estimated from door sizes because no printed scale was found, so treat them as approximate." if guessed else "")
     if len(rows) < len(rooms):
         cav += f" {len(rooms) - len(rows)} rooms have no verified view scale and are excluded."
-    return _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed else 0.8, False, boxes, cites, scene, trace,
-                       "index" if ifc else "planmap", t0 or time.perf_counter())
+    res = _answer_obj(question, [doc.doc_id], head + "\n" + "\n".join(lines) + more + cav, total, "m", 0.4 if guessed or ifc else 0.8, False, boxes, cites, scene, trace,
+                      "index" if ifc else "planmap", t0 or time.perf_counter())
+    from engine.calc_routes import baseboard as calc_baseboard
+    return calc_baseboard(res, doc, rows, calc_openings, scale)
 
 
 # ------------------------------------------------------------------ E-56: piping from the V-08 extract (plumbing IFCs), $0
@@ -955,11 +1051,12 @@ HL_CAP = 3000
 def _piping_data(doc: Doc) -> dict | None:
     """artifacts/<doc>/piping.json (written at ingest, S-38) first, then the committed results/vision/piping/<doc>.json."""
     import json
+    import os
     import sys
     from pathlib import Path
     if doc.mode != "ifc":
         return None
-    arts = getattr(sys.modules.get("engine.solvers.solve"), "ARTIFACTS", None)
+    arts = os.environ.get("ARTIFACTS_DIR") or getattr(sys.modules.get("engine.solvers.solve"), "ARTIFACTS", None)
     repo = Path(__file__).resolve().parent.parent
     for f in ([Path(arts) / doc.doc_id / "piping.json"] if arts else []) + [repo / "results/vision/piping" / f"{doc.doc_id}.json"]:
         try:
@@ -1028,13 +1125,18 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
     if st:
         pipes = [p for p in pipes if p.get("storey") == st]
 
-    def done(text, value, unit, ids, steps):
+    from engine.mep import COUNT_Q, _length_requested
+    count_objects = bool(COUNT_Q.search(ql) and not _length_requested(ql))
+
+    def done(text, value, unit, ids, steps, calc_groups=None):
         ids = [i for i in dict.fromkeys(ids) if i in by_id]
-        items = [by_id[i] for i in ids[:HL_CAP]]
+        items = [by_id[i] for i in ids]
         _b, cites, _s = _evidence(doc, items)
-        scene = {"doc_id": doc.doc_id, "highlight_item_ids": [i.item_id for i in items], "camera_target_item_id": items[0].item_id if items else None}
+        scene = {"doc_id": doc.doc_id, "highlight_item_ids": ids[:HL_CAP], "camera_target_item_id": ids[0] if ids else None}
         trace = [_step("route", "piping -> V-08 plumbing extract (item ids = IFC GlobalIds), code, no model")] + [_step("filter", x) for x in steps]
-        return _answer_obj(question, [doc.doc_id], text + tail + note, value, unit, 1.0 if items else 0.7, False, [], cites, scene, trace, "index", t0 or time.perf_counter())
+        res = _answer_obj(question, [doc.doc_id], text + tail + note, value, unit, 1.0 if items else 0.7, False, [], cites, scene, trace, "index", t0 or time.perf_counter())
+        from engine.calc_routes import piping as calc_piping
+        return calc_piping(res, doc, d, ids, calc_groups)
 
     if DRAINQ.search(ql) and not re.search(r"\bpipes?\b.*\bby\b|\bsizes?\b", ql):
         terms = [x for x in (d.get("drains") or []) if not st or x.get("storey") == st]
@@ -1056,19 +1158,27 @@ def piping(question: str, doc: Doc, t0) -> dict | None:
             sizes = sorted({int(p["dn_mm"]) for p in pipes if p.get("dn_mm")})
             return done(f"**No DN{int(size)} pipes** in this model. Sizes present: {', '.join('DN' + str(x) for x in sizes)}.", 0, "count", [], ["0 matches"])
         stor = "; ".join(f"{_fmt(m)} m on {k}" for k, _n, m in _group(sel, "storey")[:6])
+        if count_objects:
+            return done(f"**{len(sel)} pipe segments of nominal diameter {int(size)}**" + (f" on {st}" if st else "") + ". [1]",
+                        len(sel), "count", [p["item_id"] for p in sel], [f"{len(sel)} matching pipes"])
         return done(f"**DN{int(size)}: {_fmt(_pipe_sum(sel))} m** in **{len(sel)} pipe segments**{f' on {st}' if st else ''} ({stor}). [1]",
                     _pipe_sum(sel), "m", [p["item_id"] for p in sel], [f"{len(sel)} DN{int(size)} pipes"])
     if re.search(r"\bsizes?\b|diameters?", ql):
         g = _group([p for p in pipes if p.get("dn_mm")], "dn_mm")
         g = sorted(g, key=lambda x: float(x[0]))
         txt = ", ".join(f"DN{int(float(k))}: {n} pipes / {_fmt(m)} m" for k, n, m in g[:20])
-        return done(f"**{len(g)} pipe sizes**{f' on {st}' if st else ''}: {txt}. [1]", len(g), "count", [p["item_id"] for p in pipes if p.get("dn_mm")], [f"{len(g)} sizes"])
+        return done(f"**{len(g)} pipe sizes**{f' on {st}' if st else ''}: {txt}. [1]", len(g), "count", [p["item_id"] for p in pipes if p.get("dn_mm")], [f"{len(g)} sizes"],
+                    {p["item_id"]: p["dn_mm"] for p in pipes if p.get("dn_mm")})
     if re.search(r"\bsystems?\b", ql):
         g = _group(pipes, "system")
         shown, rest = system_rows(g)
         txt = "; ".join(f"{friendly_system(k)}: {_fmt(m)} m ({n} pipes)" for k, n, m in shown)
         more = f"; +{rest} smaller system{'s' if rest != 1 else ''} ({_fmt(sum(x[2] for x in g[8:]))} m)" if rest else ""
-        return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"])
+        return done(f"**{len(g)} piping systems**{f' on {st}' if st else ''}, longest first: {txt}{more}. Total {_fmt(_pipe_sum(pipes))} m. [1]", len(g), "count", [p["item_id"] for p in pipes], [f"{len(g)} systems"],
+                    {p["item_id"]: p.get("system") or "Unknown" for p in pipes})
+    if count_objects:
+        return done(f"**{len(pipes)} pipe segments**" + (f" on {st}" if st else " in this model") + ". [1]",
+                    len(pipes), "count", [p["item_id"] for p in pipes], [f"{len(pipes)} pipes counted"])
     if re.search(r"by (?:storey|floor|level)|per (?:storey|floor|level)|each (?:storey|floor|level)", ql):
         g = _group(pipes, "storey")
         txt = "; ".join(f"{k}: {_fmt(m)} m ({n} pipes)" for k, n, m in g)
@@ -1121,6 +1231,11 @@ def wet_room_takeoff(question: str, doc: Doc, t0) -> dict | None:
            f"Assumptions, not from the drawing: {TILE_BOX_M2} m² per box (four 60 x 60 cm tiles) and about €{TILE_EUR_M2:.0f} per m², "
            f"so roughly **€{cost:,.0f}**. This is a rough guide, not a quote.")
     base["answer"].update({"text_md": txt, "value": round(need, 1), "unit": "m2", "confidence": min(base["answer"].get("confidence") or 0.85, 0.85)})
+    from engine.calc import assumption_source, question_source, row
+    from engine.calc_routes import allowance, tile_order
+    allowance(base, [row(doc, it, a, "m2") for it, a in _tk.rooms_of(doc, tk) if a], pct,
+              question_source(question) if wm else assumption_source("Assumed 10% waste; not from the drawing"))
+    tile_order(base, need, boxes, TILE_BOX_M2, TILE_EUR_M2, cost)
     return base
 
 
@@ -1163,6 +1278,10 @@ def takeoff(question: str, doc: Doc, t0, solve_fn) -> dict | None:
     marks = "".join(f"[{c['n']}]" for c in base.get("citations") or [])
     base["answer"].update({"text_md": f"{txt} {marks}", "value": round(need, 2), "unit": "m2"})
     base["trace"] = trace
+    from engine.calc import question_source, row
+    from engine.calc_routes import allowance
+    cited_ids = {iid for c in base.get("citations", []) for iid in c.get("item_ids", [])}
+    allowance(base, [row(doc, it, _qty(it, "room", "area"), "m2") for it in doc.items if it.item_id in cited_ids], pct, question_source(question))
     return base
 
 
@@ -1241,6 +1360,8 @@ def compliance(question: str, doc: Doc, t0) -> dict | None:
                 + "{marks}")
         val = 0
     res = _done(question, doc, text, val, "count", items, trace, t0=t0)
+    from engine.calc_inventory import findings as calc_findings
+    calc_findings(res, doc, fs, checked)
     res["answer"]["confidence"] = 0.7
     res["advisor_cards"] = advisor.advise_doc(doc, None)[:6] if fs else []
     return res
@@ -1358,21 +1479,8 @@ REBAR_KEY = re.compile(r"rebar|reinforc|bewehr|raudoit", re.I)
 
 
 def _slab_thickness(it: Item) -> tuple[float | None, str]:
-    """(metres, source): quantity set, then a thickness property, then the box height. The source is always named."""
-    w = it.q.get("width_m") or it.q.get("thickness_m")
-    if w and float(w) > 0:
-        return float(w), "quantity"
-    for k, v in it.props.items():
-        if re.search(r"thick|dicke", str(k), re.I):
-            try:
-                return float(v), "property"
-            except (TypeError, ValueError):
-                pass
-    if it.bbox_m:
-        h = it.bbox_m[1][1] - it.bbox_m[0][1]
-        if h > 0:
-            return round(h, 3), "bbox"
-    return None, "none"
+    from engine.slab_quantities import thickness
+    return thickness(it)
 
 
 def _slab_area(it: Item) -> tuple[float | None, bool]:
@@ -1397,7 +1505,8 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
         return None
     slabs = [i for i in doc.items if i.kind == "slab" and i.props.get("ifc_class") == "IfcSlab"]
     if not slabs:
-        return None
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**No slab quantities are recorded in this model.** Floor areas cannot substitute for slab areas by thickness.", t0, doc=doc)
     from engine.solvers.solve import MAX_BOXES, _reading_order
     want = None
     m = SLAB_MM.search(question)
@@ -1413,14 +1522,17 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
             continue
         approx += est
         src_used.add(src)
-        mm = int(round(t * 1000 / 5.0) * 5)
+        mm = round(t * 1000, 3)
         tn = it.type_name or it.props.get("material") or "Unnamed slab type"
         groups.setdefault((tn, mm), []).append((it, a))
     avail = sorted({k[1] for k in groups})
     if want is not None:
-        groups = {k: v for k, v in groups.items() if abs(k[1] - want) <= 5}
+        groups = {k: v for k, v in groups.items() if abs(k[1] - want) <= .001}
     if not groups:
-        text = (f"No **{int(want)} mm** slab in this model" + (f"; the slab thicknesses present are {', '.join(f'{m} mm' for m in avail[:8])}." if avail else ".")
+        if not avail:
+            from engine.honesty import unavailable
+            return unavailable(question, [doc.doc_id], "**Slab area by thickness is unavailable.** Slabs have no recorded thickness and area; bounding-box height is not a slab thickness.", t0, doc=doc, items=slabs)
+        text = (f"No **{int(want)} mm** slab in this model" + (f"; the slab thicknesses present are {', '.join(f'{m:g} mm' for m in avail[:8])}." if avail else ".")
                 if want is not None else "No slab in this model has a thickness and an area.")
         return _done(question, doc, text, 0, "m2", [], [_step("route", "slab area by type -> IfcSlab grouped by type and thickness, no model")], t0=t0)
     items_all = [it for v in groups.values() for it, _a in v]
@@ -1430,9 +1542,9 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     for (tn, mm), v in rows:
         ns = sorted(order[i.item_id] for i, _a in v if order[i.item_id] <= MAX_BOXES)
         marks = ", ".join(f"[{n}]" for n in ns[:6]) + (f" +{len(ns) - 6}" if len(ns) > 6 else "")
-        lines.append(f"| {clean_type_name(tn, False)} | {mm} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
+        lines.append(f"| {clean_type_name(tn, False)} | {mm:g} mm | {len(v)} | {_fmt(sum(a for _i, a in v))} m² | {marks} |")
     tot = round(sum(a for v in groups.values() for _i, a in v), 2)
-    srcname = {"quantity": "the model's thickness quantity", "property": "a thickness property", "bbox": "the box height (no thickness in the model)"}
+    srcname = {"quantity": "the model's thickness quantity", "property": "a thickness property", "layers": "the material layer thicknesses"}
     thick_src = " and ".join(srcname[s] for s in sorted(src_used))
     rebar = [i for i in doc.items if "Reinforc" in str(i.props.get("ifc_class") or "") or any(REBAR_KEY.search(str(k)) for k in i.props)]
     if rebar:
@@ -1440,15 +1552,29 @@ def slab_by_type(question: str, doc: Doc, t0) -> dict | None:
     else:
         bars = "Reinforcement: **the model has no reinforcement data** (no IfcReinforcingBar and no rebar properties), so bars cannot be reported."
     head = (f"**{int(want)} mm slab:** " if want is not None else "**Slab area by type and thickness:** ") + f"**{_fmt(tot)} m²** in **{len(items_all)} slabs**, {len(groups)} type-and-thickness group{'s' if len(groups) != 1 else ''}."
+    missing = len(slabs) - sum(1 for it in slabs if _slab_thickness(it)[0] is not None and _slab_area(it)[0] is not None)
     foot = f"Thickness from {thick_src}." + (f" {approx} slab areas are the box footprint (upper bound), because the model has no usable area quantity for them." if approx else "")
+    if missing:
+        foot += f" {missing} slabs lack thickness or area and are excluded; this is a measured subtotal."
     text = "\n\n".join([head, "\n".join(lines), foot, bars])
     trace = [_step("route", "slab area by type -> IfcSlab grouped by type name and thickness, area summed per group, no model"),
              _step("filter", f"{len(slabs)} slabs, {len(items_all)} with thickness and area; thickness from {thick_src}")]
-    return _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+    result = _done(question, doc, text, tot, "m2", items_all, trace, t0=t0)
+    if approx or missing:
+        result["answer"]["confidence"] = .5
+        result["reasoning"] = {"steps": [{"kind": "calculated", "title": "Calculated", "text": foot, "cite": 1, "ok": None}],
+                               "confidence": {"label": "Estimate", "pct": 50, "reason": foot, "improve": "Provide complete slab thickness and area quantities."}}
+    from engine.calc import record_items
+    return record_items(result, doc, [(it, a) for v in groups.values() for it, a in v],
+                        note="Grouped by recorded type and thickness; bounding rectangle areas are approximate where stated.")
 
 
 def run(question: str, doc: Doc, t0, solve_fn=None) -> dict | None:
     """First handler that recognises the shape wins; every handler may return None."""
+    from engine.ifc_quantities import answer as ifc_quantity_answer
+    res = ifc_quantity_answer(question, doc, t0)
+    if res is not None:
+        return res
     res = filtered_question(question, doc, t0) or arithmetic_question(question, doc, t0, solve_fn)
     if res is not None:
         return res
@@ -1521,22 +1647,17 @@ PIPE_PLAN = re.compile(r"\b(pipes?|piping|pipework|plumbing|drains?|drainage|sew
 
 
 def plan_slab_pipe(question: str, doc: Doc, t0) -> dict | None:
-    """Judge categories on a floor-plan image: slab area = floor outline; piping = not drawn. Plain about what a plan cannot hold."""
+    """Never substitute architectural room areas for structural quantities."""
     if doc.mode != "planmap":
         return None
     nop = {"doc_id": doc.doc_id, "highlight_item_ids": [], "camera_target_item_id": None}
     if SLABQ.search(question):
-        rooms = [(r, _qty(r, "room", "area")) for r in _of_kind(doc, "room") if not _OUTDOOR.search(f"{r.label or ''} {r.props.get('room_type') or ''}")]
-        rooms = [(r, v) for r, v in rooms if v]
-        if not rooms:
-            return None
-        tot = round(sum(v for _, v in rooms), 2)
-        trace = [_step("route", "slab on a plan image -> floor outline area, no model")]
-        text = (f"The floor slab covers about **{_fmt(tot)} m²**, taken from the floor outline (the **{len(rooms)} rooms** found on the drawing added up). "
-                "A floor plan does not show slab types, thicknesses or reinforcement bars: those need a structural sheet or an IFC model. {marks}" + scale_note(doc))
-        return _done(question, doc, text, tot, "m2", [r for r, _ in rooms], trace, t0=t0)
+        from engine.honesty import unavailable
+        return unavailable(question, [doc.doc_id], "**Slab area by thickness is not recorded in this drawing.** Room floor areas do not establish slab thicknesses or slab areas.", t0, doc=doc)
     if PIPE_PLAN.search(question):
-        text = ("**No piping is drawn on this floor plan.** Pipe sizes are read from plumbing sheets, and pipe lengths from MEP models. "
-                "Upload a plumbing sheet or an IFC plumbing model and ask again.")
-        return _answer_obj(question, [doc.doc_id], text, None, "m", 0.7, False, [], [], nop, [_step("route", "piping on a plan image -> not drawn, no model")], "planmap", t0 or time.perf_counter())
+        from engine.honesty import plan_services_length, unavailable
+        import os
+        from pathlib import Path
+        measured = plan_services_length(question, doc, Path(os.environ.get("ARTIFACTS_DIR") or "artifacts"), t0)
+        return measured or unavailable(question, [doc.doc_id], "**Pipe measurements are not indexed for this sheet.** This does not establish that no piping is drawn.", t0, doc=doc)
     return None

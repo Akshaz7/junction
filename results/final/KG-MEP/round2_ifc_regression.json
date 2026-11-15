@@ -1,0 +1,340 @@
+{
+  "clinic": {
+    "docs": [
+      "ifc_models__bsc-clinic-clinic-hvac"
+    ],
+    "build_seconds": 2.837,
+    "stats": {
+      "nodes": 4131,
+      "edges": 25232,
+      "by_kind": {
+        "project": 1,
+        "doc": 1,
+        "level": 4,
+        "fixture": 127,
+        "type": 30,
+        "pipe": 77,
+        "duct": 3061,
+        "terminal": 440,
+        "room": 373,
+        "system": 17
+      },
+      "edges_by_kind": {
+        "contains": 4393,
+        "on_level": 3967,
+        "has_type": 3704,
+        "in_room": 5334,
+        "serves": 440,
+        "part_of_system": 3701,
+        "connects": 3693
+      },
+      "linked_pct": null,
+      "agree_pct": null,
+      "issues": 0,
+      "counterpart_items": 0,
+      "linked_items": 0
+    },
+    "mep": {
+      "documents": {
+        "ifc_models__bsc-clinic-clinic-hvac": {
+          "schema": "IFC2X3",
+          "services": 3704,
+          "rooms": 263
+        }
+      },
+      "notes": [],
+      "frames": {
+        "ifc_models__bsc-clinic-clinic-hvac": [
+          {
+            "building_guid": "3bBuD8vl95iwV9GcJKE3RQ",
+            "project_guid": "3bBuD8vl95iwV9GcJKE3RR",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "rooms_with_services": 347,
+    "declared_ceiling_heights": 0,
+    "services_lengths_known": 1548,
+    "dangling_edges": 0,
+    "unknown_length_note": "Whole-element lengths are not lengths inside a room; unrecorded ceilings stay unknown."
+  },
+  "digital_hub": {
+    "docs": [
+      "ifc_bench__digital-hub-arc",
+      "ifc_bench__digital-hub-ventilation"
+    ],
+    "build_seconds": 1.486,
+    "stats": {
+      "nodes": 2358,
+      "edges": 13815,
+      "by_kind": {
+        "project": 1,
+        "doc": 2,
+        "level": 6,
+        "fixture": 352,
+        "type": 157,
+        "material": 47,
+        "column": 62,
+        "wall": 179,
+        "door": 64,
+        "slab": 23,
+        "stair": 15,
+        "window": 47,
+        "room": 116,
+        "duct": 1135,
+        "terminal": 148,
+        "system": 4
+      },
+      "edges_by_kind": {
+        "contains": 2423,
+        "on_level": 2087,
+        "has_type": 2074,
+        "made_of": 2680,
+        "hosted_by": 109,
+        "part_of_system": 1315,
+        "same_as": 1,
+        "connects": 1310,
+        "in_room": 1720,
+        "serves": 96
+      },
+      "linked_pct": 0.09,
+      "agree_pct": null,
+      "issues": 0,
+      "counterpart_items": 2141,
+      "linked_items": 2
+    },
+    "mep": {
+      "documents": {
+        "ifc_bench__digital-hub-arc": {
+          "schema": "IFC4",
+          "services": 0,
+          "rooms": 64
+        },
+        "ifc_bench__digital-hub-ventilation": {
+          "schema": "IFC4",
+          "services": 1310,
+          "rooms": 0
+        }
+      },
+      "notes": [],
+      "frames": {
+        "ifc_bench__digital-hub-arc": [
+          {
+            "building_guid": "1OVsTAdVr0zxMeLRosmk1X",
+            "project_guid": "1OVsTAdVr0zxMeLRosmk1W",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                4.52949330505959e-05
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                1.90131286899941e-05
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ],
+        "ifc_bench__digital-hub-ventilation": [
+          {
+            "building_guid": "1OVsTAdVr0zxMeLRosmk1X",
+            "project_guid": "1OVsTAdVr0zxMeLRosmk1W",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      },
+      "registrations": [
+        {
+          "from_doc": "ifc_bench__digital-hub-ventilation",
+          "to_doc": "ifc_bench__digital-hub-arc",
+          "T": [
+            [
+              1.0,
+              0.0,
+              0.0,
+              4.52949330505959e-05
+            ],
+            [
+              0.0,
+              1.0,
+              0.0,
+              0.0
+            ],
+            [
+              0.0,
+              0.0,
+              1.0,
+              -1.90131286899941e-05
+            ],
+            [
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ]
+          ],
+          "residual": null,
+          "matches": 1,
+          "anchor_method": "declared shared IFC building frame",
+          "building_guid": "1OVsTAdVr0zxMeLRosmk1X",
+          "project_guid": "1OVsTAdVr0zxMeLRosmk1W",
+          "note": "Placement agreement; geometry alignment has not been independently checked."
+        }
+      ]
+    },
+    "rooms_with_services": 51,
+    "declared_ceiling_heights": 64,
+    "services_lengths_known": 596,
+    "dangling_edges": 0,
+    "unknown_length_note": "Whole-element lengths are not lengths inside a room; unrecorded ceilings stay unknown."
+  },
+  "reserved_round1_unseen": {
+    "docs": [
+      "ifc_models__resbim-224-model"
+    ],
+    "build_seconds": 0.022,
+    "stats": {
+      "nodes": 57,
+      "edges": 185,
+      "by_kind": {
+        "project": 1,
+        "doc": 1,
+        "level": 2,
+        "door": 5,
+        "type": 7,
+        "slab": 1,
+        "material": 24,
+        "wall": 11,
+        "window": 4,
+        "fixture": 1
+      },
+      "edges_by_kind": {
+        "contains": 56,
+        "on_level": 21,
+        "has_type": 21,
+        "made_of": 78,
+        "hosted_by": 9
+      },
+      "linked_pct": null,
+      "agree_pct": null,
+      "issues": 0,
+      "counterpart_items": 0,
+      "linked_items": 0
+    },
+    "mep": {
+      "documents": {
+        "ifc_models__resbim-224-model": {
+          "schema": "IFC4",
+          "services": 0,
+          "rooms": 0
+        }
+      },
+      "notes": [],
+      "frames": {
+        "ifc_models__resbim-224-model": [
+          {
+            "building_guid": "09kAUjZ9z0nwc0mrimJwZg",
+            "project_guid": "09kAUjZ9z0nwc0mrimJwZh",
+            "matrix_z_up_m": [
+              [
+                1.0,
+                0.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                1.0,
+                0.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                1.0,
+                0.0
+              ],
+              [
+                0.0,
+                0.0,
+                0.0,
+                1.0
+              ]
+            ]
+          }
+        ]
+      }
+    },
+    "rooms_with_services": 0,
+    "declared_ceiling_heights": 0,
+    "services_lengths_known": 0,
+    "dangling_edges": 0,
+    "unknown_length_note": "Whole-element lengths are not lengths inside a room; unrecorded ceilings stay unknown."
+  }
+}

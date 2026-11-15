@@ -1,0 +1,1370 @@
+[
+  {
+    "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+    "unit": "Whg. A",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 80.7995
+  },
+  {
+    "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+    "unit": "Whg. B",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 5,
+    "area": 81.296
+  },
+  {
+    "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+    "unit": "Whg. C",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 4,
+    "area": 60.66
+  },
+  {
+    "doc_id": "swiss_dwellings__site1000-bldg2082-floor9385",
+    "unit": "Whg. D",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 4,
+    "area": 72.393
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 81.159
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. B",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 73.0949
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. C",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 74.2584
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. D",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 73.5744
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. E",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 71.1242
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. F",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 84.9378
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. G",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 35.4626
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. H",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 29.4555
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. I",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 34.9627
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. J",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 63.3568
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. K",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 62.6352
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. L",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 35.3373
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. M",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 30.0316
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. N",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 34.6644
+  },
+  {
+    "doc_id": "swiss_dwellings__site1015-bldg2113-floor9557",
+    "unit": "App. O",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 63.5236
+  },
+  {
+    "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+    "unit": "App. A",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 142.711
+  },
+  {
+    "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+    "unit": "App. B",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 96.0178
+  },
+  {
+    "doc_id": "swiss_dwellings__site1040-bldg2136-floor9659",
+    "unit": "App. C",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 51.3319
+  },
+  {
+    "doc_id": "swiss_dwellings__site10499-bldg15161-floor39596",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 142.6413
+  },
+  {
+    "doc_id": "swiss_dwellings__site1088-bldg2216-floor10132",
+    "unit": "Whg. A",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 65.342
+  },
+  {
+    "doc_id": "swiss_dwellings__site1088-bldg2216-floor10132",
+    "unit": "Whg. B",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 71.5117
+  },
+  {
+    "doc_id": "swiss_dwellings__site1088-bldg2216-floor10132",
+    "unit": "Whg. C",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 82.4517
+  },
+  {
+    "doc_id": "swiss_dwellings__site1088-bldg2216-floor10132",
+    "unit": "Whg. D",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 64.5078
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "unit": "App. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 75.0783
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "unit": "App. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 54.674
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "unit": "App. C",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 70.1278
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "unit": "App. D",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 70.2908
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "unit": "App. E",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 38.0599
+  },
+  {
+    "doc_id": "swiss_dwellings__site1098-bldg2234-floor10334",
+    "unit": "App. F",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 90.3164
+  },
+  {
+    "doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 72.6223
+  },
+  {
+    "doc_id": "swiss_dwellings__site1101-bldg2241-floor10275",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 83.5795
+  },
+  {
+    "doc_id": "swiss_dwellings__site1102-bldg2242-floor10281",
+    "unit": "App. B",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 94.4839
+  },
+  {
+    "doc_id": "swiss_dwellings__site11265-bldg17059-floor45087",
+    "unit": "Whg. A",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 100.4824
+  },
+  {
+    "doc_id": "swiss_dwellings__site11265-bldg17059-floor45087",
+    "unit": "Whg. B",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 85.0018
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. A",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 72.0339
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 63.3747
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. C",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 75.3475
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. D",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 67.9315
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. E",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 87.7486
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. F",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 88.7373
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. G",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 75.484
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. H",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 67.2806
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. I",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 66.8997
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. J",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 75.377
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. K",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 72.1836
+  },
+  {
+    "doc_id": "swiss_dwellings__site1137-bldg2291-floor10570",
+    "unit": "Whg. L",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 63.0037
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 107.3571
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. B",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 113.3116
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "",
+    "n_rooms": 1,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 4.0726
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. C",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 61.5635
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. D",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 162.7228
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "",
+    "n_rooms": 1,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 3.9518
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. E",
+    "n_rooms": 4,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 31.7742
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "",
+    "n_rooms": 1,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 5.1246
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. F",
+    "n_rooms": 4,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 31.6095
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. G",
+    "n_rooms": 4,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 33.4162
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. H",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 97.1388
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. I",
+    "n_rooms": 4,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 33.307
+  },
+  {
+    "doc_id": "swiss_dwellings__site1138-bldg2292-floor10584",
+    "unit": "App. J",
+    "n_rooms": 3,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 33.282
+  },
+  {
+    "doc_id": "swiss_dwellings__site11692-bldg18240-floor48820",
+    "unit": "Whg. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 120.9664
+  },
+  {
+    "doc_id": "swiss_dwellings__site11692-bldg18240-floor48820",
+    "unit": "",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 139.7503
+  },
+  {
+    "doc_id": "swiss_dwellings__site11861-bldg18508-floor50415",
+    "unit": "App. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 110.3994
+  },
+  {
+    "doc_id": "swiss_dwellings__site11861-bldg18508-floor50415",
+    "unit": "App. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 71.7463
+  },
+  {
+    "doc_id": "swiss_dwellings__site11861-bldg18508-floor50415",
+    "unit": "App. C",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 65.915
+  },
+  {
+    "doc_id": "swiss_dwellings__site1213-bldg2383-floor48290",
+    "unit": "App. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 95.6641
+  },
+  {
+    "doc_id": "swiss_dwellings__site1213-bldg2383-floor48290",
+    "unit": "App. B",
+    "n_rooms": 14,
+    "missing": 0,
+    "unlabelled_regions": 6,
+    "area": 116.3213
+  },
+  {
+    "doc_id": "swiss_dwellings__site1213-bldg2383-floor48290",
+    "unit": "App. C",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 4,
+    "area": 112.2478
+  },
+  {
+    "doc_id": "swiss_dwellings__site1213-bldg2383-floor48290",
+    "unit": "App. D",
+    "n_rooms": 14,
+    "missing": 0,
+    "unlabelled_regions": 5,
+    "area": 125.1048
+  },
+  {
+    "doc_id": "swiss_dwellings__site1689-bldg2841-floor13117",
+    "unit": "App. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 120.9954
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "unit": "App. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 83.3791
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "unit": "App. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 91.0338
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "unit": "App. C",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 107.2775
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "unit": "App. D",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 34.0066
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "unit": "App. E",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 59.767
+  },
+  {
+    "doc_id": "swiss_dwellings__site1869-bldg2903-floor13293",
+    "unit": "App. F",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 59.7023
+  },
+  {
+    "doc_id": "swiss_dwellings__site2137-bldg2980-floor13588",
+    "unit": "Whg. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 80.6485
+  },
+  {
+    "doc_id": "swiss_dwellings__site2146-bldg2990-floor13636",
+    "unit": "Whg. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 133.7293
+  },
+  {
+    "doc_id": "swiss_dwellings__site2150-bldg3001-floor13690",
+    "unit": "App. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 74.2965
+  },
+  {
+    "doc_id": "swiss_dwellings__site2150-bldg3001-floor13690",
+    "unit": "App. B",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 39.9129
+  },
+  {
+    "doc_id": "swiss_dwellings__site2150-bldg3001-floor13690",
+    "unit": "App. C",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 93.4337
+  },
+  {
+    "doc_id": "swiss_dwellings__site2294-bldg3383-floor15064",
+    "unit": "App. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 105.9703
+  },
+  {
+    "doc_id": "swiss_dwellings__site248-bldg456-floor1800",
+    "unit": "Whg. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 70.9538
+  },
+  {
+    "doc_id": "swiss_dwellings__site248-bldg456-floor1800",
+    "unit": "Whg. B",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 44.3693
+  },
+  {
+    "doc_id": "swiss_dwellings__site248-bldg456-floor1800",
+    "unit": "Whg. C",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 90.7352
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "unit": "App. A",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 73.9023
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "unit": "App. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 66.1663
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "unit": "App. C",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 65.81
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "unit": "App. D",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 65.87
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "unit": "App. E",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 66.8028
+  },
+  {
+    "doc_id": "swiss_dwellings__site261-bldg473-floor1873",
+    "unit": "App. F",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 73.7725
+  },
+  {
+    "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+    "unit": "App. A",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 58.053
+  },
+  {
+    "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+    "unit": "App. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 62.1731
+  },
+  {
+    "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+    "unit": "App. C",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 70.0547
+  },
+  {
+    "doc_id": "swiss_dwellings__site285-bldg527-floor51568",
+    "unit": "App. D",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 63.2572
+  },
+  {
+    "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 98.6655
+  },
+  {
+    "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+    "unit": "App. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 82.3943
+  },
+  {
+    "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+    "unit": "App. C",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 82.5172
+  },
+  {
+    "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+    "unit": "App. D",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 98.6213
+  },
+  {
+    "doc_id": "swiss_dwellings__site299-bldg569-floor2304",
+    "unit": "Whg. A",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 64.6719
+  },
+  {
+    "doc_id": "swiss_dwellings__site299-bldg569-floor2304",
+    "unit": "Whg. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 64.6425
+  },
+  {
+    "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 98.0726
+  },
+  {
+    "doc_id": "swiss_dwellings__site303-bldg598-floor2434",
+    "unit": "App. B",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 55.21
+  },
+  {
+    "doc_id": "swiss_dwellings__site3259-bldg4943-floor22529",
+    "unit": "Whg. A",
+    "n_rooms": 15,
+    "missing": 0,
+    "unlabelled_regions": 8,
+    "area": 41.2643
+  },
+  {
+    "doc_id": "swiss_dwellings__site3377-bldg5220-floor23409",
+    "unit": "App. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 77.7564
+  },
+  {
+    "doc_id": "swiss_dwellings__site3377-bldg5220-floor23409",
+    "unit": "App. B",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 63.52
+  },
+  {
+    "doc_id": "swiss_dwellings__site3468-bldg5347-floor23670",
+    "unit": "Whg. A",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 16.3419
+  },
+  {
+    "doc_id": "swiss_dwellings__site3570-bldg5455-floor23806",
+    "unit": "Whg. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 94.0403
+  },
+  {
+    "doc_id": "swiss_dwellings__site3575-bldg5460-floor23814",
+    "unit": "Whg. A",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 113.1443
+  },
+  {
+    "doc_id": "swiss_dwellings__site3614-bldg5546-floor24071",
+    "unit": "Whg. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 74.9064
+  },
+  {
+    "doc_id": "swiss_dwellings__site3614-bldg5546-floor24071",
+    "unit": "Whg. B",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 4,
+    "area": 74.7894
+  },
+  {
+    "doc_id": "swiss_dwellings__site3614-bldg5546-floor24071",
+    "unit": "Whg. C",
+    "n_rooms": 14,
+    "missing": 0,
+    "unlabelled_regions": 5,
+    "area": 95.2977
+  },
+  {
+    "doc_id": "swiss_dwellings__site3614-bldg5546-floor24071",
+    "unit": "Whg. D",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 89.8086
+  },
+  {
+    "doc_id": "swiss_dwellings__site3764-bldg5789-floor24598",
+    "unit": "App. A",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 59.3538
+  },
+  {
+    "doc_id": "swiss_dwellings__site3764-bldg5789-floor24598",
+    "unit": "App. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 94.4563
+  },
+  {
+    "doc_id": "swiss_dwellings__site3764-bldg5789-floor24598",
+    "unit": "App. C",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 113.6268
+  },
+  {
+    "doc_id": "swiss_dwellings__site383-bldg846-floor3730",
+    "unit": "Whg. A",
+    "n_rooms": 13,
+    "missing": 0,
+    "unlabelled_regions": 5,
+    "area": 66.7948
+  },
+  {
+    "doc_id": "swiss_dwellings__site383-bldg846-floor3730",
+    "unit": "Whg. B",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 45.8296
+  },
+  {
+    "doc_id": "swiss_dwellings__site383-bldg846-floor3730",
+    "unit": "Whg. C",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 65.9651
+  },
+  {
+    "doc_id": "swiss_dwellings__site383-bldg846-floor3730",
+    "unit": "Whg. D",
+    "n_rooms": 4,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 33.0679
+  },
+  {
+    "doc_id": "swiss_dwellings__site3863-bldg6018-floor25218",
+    "unit": "App. A",
+    "n_rooms": 15,
+    "missing": 0,
+    "unlabelled_regions": 8,
+    "area": 74.2218
+  },
+  {
+    "doc_id": "swiss_dwellings__site3863-bldg6018-floor25218",
+    "unit": "App. B",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 4,
+    "area": 63.2271
+  },
+  {
+    "doc_id": "swiss_dwellings__site4038-bldg6362-floor26166",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 80.6895
+  },
+  {
+    "doc_id": "swiss_dwellings__site4038-bldg6362-floor26166",
+    "unit": "App. B",
+    "n_rooms": 4,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 32.8433
+  },
+  {
+    "doc_id": "swiss_dwellings__site4038-bldg6362-floor26166",
+    "unit": "App. C",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 105.1626
+  },
+  {
+    "doc_id": "swiss_dwellings__site418-bldg1080-floor4724",
+    "unit": "Whg. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 85.7108
+  },
+  {
+    "doc_id": "swiss_dwellings__site418-bldg1080-floor4724",
+    "unit": "Whg. B",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 50.1475
+  },
+  {
+    "doc_id": "swiss_dwellings__site418-bldg1080-floor4724",
+    "unit": "Whg. C",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 98.1609
+  },
+  {
+    "doc_id": "swiss_dwellings__site421-bldg1097-floor4796",
+    "unit": "Whg. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 113.3145
+  },
+  {
+    "doc_id": "swiss_dwellings__site421-bldg1097-floor4796",
+    "unit": "Whg. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 71.0884
+  },
+  {
+    "doc_id": "swiss_dwellings__site421-bldg1097-floor4796",
+    "unit": "Whg. C",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 100.5965
+  },
+  {
+    "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+    "unit": "Whg. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 86.0049
+  },
+  {
+    "doc_id": "swiss_dwellings__site4237-bldg7396-floor29509",
+    "unit": "Whg. B",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 104.3575
+  },
+  {
+    "doc_id": "swiss_dwellings__site424-bldg1074-floor4711",
+    "unit": "Whg. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 50.3735
+  },
+  {
+    "doc_id": "swiss_dwellings__site424-bldg1074-floor4711",
+    "unit": "Whg. B",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 49.8571
+  },
+  {
+    "doc_id": "swiss_dwellings__site4267-bldg7556-floor30516",
+    "unit": "Whg. A",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 51.4792
+  },
+  {
+    "doc_id": "swiss_dwellings__site4267-bldg7556-floor30516",
+    "unit": "Whg. B",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 58.3251
+  },
+  {
+    "doc_id": "swiss_dwellings__site499-bldg1187-floor5295",
+    "unit": "Whg. A",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 119.5039
+  },
+  {
+    "doc_id": "swiss_dwellings__site499-bldg1187-floor5295",
+    "unit": "Whg. B",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 48.4101
+  },
+  {
+    "doc_id": "swiss_dwellings__site499-bldg1187-floor5295",
+    "unit": "Whg. C",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 118.9011
+  },
+  {
+    "doc_id": "swiss_dwellings__site499-bldg1187-floor5295",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site541-bldg1235-floor5503",
+    "unit": "Whg. A",
+    "n_rooms": 17,
+    "missing": 0,
+    "unlabelled_regions": 4,
+    "area": 101.1888
+  },
+  {
+    "doc_id": "swiss_dwellings__site541-bldg1235-floor5503",
+    "unit": "Whg. B",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 91.2119
+  },
+  {
+    "doc_id": "swiss_dwellings__site541-bldg1235-floor5503",
+    "unit": "Whg. C",
+    "n_rooms": 12,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 95.113
+  },
+  {
+    "doc_id": "swiss_dwellings__site541-bldg1235-floor5503",
+    "unit": "Whg. D",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 74.0732
+  },
+  {
+    "doc_id": "swiss_dwellings__site604-bldg1319-floor5779",
+    "unit": "App. A",
+    "n_rooms": 5,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 71.3338
+  },
+  {
+    "doc_id": "swiss_dwellings__site610-bldg1324-floor50793",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 96.5795
+  },
+  {
+    "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+    "unit": "App. A",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 66.4996
+  },
+  {
+    "doc_id": "swiss_dwellings__site629-bldg1355-floor5906",
+    "unit": "App. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 76.1614
+  },
+  {
+    "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+    "unit": "App. A",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 110.5489
+  },
+  {
+    "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+    "unit": "App. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 89.8888
+  },
+  {
+    "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+    "unit": "App. C",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 80.5851
+  },
+  {
+    "doc_id": "swiss_dwellings__site644-bldg1390-floor6077",
+    "unit": "App. D",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 113.3398
+  },
+  {
+    "doc_id": "swiss_dwellings__site719-bldg1540-floor6678",
+    "unit": "App. A",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 73.7356
+  },
+  {
+    "doc_id": "swiss_dwellings__site719-bldg1540-floor6678",
+    "unit": "App. B",
+    "n_rooms": 7,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 87.3001
+  },
+  {
+    "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+    "unit": "App. A",
+    "n_rooms": 10,
+    "missing": 0,
+    "unlabelled_regions": 2,
+    "area": 131.5954
+  },
+  {
+    "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+    "unit": "App. B",
+    "n_rooms": 11,
+    "missing": 0,
+    "unlabelled_regions": 3,
+    "area": 136.1052
+  },
+  {
+    "doc_id": "swiss_dwellings__site799-bldg1747-floor18743",
+    "unit": "",
+    "n_rooms": 0,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 0
+  },
+  {
+    "doc_id": "swiss_dwellings__site891-bldg1900-floor8442",
+    "unit": "Whg. A",
+    "n_rooms": 8,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 82.937
+  },
+  {
+    "doc_id": "swiss_dwellings__site891-bldg1900-floor8442",
+    "unit": "Whg. B",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 51.7788
+  },
+  {
+    "doc_id": "swiss_dwellings__site891-bldg1900-floor8442",
+    "unit": "Whg. C",
+    "n_rooms": 6,
+    "missing": 0,
+    "unlabelled_regions": 0,
+    "area": 65.2959
+  },
+  {
+    "doc_id": "swiss_dwellings__site926-bldg1958-floor8576",
+    "unit": "App. A",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 85.3376
+  },
+  {
+    "doc_id": "swiss_dwellings__site926-bldg1958-floor8576",
+    "unit": "App. B",
+    "n_rooms": 9,
+    "missing": 0,
+    "unlabelled_regions": 1,
+    "area": 84.5616
+  }
+]

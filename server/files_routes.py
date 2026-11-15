@@ -24,6 +24,10 @@ async def _restore(request: Request):
     d = request.path_params.get("doc_id")
     if d and SAFE_ID.match(d):
         await artifact_store.ensure_doc(d)
+        pool = await db.get_pool()
+        if pool is not None:
+            from .taught_store import restore_materialized
+            await restore_materialized(pool, d)
 
 
 router = APIRouter(prefix="/api", dependencies=[Depends(_restore)])
@@ -45,12 +49,30 @@ def _not_built(what: str, status_code=404):
     return JSONResponse({"status": "not_built", "detail": f"{what} not available"}, status_code=status_code)
 
 
+def _missing_scene(folder):
+    state = _read_ingest(folder / "ingest.json") if (folder / "ingest.json").is_file() else {}
+    detail = state.get("reason") or state.get("detail")
+    if state.get("readable"):
+        detail = detail or "The 3D view is still being prepared. Counts and quantities stored in the model are available."
+    return JSONResponse({"status": "not_built", "detail": detail or "No 3D view is available for this document."}, status_code=404)
+
+
 @router.get("/docs/{doc_id}/pages/{n}/image")
 async def page_image(doc_id: str, n: int):
     f = _doc_dir(doc_id) / f"page-{n}.png"
     if not f.is_file():
         return _not_built(f"page {n} image")
     return FileResponse(f, media_type="image/png")
+
+
+@router.get("/docs/{doc_id}/evidence/{name}")
+async def scale_evidence(doc_id: str, name: str):
+    from .scale_evidence import crop_path
+    _doc_dir(doc_id)  # same document-id validation as other file endpoints
+    path = crop_path(config.artifacts_dir(), doc_id, name)
+    if path is None:
+        return _not_built("scale evidence")
+    return FileResponse(path, media_type="image/png")
 
 
 @router.get("/docs/{doc_id}/planmap/{n}")
@@ -63,24 +85,48 @@ async def planmap(doc_id: str, n: int):
 
 @router.get("/docs/{doc_id}/scene")
 async def scene(doc_id: str):
+    await _taught_scene(doc_id)
     # S-04 will trigger extrusion here when no scene exists.
     f = _doc_dir(doc_id) / "scene.json"
     if not f.is_file():
-        return _not_built("scene")
-    return FileResponse(f, media_type="application/json")
+        return _missing_scene(f.parent)
+    return FileResponse(f, media_type="application/json", headers={'Cache-Control': 'no-store'})
+
+
+async def _taught_scene(doc_id):
+    from .taught_scene import ensure
+    try:
+        await ensure(doc_id)
+    except ValueError as exc:
+        raise HTTPException(409, str(exc))
+
+
+@router.get('/docs/{doc_id}/knowledge-graph')
+async def knowledge_graph(doc_id: str):
+    _doc_dir(doc_id)
+    from engine.kg import build
+    return await asyncio.to_thread(build, doc_id, config.artifacts_dir())
 
 
 @router.get("/docs/{doc_id}/files/{name}")
 async def doc_file(doc_id: str, name: str):
     if name not in FILE_NAMES and not THUMB.match(name):
         raise HTTPException(404, "unknown file")
+    if name.startswith('scene.'):
+        await _taught_scene(doc_id)
+        if name == 'scene.usdz':
+            manifest = _doc_dir(doc_id) / 'scene.json'
+            if manifest.is_file() and not json.loads(manifest.read_text()).get('usdz'):
+                return _not_built('Updated AR model')
     f = _doc_dir(doc_id) / name
     if not f.is_file():
         if name == "elements.json" or re.match(r"^text-\d+\.json$", name):
             # Optional sidecars the viewer probes for every document: an empty payload, not a console-visible 404.
             return JSONResponse({"status": "not_built", "elements": [], "words": []})
+        if name in {"scene.json", "scene.glb", "scene.usdz"}:
+            return _missing_scene(f.parent)
         return _not_built(name)
-    return FileResponse(f)
+    return FileResponse(f, headers={'Cache-Control': 'no-store'})
 
 
 def _slug(s: str) -> str:
@@ -168,6 +214,8 @@ async def _ingest(doc_id: str):
     f = config.artifacts_dir() / doc_id / "ingest.json"
     proc = None
     failure = None
+    waiting = None
+    indexed = False
     try:
         # Includes time waiting for the single heavy-job slot: queued uploads cannot hang forever either.
         async with asyncio.timeout(INGEST_TIMEOUT):
@@ -180,7 +228,17 @@ async def _ingest(doc_id: str):
                     env={**os.environ, "INGEST_MANAGED_JOB": "1",
                          "HEAVY_SLOT_HELD": "1" if prefix or os.environ.get("HEAVY_SLOT_HELD") == "1" else "0"},
                     start_new_session=True)
-                await proc.wait()
+                waiting = asyncio.create_task(proc.wait())
+                while not waiting.done():
+                    await asyncio.wait([waiting], timeout=.5)
+                    state = _read_ingest(f)
+                    if not indexed and state.get("readable") and (f.parent / "elements.json").is_file():
+                        indexed = True
+                        # Persist the usable index while 3D continues; the source
+                        # was already saved by upload(). Avoid resending it.
+                        await _persist(doc_id, originals=False)
+                        await publish({"type": "doc.new", "doc_id": doc_id})
+                await waiting
         state = _read_ingest(f)
         if proc.returncode or state.get("status") not in {"ready", "partial", "failed"}:
             detail = f"Ingestion job exited with code {proc.returncode} without completing."
@@ -202,6 +260,8 @@ async def _ingest(doc_id: str):
             except ProcessLookupError:
                 pass
             await proc.wait()
+        if waiting is not None and not waiting.done():
+            waiting.cancel()
         if failure:
             _fail_ingest(f, failure)
     await _persist(doc_id)
@@ -213,17 +273,20 @@ async def _ingest(doc_id: str):
     await publish({"type": "doc.new", "doc_id": doc_id})
 
 
-async def _persist(doc_id: str):
-    """After ingestion: update the documents row (pages, kind) and mirror every derived file to PostgreSQL."""
+async def _persist(doc_id: str, originals: bool = False):
+    """After ingestion: sync document metadata and mirror derived files to PostgreSQL."""
     pool = await db.get_pool()
     if pool is None:
         return
     try:
         d = config.artifacts_dir() / doc_id
         meta = json.loads((d / "doc.json").read_text())
-        await pool.execute("update documents set pages=$2, files=$3::jsonb where doc_id=$1",
-                           doc_id, int(meta.get("pages") or 1), json.dumps(meta["files"]))
-        await artifact_store.save_doc(pool, doc_id)
+        # formats describes the source upload: JPEG can have a derived PNG in files.
+        # Older sidecars without formats still have explicit format keys in files.
+        formats = meta.get("formats") or list(meta["files"])
+        await pool.execute("update documents set pages=$2, files=$3::jsonb, formats=$4 where doc_id=$1",
+                           doc_id, int(meta.get("pages") or 1), json.dumps(meta["files"]), formats)
+        await artifact_store.save_doc(pool, doc_id, originals=originals)
     except Exception as e:  # noqa: BLE001
         print("persist failed:", doc_id, repr(e)[:200])
 
@@ -260,7 +323,10 @@ def _read_ingest(f):
 
 def _fail_ingest(f, reason):
     state = _read_ingest(f)
-    state.update(status="failed", detail=reason, reason=reason)
+    readable = state.get("readable") or (f.parent / "elements.json").is_file()
+    if readable:
+        reason += " Counts and quantities already indexed remain available; the 3D view may be unavailable."
+    state.update(status="partial" if readable else "failed", readable=bool(readable), detail=reason, reason=reason)
     tmp = f.with_suffix(".tmp")
     tmp.write_text(json.dumps(state))
     tmp.replace(f)

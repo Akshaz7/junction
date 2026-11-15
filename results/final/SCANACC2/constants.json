@@ -1,0 +1,192 @@
+{
+  "note": "No constant was changed by SCANACC2. These are the existing production values, re-validated on the CubiCasa dev split. All numbers come from offline replay of cached icon probabilities (vision/build_planmaps.py extraction + verify.free_pass duplicate merge + confidence cut).",
+  "dev_split": {
+    "file": "results/final/SCANACC2/split.json",
+    "n_dev": 115,
+    "n_test": 40,
+    "blind": 1,
+    "source": "data/cubicasa5k/calib/gt.json (SVG-derived gold counts), disjoint from the benchmark pool and the held-out id list"
+  },
+  "constants": {
+    "cut_door": {
+      "value": 0.7,
+      "swept": [
+        0.4,
+        0.5,
+        0.6,
+        0.7,
+        0.8
+      ],
+      "n": 115,
+      "dev_exact_acc": {
+        "0.5": 0.348,
+        "0.6": 0.435,
+        "0.7": 0.461,
+        "0.8": 0.304
+      },
+      "confidence": "medium: optimum is sharp at 0.7 but 0.6 and 0.7 differ by 3 documents"
+    },
+    "cut_window": {
+      "value": 0.7,
+      "n": 115,
+      "dev_exact_acc": {
+        "0.5": 0.313,
+        "0.6": 0.4,
+        "0.7": 0.47,
+        "0.8": 0.4
+      },
+      "confidence": "medium"
+    },
+    "cut_toilet": {
+      "value": 0.7,
+      "n": 115,
+      "dev_exact_acc": {
+        "0.5": 0.757,
+        "0.6": 0.783,
+        "0.7": 0.817,
+        "0.8": 0.791
+      },
+      "confidence": "medium"
+    },
+    "dup_gap_frac": {
+      "value": 0.003,
+      "tested_alternatives": [
+        0.01,
+        0.02,
+        0.04,
+        0.08
+      ],
+      "result": "no gain with max or weighted-mean confidence",
+      "n": 115,
+      "confidence": "medium"
+    },
+    "dup_iou": {
+      "value": 0.3,
+      "confidence": "low: not swept on its own"
+    },
+    "detector_input_size": {
+      "value": 1024,
+      "tested": [
+        768
+      ],
+      "dev_exact_acc_at_cut_0.7": {
+        "1024": {
+          "door": 0.461,
+          "window": 0.47,
+          "toilet": 0.817,
+          "sink": 0.217,
+          "shower_bathtub": 0.13
+        },
+        "768": {
+          "door": 0.487,
+          "window": 0.417,
+          "toilet": 0.783,
+          "sink": 0.261,
+          "shower_bathtub": 0.096
+        }
+      },
+      "n": 115,
+      "confidence": "medium: mixed, no net gain"
+    }
+  },
+  "rejected_candidates": {
+    "tta_rotate_flip_average": {
+      "n": 62,
+      "result": "doors +2 points, windows -1 to -4 points at cut 0.7, within noise; full dev run could not finish under memory pressure, so not adopted"
+    },
+    "seg_opening_second_signal": {
+      "n": 115,
+      "result": "no gain"
+    },
+    "collinear_fragment_merge": {
+      "n": 115,
+      "result": "no gain"
+    },
+    "tiling": {
+      "result": "dropped; previously cost sample200 76 to 72"
+    },
+    "upscale_1280": {
+      "n_all": 115,
+      "n_small_long_side_under_1000": 71,
+      "cut_0.7_exact_acc": {
+        "small": {
+          "production": {
+            "door": 0.521,
+            "window": 0.535,
+            "toilet": 0.789
+          },
+          "1280": {
+            "door": 0.521,
+            "window": 0.423,
+            "toilet": 0.761
+          }
+        },
+        "all": {
+          "production": {
+            "door": 0.461,
+            "window": 0.47,
+            "toilet": 0.817
+          },
+          "1280": {
+            "door": 0.461,
+            "window": 0.383,
+            "toilet": 0.791
+          }
+        }
+      },
+      "result": "worse on windows; production letterbox already resizes small inputs to 1024; not adopted"
+    },
+    "nested_suppression": {
+      "n": 115,
+      "thresholds": [
+        0.5,
+        0.7,
+        0.9
+      ],
+      "result": "no change in door/window/toilet (argmax components do not nest); not adopted"
+    },
+    "sink_cut_0.8": {
+      "dev_n": 115,
+      "dev_sink_exact_acc": {
+        "none": 0.217,
+        "0.7": 0.33,
+        "0.75": 0.409,
+        "0.8": 0.443,
+        "0.85": 0.435
+      },
+      "test_n": 40,
+      "test_sink_exact_acc": {
+        "none": 0.275,
+        "0.8": 0.4,
+        "0.85": 0.475
+      },
+      "sample200_fake_gate": "6 correct-to-wrong on sink count questions (value one lower), 0 wrong-to-correct; the benchmark question counts kitchen and bathroom sinks combined, which the SVG-derived gold does not match",
+      "result": "not adopted"
+    },
+    "upscale_all_classes": {
+      "n": 115,
+      "exact_acc_all_classes_1024_vs_1280": {
+        "sink": [
+          0.217,
+          0.2
+        ],
+        "shower_bathtub": [
+          0.13,
+          0.113
+        ]
+      },
+      "768": {
+        "sink": 0.261,
+        "shower_bathtub": 0.096
+      },
+      "result": "no class improves reliably; not adopted"
+    }
+  },
+  "raw_vs_gold_totals_dev": {
+    "window_components": 770,
+    "window_gold": 750,
+    "door_components": 966,
+    "door_gold": 855,
+    "reading": "totals match; per-document errors come from fragmented real openings and similar-confidence false blobs, not from threshold choice"
+  }
+}

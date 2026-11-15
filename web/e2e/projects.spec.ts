@@ -2,6 +2,7 @@ import { mkdirSync } from 'node:fs'
 import { resolve } from 'node:path'
 import { expect, test, type Page, type Route } from '@playwright/test'
 import type { Project, ProjectOverview } from '../src/lib/projects-api'
+import { mockCluster, mockGraph, mockNode } from '../src/lib/kg-mock'
 
 // Projects UI against fixtures served from the page (the backend is built in parallel).
 // Set PROJ_SHOTS=<dir> to write the review screenshots.
@@ -53,6 +54,12 @@ async function backend(page: Page, state: { projects: Project[]; fail?: boolean;
     const project = state.projects.find((row) => row.id === rest[0])
     if (!project) return json(route, { detail: 'Project not found.' }, 404)
     if (rest[1] === 'overview') return json(route, overview)
+    if (rest[1] === 'graph') {
+      const full = mockGraph(project.id)
+      if (rest[2] === 'node') return json(route, mockNode(full, decodeURIComponent(rest[3])))
+      if (rest[2] === 'stats') return json(route, full.stats)
+      return json(route, url.searchParams.get('depth') === 'full' ? full : mockCluster(full))
+    }
     if (rest[1] === 'docs' && method === 'POST') { for (const id of (route.request().postDataJSON() as { doc_ids: string[] }).doc_ids) project.docs.push(doc(id, library.find((l) => l.doc_id === id)!.title, 'raster', 'png', 'other', null)); return json(route, project) }
     if (rest[1] === 'docs' && method === 'PATCH') { Object.assign(project.docs.find((d) => d.doc_id === rest[2])!, route.request().postDataJSON(), { role_source: 'user' }); return json(route, project) }
     if (rest[1] === 'docs' && method === 'DELETE') { project.docs = project.docs.filter((d) => d.doc_id !== rest[2]); return json(route, project) }
@@ -105,6 +112,7 @@ test.describe('desktop', () => {
   })
 
   test('project page: ask, files with role and level, overview, Show opens the viewer', async ({ page }) => {
+    test.setTimeout(45_000)
     const state = { projects: [baseProject()], chats: [{ id: 'c1', title: 'How many doors?', created_at: new Date(Date.now() - 3600_000).toISOString(), project_id: 'p1' }] }
     await backend(page, state)
     await page.goto('/#/projects?id=p1')
@@ -114,15 +122,29 @@ test.describe('desktop', () => {
     await shoot(page, 'project-chats')
     await page.getByRole('tab', { name: 'Files' }).click()
     await expect(page.getByText('Set by you')).toBeVisible()
-    await expect(page.getByText('Set automatically').first()).toBeVisible()
-    await page.getByLabel('Type of Door schedule').selectOption('spec')
-    await expect(page.getByLabel('Type of Door schedule')).toHaveValue('spec')
-    const level = page.getByLabel(/Level for ac20/i)
-    await level.fill('Level 1'); await level.press('Enter')
+    await expect(page.getByRole('navigation', { name: 'Document folders' })).toContainText('Plans')
+    await page.getByRole('button', { name: 'Open Plans folder' }).click()
+    await expect(page.locator('.pj-explorer .data-file-row')).toHaveCount(2)
+    await page.getByRole('button', { name: 'Open All Files folder' }).click()
+    const edit = async (id: string, type: string, level: string) => {
+      await page.locator(`.pj-explorer [data-doc-id="${id}"]`).getByLabel(/^Actions for/).click()
+      await page.getByRole('button', { name: 'Change type and level' }).click()
+      const dialog = page.getByRole('dialog', { name: 'Type and level' })
+      await dialog.getByLabel('Type').selectOption(type)
+      await dialog.getByLabel('Level').fill(level)
+      await dialog.getByRole('button', { name: 'Save' }).click()
+    }
+    await edit('ac20_arc', 'model', 'Level 1')
     await expect.poll(() => state.projects[0].docs[0].level).toBe('Level 1')
+    await edit('spec-a', 'spec', '')
+    await expect.poll(() => state.projects[0].docs[3].role).toBe('spec')
+    await page.getByRole('button', { name: 'Open Level 1 plan' }).click()
+    await expect(page.locator('.pj-explorer').getByRole('complementary', { name: 'Document details' })).toBeVisible()
     await shoot(page, 'project-files')
+    await page.getByRole('button', { name: 'Close document details' }).click()
+    await page.getByLabel('Actions for Door schedule').click()
     await page.getByRole('button', { name: 'Remove Door schedule from project' }).click()
-    await expect(page.getByLabel('Level for Door schedule')).toHaveCount(0)
+    await expect(page.locator('.pj-explorer [data-doc-id="spec-a"]')).toHaveCount(0)
     await page.getByRole('tab', { name: 'Overview' }).click()
     await expect(page.getByText('212 m²')).toBeVisible()
     await expect(page.getByRole('heading', { name: 'Mistakes found' })).toBeVisible()
@@ -174,4 +196,22 @@ test.describe('phone', () => {
       await shoot(page, `phone-${name}`)
     })
   }
+})
+
+test('graph tab: stats, search, details with plain-words methods, check these list', async ({ page }) => {
+  await backend(page, { projects: [baseProject()] })
+  await page.goto('/#/projects?id=p1&tab=graph')
+  await expect(page.getByTestId('graph-tab')).toBeVisible()
+  await expect(page.getByLabel('Graph totals')).toContainText('Items')
+  await page.getByRole('searchbox', { name: 'Search the graph' }).fill('kitchen')
+  await page.getByRole('listbox').getByRole('button').first().click()
+  const panel = page.getByRole('complementary', { name: 'Item details' })
+  await expect(panel).toContainText('Kitchen')
+  await expect(panel.getByText(/matched by position/).first()).toBeVisible()
+  await expect(panel.getByRole('button', { name: 'Ask about this' })).toBeVisible()
+  await panel.getByRole('button', { name: 'Ask about this' }).click()
+  await expect(page.locator('#project-question')).toHaveValue(/Kitchen/)
+  await page.locator('button.kg-check').click()
+  await expect(page.getByRole('complementary', { name: 'Check these' })).toBeVisible()
+  expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true)
 })

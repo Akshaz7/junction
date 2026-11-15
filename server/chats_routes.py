@@ -38,10 +38,14 @@ def _no_data_answer(question, doc_ids, on_event=None):
             dd = root / d
             if load_doc(d, root) or load_sheet_parent(d, root) or any(dd.glob("text*.json")) or any(dd.glob("page-*.png")):   # a page image: the drawing reader can still answer
                 return None
-        running = any(json.loads((root / d / "ingest.json").read_text()).get("status") == "running"
-                      for d in doc_ids if (root / d / "ingest.json").is_file())
+        states = [json.loads((root / d / "ingest.json").read_text())
+                  for d in doc_ids if (root / d / "ingest.json").is_file()]
+        running = any(s.get("status") == "running" for s in states)
+        failures = [s.get("reason") or s.get("detail") for s in states
+                    if s.get("status") in {"failed", "partial"} and (s.get("reason") or s.get("detail"))]
         why = ("This document is still being processed, so there is nothing to answer from yet. Try again in a moment."
-               if running else "This document has no readable drawing data on this server (no plan map, model or text), "
+               if running else " ".join(dict.fromkeys(failures)) if failures else
+               "This document has no readable drawing data on this server (no plan map, model or text), "
                "so I cannot answer questions about it.")
         t0 = time.perf_counter()
         if on_event:
@@ -52,8 +56,15 @@ def _no_data_answer(question, doc_ids, on_event=None):
         return None
 
 
-def _run_engine(question, doc_ids, on_event, scene_state=None, history=None, catalogue=None):
+def _run_engine(question, doc_ids, on_event, scene_state=None, history=None, catalogue=None, project=None):
     if ENGINE is _real_engine:
+        if project is not None:
+            from engine.kg_answer import answer as graph_answer
+            quick = graph_answer(question, project, config.artifacts_dir())
+            if quick is not None:
+                for step in quick.get("trace", []):
+                    on_event("trace", step)
+                return quick
         from engine.library import CATALOGUE, drawing_selection_answer, library_answer, library_search_answer, sheet_count_answer
         token = CATALOGUE.set(catalogue)
         try:
@@ -78,7 +89,22 @@ def _selected_engine(question, doc_ids, on_event, scene_state=None, history=None
     # E-20: hidden items from this chat's scene edits shape later answers ("how many windows" after "remove W7").
     # history: earlier turns of this chat, for plain conversation without a document.
     if ENGINE is _real_engine:
-        return ENGINE(question, doc_ids, on_event, scene_state=scene_state, history=history)
+        result = ENGINE(question, doc_ids, on_event, scene_state=scene_state, history=history)
+        from .ifc_ingest import PARTIAL_DETAIL
+        for doc_id in doc_ids:
+            folder = config.artifacts_dir() / doc_id
+            state_path = folder / "ingest.json"
+            if not (folder / "elements.json").is_file() or (folder / "scene.json").is_file() or not state_path.is_file():
+                continue
+            try:
+                state = json.loads(state_path.read_text())
+            except (OSError, ValueError):
+                continue
+            notice = ("The 3D view is still being prepared. " + PARTIAL_DETAIL
+                      if state.get("status") == "running" else state.get("detail"))
+            if notice:
+                result["answer"]["text_md"] += "\n\n" + notice
+        return result
     return ENGINE(question, doc_ids, on_event)
 
 
@@ -212,7 +238,7 @@ async def get_scene_state(chat_id: str, doc_id: str | None = None):
     if await pool.fetchval("select 1 from chats where id=$1", cid) is None:
         raise HTTPException(404, "chat not found")
     states = await scene_edits.scene_state(pool, cid, doc_id)
-    return {"chat_id": str(cid), "states": [{k: v for k, v in s.items() if k != "type"} for s in states]}
+    return {"chat_id": str(cid), "states": [{k: v for k, v in scene_edits.public_state(s).items() if k != "type"} for s in states]}
 
 
 async def _attach_advice(ans: dict, doc_ids: list[str], hidden: list[str], cid) -> None:
@@ -253,11 +279,13 @@ async def ask(chat_id: str, body: NewMessage):
     if c is None:
         raise HTTPException(404, "chat not found")
     doc_ids = body.doc_ids if body.doc_ids is not None else ([c["doc_id"]] if c["doc_id"] else [])
-    if body.doc_ids is None and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
+    project = None
+    if (body.doc_ids is None or body.doc_ids == []) and not doc_ids:   # a project chat with no explicit selection asks all the project's documents
         pid = await pool.fetchval("select project_id from chats where id=$1", cid)
         if isinstance(pid, uuid.UUID):
-            from .projects_routes import project_doc_ids
-            doc_ids = await project_doc_ids(pool, pid) or []
+            from .projects_routes import _project
+            project = await _project(pool, pid, refresh=False)
+            doc_ids = [d["doc_id"] for d in project["docs"]]
     if doc_ids:
         from .changes_source import visible_doc_ids
         listed = await visible_doc_ids(pool)
@@ -308,6 +336,11 @@ async def ask(chat_id: str, body: NewMessage):
                 hidden = list(dict.fromkeys(i for st in states.values() for i in st["hidden"]))
                 sstate = {"hidden": hidden, "edits": edits,
                           "last_hidden": scene_edits.last_hidden(edits, doc_ids)}
+                # shared layer: Edit-panel moves / wall materials ("move the window back", "put it back where it was")
+                moved = {i: v for st in states.values() for i, v in (st.get("moved") or {}).items()}
+                mats = {i: v for st in states.values() for i, v in (st.get("materials") or {}).items()}
+                last = scene_edits.last_edit(edits, doc_ids)
+                sstate.update({k: v for k, v in (("moved", moved), ("materials", mats), ("last_edit", last)) if v})
         except Exception:  # noqa: BLE001 — scene state is optional context, never block the answer
             sstate = None
 
@@ -331,7 +364,11 @@ async def ask(chat_id: str, body: NewMessage):
                 except RuntimeError:  # a disconnected request's loop may already be closed
                     pass
 
-        task = asyncio.create_task(asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue))
+        from .markup_routes import answer_taught
+        taught = await answer_taught(pool, body.content, doc_ids) if ENGINE is _real_engine else None
+        async def run_selected():
+            return taught if taught is not None else await asyncio.to_thread(_run_engine, body.content, doc_ids, on_event, sstate, history, catalogue, project)
+        task = asyncio.create_task(run_selected())
         task.add_done_callback(lambda _: q.put_nowait(None) if accepting else None)
         deadline = time.monotonic() + partial_deadline()
         last_delta = 0.0
@@ -408,6 +445,11 @@ async def ask(chat_id: str, body: NewMessage):
             "insert into messages (chat_id, role, content) values ($1,'assistant',$2) returning id",
             cid, ans["answer"]["text_md"])
         answer_docs = ans.get("doc_ids") or doc_ids
+        try:
+            from .scale_evidence import persist as persist_scale_evidence
+            await persist_scale_evidence(pool, ans, config.artifacts_dir())
+        except Exception:  # noqa: BLE001 - a crop-store outage must not drop the answer
+            pass
         await pool.execute("insert into answers (message_id, chat_id, doc_id, answer) values ($1,$2,$3,$4::jsonb)",
                            mid, cid, answer_docs[0] if answer_docs else None, json.dumps(ans))
         ACTIVE.pop(str(cid), None)  # before the notification, so the resync snapshot shows no live job

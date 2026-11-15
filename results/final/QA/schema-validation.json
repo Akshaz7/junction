@@ -1,0 +1,38 @@
+{
+  "fixture_type": "generated unit fixtures, never product/demo data",
+  "results": [
+    {
+      "schema": "IFC2X3",
+      "checks": {
+        "door_count": true,
+        "typed_generic_pipe": true,
+        "millimetres": true,
+        "width": true,
+        "storey": true,
+        "missing_fire": true
+      }
+    },
+    {
+      "schema": "IFC4",
+      "checks": {
+        "door_count": true,
+        "typed_generic_pipe": true,
+        "millimetres": true,
+        "width": true,
+        "storey": true,
+        "missing_fire": true
+      }
+    },
+    {
+      "schema": "IFC4X3",
+      "checks": {
+        "door_count": true,
+        "typed_generic_pipe": true,
+        "millimetres": true,
+        "width": true,
+        "storey": true,
+        "missing_fire": true
+      }
+    }
+  ]
+}

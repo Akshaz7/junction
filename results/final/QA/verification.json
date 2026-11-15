@@ -1,0 +1,30 @@
+{
+  "created": "2026-11-14T21:19:52+00:00",
+  "runner_sha256": "c34c946f4849d9e9ccab23d7004715f98a86cc4b506a93ff061276f62a05dd5b",
+  "runner_development_finished_before_unseen_evaluation": true,
+  "python_compiles": true,
+  "self_tests_passed": 22,
+  "self_test_and_validation_wall_s": 0.24,
+  "unit_fixtures": "Generated test fixtures only; IFC2X3/IFC4/IFC4X3, millimetres and feet, missing source units; no product/demo data.",
+  "public_cases_validated": 120,
+  "holdout_questions_excluded_from_public_file": 30,
+  "git_diff_check_passed": true,
+  "git_commit_status": "blocked: sandbox denied creation of .git/worktrees/qa/index.lock",
+  "branch": "final/qa",
+  "last_commit": "aa436a771bd17c9f2eb2231dd61b0b5de9601e21",
+  "completed_reports_privacy_and_budget_validated": 16,
+  "private_case_digests_match_manifests": true,
+  "reports_contain_only_public_individual_rows": true,
+  "every_report_file_under_10_mb": true,
+  "runner_unchanged_through_unseen_evaluation": true,
+  "all_selected_final_questions_completed": 162,
+  "total_question_evaluations": 555,
+  "row_budget": {
+    "accounted_usd": 1.908472,
+    "reported_usd": 1.520712,
+    "unsettled_reserve_usd": 0.38776,
+    "requests": 503
+  },
+  "final_main_commit": "9d244d220e8e85f761743f365a66a4bcfbb22353",
+  "verified_at": "2026-11-14T21:38:52+00:00"
+}

@@ -1,0 +1,29 @@
+{
+  "file": "data/full/junction-dataset/data/ifc_bench/sixty5_arc.ifc",
+  "size_bytes": 342657851,
+  "end_only": true,
+  "status": "failed",
+  "ingest_s": 0.008,
+  "state": {
+    "status": "failed",
+    "stages": [],
+    "detail": "This IFC is 342.7 MB; this server indexes IFC files up to 104.858 MB. The original is stored. Split the model into smaller IFC files and upload them separately.",
+    "mode": "vlm",
+    "started_at": 1794700554.6178958,
+    "step": "starting",
+    "readable": false,
+    "progress": 0.0,
+    "cost_usd": 0.0,
+    "updated": "2026-11-15T01:55:54+0200",
+    "reason": "This IFC is 342.7 MB; this server indexes IFC files up to 104.858 MB. The original is stored. Split the model into smaller IFC files and upload them separately."
+  },
+  "validation_note": "Only code answers without model calls are verified here. Fake-provider fallbacks are not source observations.",
+  "failure_answer": {
+    "text_md": "This IFC is 342.7 MB; this server indexes IFC files up to 104.858 MB. The original is stored. Split the model into smaller IFC files and upload them separately.",
+    "value": null,
+    "unit": null,
+    "confidence": 0.0,
+    "abstained": true
+  },
+  "time_maximum_rss_bytes": 58163200
+}

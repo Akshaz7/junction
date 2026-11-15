@@ -1,0 +1,143 @@
+[
+  {
+    "doc_id": "cubicasa5k__colorful-11397",
+    "source_kind": "raster",
+    "source_unchanged": true,
+    "input_sha256": {
+      "doc.json": "40edb5ccfb050c01e8b4e1fd0189042cc880b03c53f70c8e93d1c91f096d7485",
+      "page-1.png": "667e8e3dbe8763e375616ceae50353dd8e3cd1791668f28faf7bea5e27841779",
+      "page-1.thumb.png": "5c7240b55c1b2f431a45c7433f6058e997113ea270c40d0ef87a9a35b494af0e",
+      "planmap-1.json": "6479a7a33543e36cbe1bedc488592a0ba6054f5980e98d0b9b57f15416f8191d",
+      "planmap-det.json": "608985de893992543c6b6fd15fdf4994705473a93dbcb7a8cd72db1717447175",
+      "planmap-seg.json": "60b2241697cce168b36da7f0575fdaa0bc9c30da561d014a256b99bfcfdc3796"
+    },
+    "counts": {
+      "door": {
+        "expected": 11,
+        "before": 0,
+        "after": 11,
+        "item_ids": [
+          "door-001",
+          "door-002",
+          "door-003",
+          "door-004",
+          "door-005",
+          "door-006",
+          "door-007",
+          "door-008",
+          "door-009",
+          "door-010",
+          "door-011"
+        ]
+      },
+      "window": {
+        "expected": 11,
+        "before": 0,
+        "after": 11,
+        "item_ids": [
+          "window-001",
+          "window-002",
+          "window-003",
+          "window-004",
+          "window-005",
+          "window-006",
+          "window-007",
+          "window-008",
+          "window-009",
+          "window-010",
+          "window-011"
+        ]
+      }
+    },
+    "built": {
+      "prims": 52,
+      "parts": 77,
+      "mb": 0.07
+    }
+  },
+  {
+    "doc_id": "swiss_dwellings__site289-bldg536-floor2149",
+    "source_kind": "dxf",
+    "source_unchanged": true,
+    "input_sha256": {
+      "doc.json": "2a885c19ce02992ab3ead3484d78d3097640cf511753e1071c88d11b034a23d3",
+      "page-1.png": "8f38fe3986a365e97757a70ba1a47668a87897be454053c12ff04299d0ba8906",
+      "page-1.thumb.png": "47d1ed928e7dd130489ed28648b17c08e7d40c44ecf0d7e28f7e4b00232fa060",
+      "planmap-1.json": "429a559cb309b4f57adf127702a631991a25f2804aff0c050aabcc1166b1fec7"
+    },
+    "counts": {
+      "door": {
+        "expected": 36,
+        "before": 0,
+        "after": 36,
+        "item_ids": [
+          "door-1",
+          "door-10",
+          "door-11",
+          "door-12",
+          "door-13",
+          "door-14",
+          "door-15",
+          "door-16",
+          "door-17",
+          "door-18",
+          "door-19",
+          "door-2",
+          "door-20",
+          "door-21",
+          "door-22",
+          "door-23",
+          "door-24",
+          "door-25",
+          "door-26",
+          "door-27",
+          "door-28",
+          "door-29",
+          "door-3",
+          "door-30",
+          "door-31",
+          "door-32",
+          "door-33",
+          "door-34",
+          "door-35",
+          "door-36",
+          "door-4",
+          "door-5",
+          "door-6",
+          "door-7",
+          "door-8",
+          "door-9"
+        ]
+      },
+      "window": {
+        "expected": 17,
+        "before": 0,
+        "after": 17,
+        "item_ids": [
+          "window-1",
+          "window-10",
+          "window-11",
+          "window-12",
+          "window-13",
+          "window-14",
+          "window-15",
+          "window-16",
+          "window-17",
+          "window-2",
+          "window-3",
+          "window-4",
+          "window-5",
+          "window-6",
+          "window-7",
+          "window-8",
+          "window-9"
+        ]
+      }
+    },
+    "built": {
+      "prims": 168,
+      "parts": 221,
+      "mb": 0.75
+    }
+  }
+]

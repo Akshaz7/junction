@@ -1,0 +1,71 @@
+{
+  "seed": 20261114,
+  "unseen_file": "data/full/junction-dataset/data/ifc_models/resbim-110_model.ifc",
+  "reserved_before_development": true,
+  "file_count": 28467,
+  "documents": [
+    "ifc_bench__sixty5-arc",
+    "ifc_bench__sixty5-plumbing",
+    "ifc_bench__sixty5-ventilation",
+    "ifc_bench__sixty5-electrical",
+    "ifc_bench__dental-clinic-str",
+    "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+    "swiss_dwellings__site961-bldg2019-floor8945",
+    "opening_design__crema-cafe-models-crema-cafe-6-blend",
+    "cubicasa5k__high-quality-architectural-1269",
+    "wikimedia__79521417",
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives",
+    "ifc_models__bimspeed-vitoria-ald26-before",
+    "ifc_models__bimspeed-vitoria-ald26-project"
+  ],
+  "selection_method": "Four largest IFCs; large structural IFC; largest IFC from a second source; largest DXF and largest Swiss dwelling DXF; largest PNG and JPG; largest DWG; explicit before/project IFC revision pair. File sizes, not outcome, select complexity.",
+  "cross_document": [
+    {
+      "id": "project:pipe-total",
+      "doc_ids": [
+        "ifc_bench__sixty5-plumbing",
+        "ifc_bench__sixty5-ventilation",
+        "ifc_bench__sixty5-electrical"
+      ],
+      "kind": "pipe",
+      "operation": "sum",
+      "owner": "PROJECTS",
+      "question": "Across the selected plumbing, ventilation and electrical models, how many straight pipe segments are recorded in total? Count each occurrence once."
+    },
+    {
+      "id": "project:door-total",
+      "doc_ids": [
+        "ifc_bench__sixty5-arc",
+        "ifc_bench__sixty5-plumbing",
+        "ifc_bench__sixty5-ventilation",
+        "ifc_bench__sixty5-electrical"
+      ],
+      "kind": "door",
+      "operation": "sum",
+      "owner": "PROJECTS",
+      "question": "Across these selected discipline models, how many door objects are recorded in total? Do not infer unmodelled doors."
+    },
+    {
+      "id": "revision:door-change",
+      "doc_ids": [
+        "ifc_models__bimspeed-vitoria-ald26-before",
+        "ifc_models__bimspeed-vitoria-ald26-project"
+      ],
+      "kind": "door",
+      "operation": "difference",
+      "owner": "CHANGES",
+      "question": "Comparing the first (before) model with the second (project) model, what is the net change in recorded door count? Give second minus first."
+    },
+    {
+      "id": "revision:window-change",
+      "doc_ids": [
+        "ifc_models__bimspeed-vitoria-ald26-before",
+        "ifc_models__bimspeed-vitoria-ald26-project"
+      ],
+      "kind": "window",
+      "operation": "difference",
+      "owner": "CHANGES",
+      "question": "Comparing the first (before) model with the second (project) model, what is the net change in recorded window count? Give second minus first."
+    }
+  ]
+}

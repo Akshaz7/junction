@@ -1,0 +1,10 @@
+{
+  "run": "local-first",
+  "base_url": "http://localhost:5173",
+  "status": "failed",
+  "startTime": "2026-11-14T20:13:09.274Z",
+  "duration": 1640.946,
+  "counts": {
+    "failed": 3
+  }
+}

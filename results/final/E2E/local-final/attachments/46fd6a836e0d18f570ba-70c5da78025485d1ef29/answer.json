@@ -1,0 +1,372 @@
+{
+  "answer_id": "c3cb8a8499104de8bb484dc1cc2027b3",
+  "question": "How many doors are there?",
+  "doc_ids": [
+    "ifc_bench__4351-arc"
+  ],
+  "answer": {
+    "text_md": "**There are 17 doors in this model.** [1][2][3]",
+    "value": 17,
+    "unit": "count",
+    "confidence": 1,
+    "abstained": false
+  },
+  "citations": [
+    {
+      "n": 1,
+      "doc_id": "ifc_bench__4351-arc",
+      "page": 1,
+      "kind": "element",
+      "bbox_px": [
+        40,
+        255.9,
+        1047.8,
+        2250.4
+      ],
+      "item_ids": [
+        "0wT$C4UIHBtPxNrY1uCPFK",
+        "1UDFRzXYL0uenoP45X20Ib",
+        "2EvxrJh$nBCOf6drB7QwTZ",
+        "2tMe7qG7n4XhDG_TV6QikP",
+        "2rY6ZB_FT3bRLgI3yFLRV5",
+        "2rY6ZB_FT3bRLgI3yFLRMf",
+        "2rY6ZB_FT3bRLgI3yFLRMH",
+        "2rY6ZB_FT3bRLgI3yFLRkp",
+        "2EvxrJh$nBCOf6drB7QwUw",
+        "2rY6ZB_FT3bRLgI3yFLRe7",
+        "3r_7rUSq53V8dab_E3Zlws"
+      ],
+      "quote": null,
+      "label": "01 First Floor · 11 doors"
+    },
+    {
+      "n": 2,
+      "doc_id": "ifc_bench__4351-arc",
+      "page": 2,
+      "kind": "element",
+      "bbox_px": [
+        358.5,
+        491.5,
+        767.9,
+        1408.6
+      ],
+      "item_ids": [
+        "1Vp_ZIf01ANQz9mYpe1Peb",
+        "2gTG8I4eL6z9beKMqLBe0M",
+        "2gTG8I4eL6z9beKMqLBe0q",
+        "2SqDm2VurA4wpcRwks3Xlh"
+      ],
+      "quote": null,
+      "label": "02 Second Floor · 4 doors"
+    },
+    {
+      "n": 3,
+      "doc_id": "ifc_bench__4351-arc",
+      "page": 3,
+      "kind": "element",
+      "bbox_px": [
+        555.2,
+        543.5,
+        654.7,
+        807.7
+      ],
+      "item_ids": [
+        "3aFPed1ijDewmDm14mfLt4",
+        "3aFPed1ijDewmDm14mfRrH"
+      ],
+      "quote": null,
+      "label": "03 Third Floor · 2 doors"
+    }
+  ],
+  "evidence": {
+    "boxes": [
+      {
+        "item_id": "0wT$C4UIHBtPxNrY1uCPFK",
+        "page": 1,
+        "bbox_px": [
+          40,
+          255.9,
+          81.5,
+          337
+        ],
+        "label": "1",
+        "kind": "door"
+      },
+      {
+        "item_id": "1UDFRzXYL0uenoP45X20Ib",
+        "page": 1,
+        "bbox_px": [
+          595.2,
+          300.4,
+          676.3,
+          310.2
+        ],
+        "label": "2",
+        "kind": "door"
+      },
+      {
+        "item_id": "2EvxrJh$nBCOf6drB7QwTZ",
+        "page": 1,
+        "bbox_px": [
+          40,
+          395,
+          81.5,
+          476.1
+        ],
+        "label": "3",
+        "kind": "door"
+      },
+      {
+        "item_id": "2tMe7qG7n4XhDG_TV6QikP",
+        "page": 1,
+        "bbox_px": [
+          758.2,
+          378.4,
+          839.3,
+          388.3
+        ],
+        "label": "4",
+        "kind": "door"
+      },
+      {
+        "item_id": "2rY6ZB_FT3bRLgI3yFLRV5",
+        "page": 1,
+        "bbox_px": [
+          966.7,
+          416.2,
+          1047.8,
+          431.6
+        ],
+        "label": "5",
+        "kind": "door"
+      },
+      {
+        "item_id": "2rY6ZB_FT3bRLgI3yFLRMf",
+        "page": 1,
+        "bbox_px": [
+          86.3,
+          491.5,
+          167.4,
+          533
+        ],
+        "label": "6",
+        "kind": "door"
+      },
+      {
+        "item_id": "2rY6ZB_FT3bRLgI3yFLRMH",
+        "page": 1,
+        "bbox_px": [
+          642.4,
+          491.5,
+          723.5,
+          533
+        ],
+        "label": "7",
+        "kind": "door"
+      },
+      {
+        "item_id": "2rY6ZB_FT3bRLgI3yFLRkp",
+        "page": 1,
+        "bbox_px": [
+          843.2,
+          626.7,
+          858.6,
+          707.7
+        ],
+        "label": "8",
+        "kind": "door"
+      },
+      {
+        "item_id": "2EvxrJh$nBCOf6drB7QwUw",
+        "page": 1,
+        "bbox_px": [
+          40,
+          788.8,
+          81.5,
+          869.9
+        ],
+        "label": "9",
+        "kind": "door"
+      },
+      {
+        "item_id": "2rY6ZB_FT3bRLgI3yFLRe7",
+        "page": 1,
+        "bbox_px": [
+          40,
+          1084.2,
+          81.5,
+          1165.3
+        ],
+        "label": "10",
+        "kind": "door"
+      },
+      {
+        "item_id": "3r_7rUSq53V8dab_E3Zlws",
+        "page": 1,
+        "bbox_px": [
+          333.4,
+          2235,
+          476.3,
+          2250.4
+        ],
+        "label": "11",
+        "kind": "door"
+      },
+      {
+        "item_id": "1Vp_ZIf01ANQz9mYpe1Peb",
+        "page": 2,
+        "bbox_px": [
+          547.8,
+          491.5,
+          628.9,
+          533
+        ],
+        "label": "12",
+        "kind": "door"
+      },
+      {
+        "item_id": "2gTG8I4eL6z9beKMqLBe0M",
+        "page": 2,
+        "bbox_px": [
+          358.5,
+          868.5,
+          447.4,
+          886.8
+        ],
+        "label": "13",
+        "kind": "door"
+      },
+      {
+        "item_id": "2gTG8I4eL6z9beKMqLBe0q",
+        "page": 2,
+        "bbox_px": [
+          358.5,
+          868.5,
+          447.4,
+          886.8
+        ],
+        "label": "14",
+        "kind": "door"
+      },
+      {
+        "item_id": "2SqDm2VurA4wpcRwks3Xlh",
+        "page": 2,
+        "bbox_px": [
+          726.4,
+          1327.5,
+          767.9,
+          1408.6
+        ],
+        "label": "15",
+        "kind": "door"
+      },
+      {
+        "item_id": "3aFPed1ijDewmDm14mfLt4",
+        "page": 3,
+        "bbox_px": [
+          555.2,
+          543.5,
+          640.5,
+          559.8
+        ],
+        "label": "16",
+        "kind": "door"
+      },
+      {
+        "item_id": "3aFPed1ijDewmDm14mfRrH",
+        "page": 3,
+        "bbox_px": [
+          638.5,
+          722.4,
+          654.7,
+          807.7
+        ],
+        "label": "17",
+        "kind": "door"
+      }
+    ],
+    "scene": {
+      "doc_id": "ifc_bench__4351-arc",
+      "highlight_item_ids": [
+        "0wT$C4UIHBtPxNrY1uCPFK",
+        "1UDFRzXYL0uenoP45X20Ib",
+        "2EvxrJh$nBCOf6drB7QwTZ",
+        "2tMe7qG7n4XhDG_TV6QikP",
+        "2rY6ZB_FT3bRLgI3yFLRV5",
+        "2rY6ZB_FT3bRLgI3yFLRMf",
+        "2rY6ZB_FT3bRLgI3yFLRMH",
+        "2rY6ZB_FT3bRLgI3yFLRkp",
+        "2EvxrJh$nBCOf6drB7QwUw",
+        "2rY6ZB_FT3bRLgI3yFLRe7",
+        "3r_7rUSq53V8dab_E3Zlws",
+        "1Vp_ZIf01ANQz9mYpe1Peb",
+        "2gTG8I4eL6z9beKMqLBe0M",
+        "2gTG8I4eL6z9beKMqLBe0q",
+        "2SqDm2VurA4wpcRwks3Xlh",
+        "3aFPed1ijDewmDm14mfLt4",
+        "3aFPed1ijDewmDm14mfRrH"
+      ],
+      "camera_target_item_id": "0wT$C4UIHBtPxNrY1uCPFK"
+    }
+  },
+  "trace": [
+    {
+      "step": "route",
+      "detail": "count / door / unscoped (rules)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "load",
+      "detail": "17 door elements of 403 in the model",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "count",
+      "detail": "17 door",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "explain",
+      "detail": "explained in plain words from the cited elements (numbers unchanged)",
+      "ms": 1846,
+      "model": "claude-sonnet-5-5",
+      "cost_usd": 0.004226
+    }
+  ],
+  "route": "index",
+  "cost": {
+    "usd_total": 0.004226,
+    "calls": [
+      {
+        "task": "write_answer",
+        "provider": "runware_claude",
+        "model": "claude-sonnet-5-5",
+        "cost_usd": 0.004226
+      }
+    ]
+  },
+  "latency_ms": 2214,
+  "reasoning": {
+    "steps": [
+      {
+        "kind": "found",
+        "title": "Found",
+        "text": "17 doors on 01 First Floor, 02 Second Floor, 03 Third Floor in the building model (IFC), each one numbered",
+        "cite": 1,
+        "ok": null
+      }
+    ],
+    "confidence": {
+      "label": "Verified",
+      "pct": 97,
+      "reason": "Read directly from the building model's own data. Nothing is estimated.",
+      "improve": null
+    }
+  }
+}

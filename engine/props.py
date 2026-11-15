@@ -38,6 +38,7 @@ ALIASES = {
     "load_bearing": ("LoadBearing", "load_bearing", "Tragend", "Kantava", "Bärande"),
     "reference": ("Reference", "Mark", "TypeMark", "Tunnus", "Kennzeichen", "Beteckning"),
     "width_m": ("width_m", "Width", "OverallWidth", "Breite", "Leveys", "Bredd"),
+    "overall_width_m": ("overall_width_m",),
     "height_m": ("height_m", "Height", "OverallHeight", "Höhe", "Korkeus", "Höjd"),
     "area_m2": ("area_m2", "NetFloorArea", "GrossFloorArea"),
     "material": ("Material", "Materials", "Baustoff", "Materiaali"),
@@ -53,6 +54,7 @@ LABEL = {"fire_rating": "fire rating", "is_external": "external status", "therma
          "width_m": "width", "height_m": "height", "material": "material", "area_m2": "area",
          "escape_route": "escape-route membership", "window_count": "recorded window count", "fire_rated": "fire rating",
          "type_name": "type", "storey": "level", "description": "description"}
+LABEL["overall_width_m"] = "overall width"
 MISSING = {"", "-", "?", "n/a", "na", "unknown", "undefined", "not defined", "not set", "unset", "null", "none specified",
            "tbd", "to be determined", "not specified", "not applicable"}
 KINDS = {"door": r"doors?|türen?|tür|ovet|ovi|dörr(?:ar)?", "window": r"windows?|fenster|ikkunat?|fönster",
@@ -77,7 +79,7 @@ def clean(value, key):
         if str(value).strip().casefold() in {"false", "no", "0", "nein", "ei", "nej"}:
             return False
         return None
-    if key in ("width_m", "height_m", "area_m2", "window_count"):
+    if key in ("width_m", "overall_width_m", "height_m", "area_m2", "window_count"):
         if isinstance(value, bool):
             return None
         try:
@@ -127,7 +129,7 @@ def _signature(path):
 
 
 @lru_cache(maxsize=2)
-def _read_ifc(signature):
+def _read_ifc(signature, requested_kind=None):
     """Return serializable property records only; IFC is optional and imported lazily."""
     import ifcopenshell
     import ifcopenshell.util.element as ue
@@ -143,7 +145,7 @@ def _read_ifc(signature):
             # units. Never relabel a custom IFC unit as W/(m²·K).
             symbol = uu.get_unit_symbol(unit) if unit is not None else "unit not recorded"
             return f"{value:g} {symbol}"
-        if value is None or key not in ("width_m", "height_m", "area_m2"):
+        if value is None or key not in ("width_m", "overall_width_m", "height_m", "area_m2"):
             return value
         dim = 2 if key == "area_m2" else 1
         unit = uu.get_property_unit(prop, model) if prop is not None else length_unit
@@ -158,6 +160,8 @@ def _read_ifc(signature):
     classes = {"IfcDoor": "door", "IfcWindow": "window", "IfcWall": "wall", "IfcSpace": "room",
                "IfcColumn": "column", "IfcBeam": "beam", "IfcSlab": "slab"}
     for cls, kind in classes.items():
+        if requested_kind and kind != requested_kind:
+            continue
         for el in model.by_type(cls):
             values, sources = {}, {}
             def put(key, val, source, prop=None):
@@ -207,6 +211,8 @@ def _read_ifc(signature):
                 val = getattr(el, attr, None)
                 if val is not None:
                     put(key, val, f"{cls}.{attr}")
+                    if attr == "OverallWidth":
+                        put("overall_width_m", val, f"{cls}.{attr}")
             mats = ue.get_materials(el)
             names = [m.Name for m in mats if getattr(m, "Name", None)]
             if names:
@@ -226,7 +232,7 @@ def _read_ifc(signature):
     return out, storeys
 
 
-def index(doc_id, root):
+def index(doc_id, root, kind=None):
     root = Path(root)
     doc = load_doc(doc_id, root)
     if doc is not None and doc.mode != "ifc":
@@ -252,9 +258,10 @@ def index(doc_id, root):
         rec.aliases.update(str(v) for k, v in rec.item.props.items() if norm(k) in {"tag", "mark", "reference"} and v)
     status = "the stored model index"
     storeys = doc.storeys if doc else []
-    if source:
+    index_only = doc is not None and (root / doc_id / "ingest.json").is_file() and not (root / doc_id / "scene.json").is_file()
+    if source and not index_only:
         try:
-            raw, raw_storeys = _read_ifc(_signature(source))
+            raw, raw_storeys = _read_ifc(_signature(source), kind)
             storeys = storeys or raw_storeys
             for iid, data in raw.items():
                 if iid not in records:
@@ -289,6 +296,7 @@ class Request:
     threshold: tuple | None = None
     tag: str | None = None
     special: str | None = None
+    presence: bool | None = None
 
 
 def request(question):
@@ -306,6 +314,8 @@ def request(question):
         ("width_m", r"\bwidth\b|\bwider\b|\bnarrower\b"),
         ("height_m", r"\bheight\b|\btaller\b|\bshorter\b")) if re.search(rx, q)), None)
     schedule = bool(re.search(r"\bschedule\b|türliste|oviluettelo|dörrförteckning|fensterliste", q))
+    if not schedule and re.search(r"\b(?:area|length|volume|perimeter)\b", q):
+        return None  # Named-room quantities belong to the existing quantity solver.
     if re.search(r"\b(?:group|by)\b", q):
         if re.search(r"\bby type\b", q):
             prop = "type_name"
@@ -348,7 +358,7 @@ def request(question):
     if prop == "fire_rating" and re.search(r"\b(?:which|how many|list)\b", q) and re.search(r"\bfire[ -]rated\b", q):
         predicates.append(("fire_rated", not bool(re.search(r"\b(?:not|non)[ -]?fire[ -]rated\b", q))))
     threshold = None
-    measurements = list(re.finditer(r"\b(wider than|narrower than|taller than|shorter than|at least|at most|over|under|more than|less than)\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|metres?|meters?|m|feet|foot|ft|inches|inch|in|\")(?=\W|$)", q))
+    measurements = list(re.finditer(r"\b(wider than|narrower than|taller than|shorter than|at least|at most|over|under|above|below|more than|less than)\s*(\d+(?:[.,]\d+)?)\s*(mm|cm|metres?|meters?|m|feet|foot|ft|inches|inch|in|\")(?=\W|$)", q))
     if len(measurements) > 1:
         return None  # Existing multi-condition route can keep every inequality.
     m = measurements[0] if measurements else None
@@ -356,10 +366,18 @@ def request(question):
         return None
     if m:
         key = "height_m" if re.search(r"height|tall|short", q) else "width_m"
+        if key == "width_m" and re.search(r"\boverall width\b", q):
+            key = prop = "overall_width_m"
         unit = m[3]
         scale = .001 if unit == "mm" else .01 if unit == "cm" else .3048 if unit in ("feet", "foot", "ft") else .0254 if unit in ("inch", "inches", "in", '"') else 1
         threshold = key, m[1], float(m[2].replace(",", ".")) * scale
-    return Request(kind, prop, schedule, bool(re.search(r"\bgroup|\bby (?:type|material|fire|acoustic|reference|storey|floor|level)", q)), predicates, threshold, tag, special)
+    presence = None
+    if prop and re.search(r"\b(?:recorded|missing|not recorded)\b", q):
+        if re.search(r"\b(?:no|without|missing|not recorded)\b", q):
+            presence = False
+        elif not threshold and re.search(r"\b(?:have|has|with)\b", q):
+            presence = True
+    return Request(kind, prop, schedule, bool(re.search(r"\bgroup|\bby (?:type|material|fire|acoustic|reference|storey|floor|level)", q)), predicates, threshold, tag, special, presence)
 
 
 def _rated(value):
@@ -375,7 +393,7 @@ def display(value, key):
         return "Not recorded"
     if isinstance(value, bool):
         return "Yes" if value else "No"
-    if key in ("width_m", "height_m"):
+    if key in ("width_m", "overall_width_m", "height_m"):
         return f"{value * 1000:g} mm"
     if key == "area_m2":
         return f"{value:g} m²"
@@ -410,6 +428,10 @@ def _result(question, doc_id, records, text, checked, total, root, t0, *, value=
         if it.bbox_px:
             boxes.append(dict(item_id=it.item_id, page=it.page, bbox_px=it.bbox_px, label=str(n), kind=it.kind))
     ids = [r.item.item_id for r in records]
+    if not citations and value == 0:
+        citations.append(dict(n=1, doc_id=doc_id, page=1, kind="element", bbox_px=None, item_ids=[],
+                              inventory_check=True,
+                              quote=f"Checked {total} elements in the requested scope against {source}; no matching recorded values."))
     text += " " + " ".join(f"[{n}]" for n in range(1, min(len(citations), 3) + 1))
     checked_text = f"Requested property present on {checked} of {total} elements; checked {source}."
     reasoning = dict(steps=[dict(kind="found", title="Found", text=f"{len(records)} cited model elements; {total} elements in the checked scope", cite=1 if citations else None, ok=None),
@@ -417,16 +439,18 @@ def _result(question, doc_id, records, text, checked, total, root, t0, *, value=
                      confidence=dict(label="Verified" if complete else "Estimate", pct=100 if complete else 0,
                                      reason="Read directly from the recorded model data." if complete else "Some requested data or scope is missing; no value was inferred.",
                                      improve=None if complete else "Check the missing properties in the source model."))
-    return dict(answer_id=uuid.uuid4().hex, question=question, doc_ids=[doc_id],
+    res = dict(answer_id=uuid.uuid4().hex, question=question, doc_ids=[doc_id],
                 answer=dict(text_md=text.rstrip(), value=value, unit="count" if isinstance(value, int) and not isinstance(value, bool) else None,
                             confidence=1.0 if complete else 0.0, abstained=False),
                 citations=citations, evidence=dict(boxes=boxes, scene=dict(doc_id=doc_id, highlight_item_ids=ids, camera_target_item_id=ids[0] if ids else None)),
                 trace=[dict(step="props", detail=checked_text, ms=0, model=None, cost_usd=0)],
                 reasoning=reasoning, route="index", cost=dict(usd_total=0.0, calls=[]), latency_ms=int((time.perf_counter()-t0)*1000))
+    from engine.method_properties import capture
+    return capture(res, records, checked, total, source)
 
 
 def _model_answer(question, doc_id, root, req, t0, hidden=()):
-    loaded = index(doc_id, root)
+    loaded = index(doc_id, root, req.kind)
     if loaded is None:
         return None
     records, storeys, source = loaded
@@ -447,13 +471,17 @@ def _model_answer(question, doc_id, root, req, t0, hidden=()):
     if st:
         scope = [r for r in scope if r.item.storey == st]
     original = list(scope)
+    count_query = bool(re.search(r"\bhow many\b|\bcount\b", question, re.I))
     if not scope:
-        return _result(question, doc_id, [], f"**No {noun} are recorded in the requested scope.**", 0, 0, root, t0, source=source)
+        return _result(question, doc_id, [], f"**No {noun} are recorded in the requested scope.**", 0, 0, root, t0,
+                       value=0 if re.search(r"\bhow many\b|\bcount\b", question, re.I) else None, source=source)
     missing_filters = Counter()
     filters = list(req.predicates)
     selected = []
     for r in scope:
         unknown, reject = False, False
+        if req.presence is not None:
+            reject = (req.prop in r.values) != req.presence
         for key, expected in filters:
             v = _rated(r.values.get("fire_rating")) if key == "fire_rated" else r.values.get(key)
             if v is None:
@@ -470,7 +498,7 @@ def _model_answer(question, doc_id, root, req, t0, hidden=()):
             else:
                 # IFC floating conversion noise must not turn equality into 'wider than'.
                 equal = math.isclose(v, bound, rel_tol=1e-9, abs_tol=1e-9)
-                match = (v >= bound or equal) if op == "at least" else (v <= bound or equal) if op == "at most" else (v < bound and not equal) if op in ("under", "less than", "narrower than", "shorter than") else (v > bound and not equal)
+                match = (v >= bound or equal) if op == "at least" else (v <= bound or equal) if op == "at most" else (v < bound and not equal) if op in ("under", "below", "less than", "narrower than", "shorter than") else (v > bound and not equal)
                 reject |= not match
         if not reject and not unknown:
             selected.append(r)
@@ -481,11 +509,17 @@ def _model_answer(question, doc_id, root, req, t0, hidden=()):
         suffix = "\n\nCannot classify all elements: " + "; ".join(f"{n} lack {LABEL[k]}" for k, n in missing_filters.items()) + "."
         if not scope:
             return _result(question, doc_id, original, f"**This model does not record enough properties to apply every requested filter.**" + suffix,
-                           0, len(original), root, t0, complete=False, source=source)
+                           0, len(original), root, t0, complete=False, source=source,
+                           value=0 if count_query and re.search(r"\brecorded\b", question, re.I) else None)
     elif not scope:
-        return _result(question, doc_id, original, f"**No {noun} match the recorded filters.**", len(original), len(original), root, t0,
+        return _result(question, doc_id, [] if count_query else original, f"**No {noun} match the recorded filters.**", len(original), len(original), root, t0,
                        value=0, source=source)
     prop = req.prop
+    if req.presence is not None:
+        state = "a recorded" if req.presence else "no recorded"
+        text = f"**{len(scope)} {noun} have {state} {LABEL[prop]}.**"
+        return _result(question, doc_id, scope, text, len(original), len(original), root, t0,
+                       value=len(scope), complete=complete, source=source)
     if req.special == "windowless":
         prop = "window_count"
         known = [r for r in scope if prop in r.values]

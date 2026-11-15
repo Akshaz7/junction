@@ -1,0 +1,22 @@
+{
+  ".png": [
+    "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-7607.png",
+    431580
+  ],
+  ".jpg": [
+    "data/full/junction-dataset/data/wikimedia/53751789.jpg",
+    578110
+  ],
+  ".dxf": [
+    "data/full/junction-dataset/data/swiss_dwellings/site1142_bldg2293_floor10589.dxf",
+    283060
+  ],
+  ".ifc": [
+    "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+    343221
+  ],
+  "reserved_unseen": {
+    "path": "data/full/junction-dataset/data/ifc_models/resbim-409_model.ifc",
+    "rule": "Randomly selected before development; inspect/upload only in final test; path and size only seen."
+  }
+}

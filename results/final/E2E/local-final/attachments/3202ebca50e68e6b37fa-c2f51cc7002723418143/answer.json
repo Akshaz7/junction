@@ -1,0 +1,172 @@
+{
+  "answer_id": "095ad23b558f4b6c9ed94cdb318b7fb5",
+  "question": "How many doors are there?",
+  "doc_ids": [
+    "uploads__e2e-1794690973986-resbim-409-model-0cf983"
+  ],
+  "answer": {
+    "text_md": "**There are 5 doors in this model.** [1]",
+    "value": 5,
+    "unit": "count",
+    "confidence": 1,
+    "abstained": false
+  },
+  "citations": [
+    {
+      "n": 1,
+      "doc_id": "uploads__e2e-1794690973986-resbim-409-model-0cf983",
+      "page": 1,
+      "kind": "element",
+      "bbox_px": [
+        147.4,
+        134.8,
+        971,
+        554
+      ],
+      "item_ids": [
+        "2RukxHl$557A4wjWLtyLZ7",
+        "2RukxHl$557A4wjWLtyLZ0",
+        "2RukxHl$557A4wjWLtyLZ5",
+        "2RukxHl$557A4wjWLtyLZ2",
+        "2RukxHl$557A4wjWLtyLZi"
+      ],
+      "quote": null,
+      "label": "Level 0 · 5 doors"
+    }
+  ],
+  "evidence": {
+    "boxes": [
+      {
+        "item_id": "2RukxHl$557A4wjWLtyLZ7",
+        "page": 1,
+        "bbox_px": [
+          729,
+          134.8,
+          865,
+          141.2
+        ],
+        "label": "1",
+        "kind": "door"
+      },
+      {
+        "item_id": "2RukxHl$557A4wjWLtyLZ0",
+        "page": 1,
+        "bbox_px": [
+          653,
+          230,
+          659.4,
+          366
+        ],
+        "label": "2",
+        "kind": "door"
+      },
+      {
+        "item_id": "2RukxHl$557A4wjWLtyLZ5",
+        "page": 1,
+        "bbox_px": [
+          377.8,
+          327.4,
+          448.2,
+          342
+        ],
+        "label": "3",
+        "kind": "door"
+      },
+      {
+        "item_id": "2RukxHl$557A4wjWLtyLZ2",
+        "page": 1,
+        "bbox_px": [
+          147.4,
+          423.4,
+          217.8,
+          438
+        ],
+        "label": "4",
+        "kind": "door"
+      },
+      {
+        "item_id": "2RukxHl$557A4wjWLtyLZi",
+        "page": 1,
+        "bbox_px": [
+          955.1,
+          477.2,
+          971,
+          554
+        ],
+        "label": "5",
+        "kind": "door"
+      }
+    ],
+    "scene": {
+      "doc_id": "uploads__e2e-1794690973986-resbim-409-model-0cf983",
+      "highlight_item_ids": [
+        "2RukxHl$557A4wjWLtyLZ7",
+        "2RukxHl$557A4wjWLtyLZ0",
+        "2RukxHl$557A4wjWLtyLZ5",
+        "2RukxHl$557A4wjWLtyLZ2",
+        "2RukxHl$557A4wjWLtyLZi"
+      ],
+      "camera_target_item_id": "2RukxHl$557A4wjWLtyLZ7"
+    }
+  },
+  "trace": [
+    {
+      "step": "route",
+      "detail": "count / door / unscoped (rules)",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "load",
+      "detail": "5 door elements of 33 in the model",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "count",
+      "detail": "5 door",
+      "ms": 0,
+      "model": null,
+      "cost_usd": 0
+    },
+    {
+      "step": "explain",
+      "detail": "explained in plain words from the cited elements (numbers unchanged)",
+      "ms": 5138,
+      "model": "claude-sonnet-5-5",
+      "cost_usd": 0.003124
+    }
+  ],
+  "route": "index",
+  "cost": {
+    "usd_total": 0.003124,
+    "calls": [
+      {
+        "task": "write_answer",
+        "provider": "runware_claude",
+        "model": "claude-sonnet-5-5",
+        "cost_usd": 0.003124
+      }
+    ]
+  },
+  "latency_ms": 285,
+  "reasoning": {
+    "steps": [
+      {
+        "kind": "found",
+        "title": "Found",
+        "text": "5 doors on Level 0 in the building model (IFC), each one numbered",
+        "cite": 1,
+        "ok": null
+      }
+    ],
+    "confidence": {
+      "label": "Verified",
+      "pct": 97,
+      "reason": "Read directly from the building model's own data. Nothing is estimated.",
+      "improve": null
+    }
+  }
+}

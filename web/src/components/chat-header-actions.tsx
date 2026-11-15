@@ -65,7 +65,7 @@ export function ChatHeaderActions({ chatId, onNew }: { chatId: string | null; on
     }
   }
 
-  return <div className="chat-header-actions" ref={host}>
+  return <div className="chat-header-actions" data-has-chat={chatId ? "true" : "false"} ref={host}>
     <Button variant="raised" aria-label="New chat" title="New chat" onClick={() => { setOpen(false); setToast(''); onNew() }}><Plus size={16} /><span>New</span></Button>
     <button type="button" className="button button-raised button-size-default" ref={historyButton} aria-label="History" title="History" aria-haspopup="dialog" aria-expanded={open} aria-controls={open ? 'chat-history' : undefined} onClick={() => setOpen((value) => !value)}><Clock size={16} /><span>History</span></button>
     <Button variant="raised" aria-label="Share" title="Share" onClick={() => void share()}><MessageSquareShare size={16} /><span>Share</span></Button>

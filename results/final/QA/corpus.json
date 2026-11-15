@@ -1,0 +1,251 @@
+{
+  "created": "2026-11-14T20:11:31+00:00",
+  "seed": 20261114,
+  "questions": 150,
+  "public": 120,
+  "holdout": 30,
+  "holdout_ids": [
+    "cubicasa5k__high-quality-architectural-1269:schedule",
+    "cubicasa5k__high-quality-architectural-1269:services",
+    "cubicasa5k__high-quality-architectural-1269:structure",
+    "ifc_bench__dental-clinic-str:column",
+    "ifc_bench__dental-clinic-str:light",
+    "ifc_bench__dental-clinic-str:width",
+    "ifc_bench__sixty5-arc:light",
+    "ifc_bench__sixty5-electrical:beam",
+    "ifc_bench__sixty5-electrical:column",
+    "ifc_bench__sixty5-electrical:window",
+    "ifc_bench__sixty5-plumbing:pipe",
+    "ifc_bench__sixty5-ventilation:door",
+    "ifc_bench__sixty5-ventilation:fire",
+    "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:door",
+    "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:fire",
+    "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000:window",
+    "ifc_models__bimspeed-vitoria-ald26-before:duct",
+    "ifc_models__bimspeed-vitoria-ald26-before:fire",
+    "ifc_models__bimspeed-vitoria-ald26-before:storey",
+    "ifc_models__bimspeed-vitoria-ald26-before:window",
+    "ifc_models__bimspeed-vitoria-ald26-project:storey",
+    "ifc_models__bimspeed-vitoria-ald26-project:width",
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:doors",
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:schedule",
+    "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives:width",
+    "project:door-total",
+    "revision:door-change",
+    "wikimedia__79521417:order",
+    "wikimedia__79521417:schedule",
+    "wikimedia__79521417:storeys"
+  ],
+  "holdout_sha256": "7b42037e43148e6c9360a1304554332552922522269a126ba7d2cb9ed87db75a",
+  "holdout_storage": "Private temporary session directory; see private-state.json. Do not share question text.",
+  "source_inventory": [
+    {
+      "doc_id": "ifc_bench__sixty5-arc",
+      "raw_file": "data/full/junction-dataset/data/ifc_bench/sixty5_arc.ifc",
+      "format": "ifc",
+      "raw_bytes": 342657851,
+      "sha256": "e91ddbbd672bbde946af14631de4c732f0cf8a7cfae5dbbf06fbeab03b5c46df",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "ARCHICAD-64"
+      ],
+      "unit_scale_m": 0.001,
+      "storey_count": 17,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_bench__sixty5-plumbing",
+      "raw_file": "data/full/junction-dataset/data/ifc_bench/sixty5_plumbing.ifc",
+      "format": "ifc",
+      "raw_bytes": 222099255,
+      "sha256": "15382b06d0a63464b95ba451ce7d5fa981bf6c236ebe3f4f62bb9d2b9abfd821",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit 2018 (ENU)"
+      ],
+      "unit_scale_m": 0.001,
+      "storey_count": 19,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_bench__sixty5-ventilation",
+      "raw_file": "data/full/junction-dataset/data/ifc_bench/sixty5_ventilation.ifc",
+      "format": "ifc",
+      "raw_bytes": 114891068,
+      "sha256": "c78f6ad085961500f0890bbffda9e171c1342c5865ca152f64098dd4da644cca",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit 2018 (ENU)"
+      ],
+      "unit_scale_m": 0.001,
+      "storey_count": 17,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_bench__sixty5-electrical",
+      "raw_file": "data/full/junction-dataset/data/ifc_bench/sixty5_electrical.ifc",
+      "format": "ifc",
+      "raw_bytes": 97058912,
+      "sha256": "adb8d5eda2c706a1fded2a00bd38d845e35f513e2f6ba048fc6228274dfb3986",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit 2018 (ENU)"
+      ],
+      "unit_scale_m": 0.001,
+      "storey_count": 17,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_bench__dental-clinic-str",
+      "raw_file": "data/full/junction-dataset/data/ifc_bench/dental_clinic_str.ifc",
+      "format": "ifc",
+      "raw_bytes": 19375987,
+      "sha256": "3351ee3bd19aea39167ba466237fe06de64ea391b0a31b0aacc017c84311e14d",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit Architecture 2011"
+      ],
+      "unit_scale_m": 1.0,
+      "storey_count": 3,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-barlad-ro-arc-m3-e-pth-0000",
+      "raw_file": "data/full/junction-dataset/data/ifc_models/bimspeed-barlad_ro-arc-m3-e-pth-0000.ifc",
+      "format": "ifc",
+      "raw_bytes": 85116839,
+      "sha256": "509d011492a791b31fc308bd60c624da0dbfe9aee84ceafb6f3f3f4400a99140",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit 2019 (ENU)"
+      ],
+      "unit_scale_m": 0.001,
+      "storey_count": 7,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "swiss_dwellings__site961-bldg2019-floor8945",
+      "raw_file": "data/full/junction-dataset/data/swiss_dwellings/site961_bldg2019_floor8945.dxf",
+      "format": "dxf",
+      "raw_bytes": 800298,
+      "sha256": "cb754133196fd841bfbb326a2d204b979e72e4d7784937074c78a8a41394dd15",
+      "schema": null,
+      "authoring_tools": null,
+      "unit_scale_m": null,
+      "storey_count": null,
+      "raw_entities": 1783,
+      "raw_entity_types": {
+        "LWPOLYLINE": 1077,
+        "HATCH": 132,
+        "ARC": 159,
+        "CIRCLE": 102,
+        "TEXT": 313
+      },
+      "raw_dxf_insunits": 6
+    },
+    {
+      "doc_id": "opening_design__crema-cafe-models-crema-cafe-6-blend",
+      "raw_file": "data/full/junction-dataset/data/opening_design/Crema_Cafe/Models/crema cafe 6.blend.dxf",
+      "format": "dxf",
+      "raw_bytes": 81553610,
+      "sha256": "82da17b89fb2021de8d4da44848ddc2a03f61ffb9cbee10154349d1d1906a17c",
+      "schema": null,
+      "authoring_tools": null,
+      "unit_scale_m": null,
+      "storey_count": null,
+      "raw_entities": 293482,
+      "raw_entity_types": {
+        "3DFACE": 293482
+      },
+      "raw_dxf_insunits": 0
+    },
+    {
+      "doc_id": "cubicasa5k__high-quality-architectural-1269",
+      "raw_file": "data/full/junction-dataset/data/cubicasa5k/high_quality_architectural-1269.png",
+      "format": "png",
+      "raw_bytes": 13501646,
+      "sha256": "b5b082dd1b2fbee8bc9fdc27ccbd5d1ed95d9637b2e94d324a63c9e0ca32854f",
+      "schema": null,
+      "authoring_tools": null,
+      "unit_scale_m": null,
+      "storey_count": null,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "wikimedia__79521417",
+      "raw_file": "data/full/junction-dataset/data/wikimedia/79521417.jpg",
+      "format": "jpg",
+      "raw_bytes": 2784709,
+      "sha256": "3a6462fb92383e86e48f29b12e20116d880738ecc6997df3d1967223960bbd4d",
+      "schema": null,
+      "authoring_tools": null,
+      "unit_scale_m": null,
+      "storey_count": null,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "opening_design__open-source-metal-building-transfer-20150827-dwgs-to-hvac-engineer-open-source-metal-building-exterior-sheet-a-900-perspectives",
+      "raw_file": "data/full/junction-dataset/data/opening_design/Open_Source_Metal_Building/Transfer/20150827 - DWGs to HVAC engineer/Open Source Metal Building_Exterior-Sheet - A-900 - PERSPECTIVES.dwg",
+      "format": "dwg",
+      "raw_bytes": 16716821,
+      "sha256": "96ca27959ab38ed8016a5cb250615d897f94d2c50ea0c609ccf631c13b2b70c0",
+      "schema": null,
+      "authoring_tools": null,
+      "unit_scale_m": null,
+      "storey_count": null,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-vitoria-ald26-before",
+      "raw_file": "data/full/junction-dataset/data/ifc_models/bimspeed-vitoria_ald26-before.ifc",
+      "format": "ifc",
+      "raw_bytes": 10873068,
+      "sha256": "a42c6f3b0c9b7575d4c37c675155ff53c02571ca81357a87023f9da5fbf45181",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit 2018 (ESP)"
+      ],
+      "unit_scale_m": 1.0,
+      "storey_count": 5,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    },
+    {
+      "doc_id": "ifc_models__bimspeed-vitoria-ald26-project",
+      "raw_file": "data/full/junction-dataset/data/ifc_models/bimspeed-vitoria_ald26-project.ifc",
+      "format": "ifc",
+      "raw_bytes": 11490734,
+      "sha256": "e9eba3aca6eca89ef28d38d9b5cc70335621502feac1a81687ffa115bd84f830",
+      "schema": "IFC2X3",
+      "authoring_tools": [
+        "Autodesk Revit 2018 (ESP)"
+      ],
+      "unit_scale_m": 1.0,
+      "storey_count": 5,
+      "raw_entities": null,
+      "raw_entity_types": null,
+      "raw_dxf_insunits": null
+    }
+  ],
+  "oracle_scope": "IFC raw queries only. DXF/raster/DWG have expected=null; no accuracy claim.",
+  "gold_questions": 92
+}

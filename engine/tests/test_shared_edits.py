@@ -71,3 +71,64 @@ def test_singular_restores_the_latest_removal_plural_restores_all(doc):
     assert _cmd(scene_answer("put the door back", doc, parse_scene("put the door back"), st))["item_ids"] == [other]
     assert set(_cmd(scene_answer("put the doors back", doc, parse_scene("put the doors back"), st))["item_ids"]) == {DOOR, other}
     assert _cmd(scene_answer("put the door back", doc, parse_scene("put the door back"), {"hidden": [DOOR, other]}))["item_ids"] == [other]
+
+
+def _ids(doc, kind, n=2):
+    return [i.item_id for i in doc.items if i.kind == kind][:n]
+
+
+@pytest.mark.parametrize("q", ["move the window back", "put it back where it was", "undo my edit", "undo", "put the window back"])
+def test_chat_reverts_a_manual_move(doc, q):
+    """Edit-panel move recorded in the shared layer; the chat puts it back (offset [0, 0])."""
+    win = _ids(doc, "window", 1)[0]
+    st = {"hidden": [], "last_hidden": [], "moved": {win: [0.5, 0.0]}, "last_edit": {"op": "move", "item_ids": [win]}}
+    a = answer(q, [DOC], scene_state=st)
+    assert a["evidence"]["scene"]["commands"] == [
+        {"op": "move", "item_ids": [win], "offset_m": [0.0, 0.0], "labels": {win: tags(doc)[win]}}]
+    assert "back where it was" in a["answer"]["text_md"] and tags(doc)[win] in a["answer"]["text_md"]
+
+
+def test_chat_reverts_a_material_and_hides_still_win(doc):
+    wall = _ids(doc, "wall", 1)[0]
+    st = {"hidden": [DOOR], "last_hidden": [DOOR], "materials": {wall: "Glass"}, "last_edit": {"op": "material", "item_ids": [wall]}}
+    a = answer("undo my edit", [DOC], scene_state=st)
+    assert _cmd(a) == {"op": "material", "item_ids": [wall], "material": None, "labels": {wall: tags(doc)[wall]}}
+    assert "original material" in a["answer"]["text_md"]
+    # the newest edit was the removal: undo brings the door back, the material stays
+    st["last_edit"] = {"op": "hide", "item_ids": [DOOR]}
+    assert _cmd(answer("undo my edit", [DOC], scene_state=st)) == {**_cmd(answer("undo my edit", [DOC], scene_state=st)),
+                                                                   "op": "restore", "item_ids": [DOOR]}
+    # "put the door back" names a hidden door: restore, not a material revert
+    assert _cmd(answer("put the door back", [DOC], scene_state=st))["op"] == "restore"
+
+
+def test_named_kind_reverts_only_moved_items(doc):
+    w1, w2 = _ids(doc, "window")
+    st = {"hidden": [], "moved": {w1: [1.0, 0.0], w2: [0.0, 1.0]}, "last_edit": {"op": "move", "item_ids": [w2]}}
+    assert _cmd(answer("move the window back", [DOC], scene_state=st))["item_ids"] == [w2]          # singular: the latest
+    assert set(_cmd(answer("move the windows back", [DOC], scene_state=st))["item_ids"]) == {w1, w2}
+    # nothing moved: the old restore path (all windows visible again)
+    assert _cmd(answer("move the window back", [DOC], scene_state={"hidden": []}))["op"] == "restore"
+
+
+def test_edit_log_undo_steps_moves_and_materials_back(doc):
+    """Main's ordered edit-log undo (state["edits"]) inverts the last edit, now including moves and materials."""
+    from engine.scene_cmds import undo_commands
+    win, wall = _ids(doc, "window", 1)[0], _ids(doc, "wall", 1)[0]
+
+    def ed(op, ids, **detail):
+        return {"doc_id": DOC, "op": op, "item_ids": ids, "labels": {}, "detail": detail}
+    log = [ed("hide", [DOOR]), ed("move", [win], offset_m=[0.5, 0]), ed("move", [win], offset_m=[1.0, 0])]
+    assert undo_commands(doc, {"edits": log}) == [{"op": "move", "item_ids": [win], "offset_m": [0.5, 0.0]}]   # one step back
+    assert undo_commands(doc, {"edits": log[:2]}) == [{"op": "move", "item_ids": [win], "offset_m": [0.0, 0.0]}]
+    assert undo_commands(doc, {"edits": [*log, ed("material", [wall], material="Glass")]}) == [
+        {"op": "material", "item_ids": [wall], "material": None}]
+    assert undo_commands(doc, {"edits": [*log, ed("highlight", [win])]})[0]["op"] == "move"            # highlights never consume Undo
+    assert undo_commands(doc, {"edits": log[:1]}) == [{"op": "restore", "item_ids": [DOOR]}]          # visibility unchanged
+    # undo of a reset brings the hidden door and the move back
+    out = undo_commands(doc, {"edits": [*log, ed("reset", [])]})
+    assert {"op": "hide", "item_ids": [DOOR]} in out and {"op": "move", "item_ids": [win], "offset_m": [1.0, 0.0]} in out
+    # through answer(): undo with the log is main's path
+    a = answer("undo", [DOC], scene_state={"hidden": [DOOR], "edits": log, "last_hidden": [DOOR], "moved": {win: [1.0, 0.0]},
+                                           "last_edit": {"op": "move", "item_ids": [win]}})
+    assert a["evidence"]["scene"]["commands"] == [{"op": "move", "item_ids": [win], "offset_m": [0.5, 0.0]}]

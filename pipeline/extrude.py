@@ -700,7 +700,7 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
                 register(f"wall-r{wi:03d}", "wall", [("wall", mesh)])
     for it in pm["items"]:
         k = it["kind"]
-        if k not in ("wall", "door", "window", "room") + FIXTURES:
+        if k not in ("wall", "door", "window", "room") + FIXTURES and it.get('source') != 'taught':
             continue
         iid = it["item_id"]
         if rw and k == "wall":
@@ -761,6 +761,12 @@ def process(doc_id: str, art: Path, page: int = 1, raster_walls: bool = False, *
                     rgb = tuple(int(c * 0.78) for c in rgb)
                 m.visual = trimesh.visual.TextureVisuals(material=_mat(rgb, rough=0.9, double=True))
             register(iid, k, [("floor", m)])
+        elif k not in FIXTURES:
+            # Unknown manual kinds get a footprint marker, never invented equipment geometry.
+            marker = prism(pts, FLOOR_T + .005, FLOOR_T + .025)
+            if marker is not None:
+                marker.visual.vertex_colors = [59, 130, 246, 220]
+            register(iid, k, [('user-label-marker', marker)])
         else:
             x0, y0, x1, y1 = it["bbox_px"]
             (ax_, az_), (bx_, bz_) = to_m((x0, y0)), to_m((x1, y1))

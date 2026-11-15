@@ -496,15 +496,75 @@ LEVEL_REF = re.compile(r"\b(?:level|floor|storey|story)s?\s*\d+\b|\b\d+(?:st|nd|
 VERSION_WORD = re.compile(r"\b(?:versions?|revisions?|rev\.?|v\d+|issued|transfer|before|after)\b", re.I)
 
 
+def _count_difference(question, ids, root):
+    """A net inventory change is B minus A, not the number of changed properties."""
+    q = question.casefold()
+    if not (re.search(r"\b(?:net (?:change|difference)|(?:second|first) minus (?:first|second)|difference in)\b", q)
+            and re.search(r"\bcounts?\b|\bnumber\b|\bhow many\b", q)):
+        return None
+    kinds = [kind for kind, rx in (("door", r"doors?"), ("window", r"windows?"), ("wall", r"walls?"),
+             ("room", r"rooms?|spaces?"), ("column", r"columns?"), ("beam", r"beams?"))
+             if re.search(r"\b(?:" + rx + r")\b", q)]
+    if len(kinds) != 1 or len(ids) != 2:
+        return None
+    from engine.solvers.data import load_doc
+    from engine.solvers.solve import MIN_CONF, _answer_obj, _step
+    t0 = time.perf_counter()
+    try:
+        docs = [load_doc(did, root) for did in ids]
+    except (OSError, ValueError, KeyError, TypeError):
+        docs = [None, None]
+    if any(doc is None for doc in docs):
+        return None  # The comparison route explains missing source inventories.
+    kind = kinds[0]
+    inventories = [[it for it in doc.items if it.kind == kind and (doc.mode == "ifc" or it.conf >= MIN_CONF)] for doc in docs]
+    counts = [len({it.item_id for it in items}) for items in inventories]
+    reverse = bool(re.search(r"\bfirst minus second\b", q))
+    value = counts[0] - counts[1] if reverse else counts[1] - counts[0]
+    direction = "first minus second" if reverse else "second minus first"
+    exact = all(doc.mode == "ifc" for doc in docs)
+    noun = kind + "s"
+    text = (f"**Net change in {'recorded' if exact else 'detected'} {kind} count: {value:+d} ({direction}).** [1] [2]"
+            f"\n\n- First model: {counts[0]} {noun}; second model: {counts[1]} {noun}."
+            "\n- This compares inventory totals; additions and removals can cancel out.")
+    if not exact:
+        text += "\n- Drawing detections can be incomplete; check the marked items in both versions."
+    citations = []
+    for n, (doc, items) in enumerate(zip(docs, inventories), 1):
+        # Each version has one source citation covering its complete inventory.
+        citations.append(dict(n=n, doc_id=doc.doc_id, page=1,
+            kind="element" if doc.mode == "ifc" else "region", bbox_px=None,
+            inventory_check=True,
+            item_ids=[it.item_id for it in items], quote=f"{len(items)} {noun} in this version's checked inventory."))
+    trace = [_step("revision_count", f"{direction}: {counts[0] if reverse else counts[1]} - {counts[1] if reverse else counts[0]} = {value}")]
+    highlights = [it.item_id for it in inventories[1]]
+    res = _answer_obj(question, ids, text, value, "count", 1 if exact else .5, False, [], citations,
+        {"doc_id": ids[1], "highlight_item_ids": highlights, "camera_target_item_id": highlights[0] if highlights else None},
+        trace, "index" if exact else "planmap", t0)
+    res["reasoning"] = {"steps": [
+        {"kind": "found", "title": "Found", "text": f"First inventory: {counts[0]} {noun}; second: {counts[1]}.", "cite": 1, "ok": True},
+        {"kind": "calculated", "title": "Calculated", "text": trace[0]["detail"], "cite": 2, "ok": True}],
+        "confidence": {"label": "Verified" if exact else "Estimate", "pct": 100 if exact else 50,
+            "reason": "Counted each stored element identity once in both inventories." if exact else "Compared drawing detections; completeness is not verified.",
+            "improve": None if exact else "Verify detections against both source drawings."}}
+    return res
+
+
 def comparison_answer(question, doc_ids, root):
     """Early code route; returning it before context/explain avoids any model call."""
-    if not COMPARE_INTENT.search(question or "") and not (len(doc_ids or []) == 2 and re.search(r"\bcompare\b", question or "", re.I)):
+    is_count_change = bool(re.search(r"\bnet (?:change|difference)\b|\b(?:first|second) minus (?:first|second)\b", question or "", re.I))
+    if not COMPARE_INTENT.search(question or "") and not (len(doc_ids or []) == 2 and re.search(r"\bcompar(?:e|ing)\b", question or "", re.I)) and not is_count_change:
         return None
     # "compare level 1 and level 2" compares parts of one project (projects engine), not two versions of a drawing.
     if LEVEL_REF.search(question or "") and not VERSION_WORD.search(question or ""):
         return None
     t0 = time.perf_counter()
     ids = list(dict.fromkeys(doc_ids or []))
+    # Explicit first/second operands refer to attachment order. Named-version
+    # direction for a full geometric comparison is resolved separately below.
+    count_result = _count_difference(question, ids, root)
+    if count_result is not None:
+        return count_result
     # Explicit names in the question establish direction; attachment order is
     # the fallback. Never infer chronology from a particular document name.
     if len(ids) == 2:
@@ -551,7 +611,7 @@ def comparison_answer(question, doc_ids, root):
                   "improve": "; ".join(result["warnings"]) if result and result["warnings"] else None}
     steps = [{"kind": "found", "title": "Found", "text": f"Read both version inventories: {result['inventory_a']} and {result['inventory_b']} items.", "cite": 1, "ok": True},
              {"kind": "checked", "title": "Checked", "text": result["note"], "cite": 2, "ok": result["status"] == "ready"}] if available else []
-    return {"answer_id": uuid.uuid4().hex, "question": question, "doc_ids": ids,
+    res = {"answer_id": uuid.uuid4().hex, "question": question, "doc_ids": ids,
             "answer": {"text_md": text, "value": result["summary"]["total"] if available else None,
                        "unit": "changes" if available else None, "confidence": pct / 100, "abstained": not available},
             "citations": citations, "evidence": {"boxes": [], "scene": {"doc_id": ids[-1] if ids else "", "highlight_item_ids": scene_ids,
@@ -559,3 +619,7 @@ def comparison_answer(question, doc_ids, root):
             "trace": [{"step": "revision_compare", "detail": result["note"] if result else "Two versions required", "ms": 0, "model": None, "cost_usd": 0}],
             "route": "index" if result and result.get("method") == "ifc-globalid" else "planmap", "cost": {"usd_total": 0, "calls": []},
             "latency_ms": int((time.perf_counter() - t0) * 1000), "reasoning": {"steps": steps, "confidence": confidence}}
+    if available:
+        from engine.calc_inventory import revisions
+        revisions(res, result)
+    return res

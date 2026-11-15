@@ -1,0 +1,9 @@
+{
+  "doc_id": "ifc_models__resbim-317-model",
+  "schema": "IFC4",
+  "raw_sha256": "b0400812724f340c424efc3cf1b6b9875d7f11b92f8977f2777c35bd66e82629",
+  "authoring_tools": [
+    "Autodesk Revit 2026 (ENG)"
+  ],
+  "unit_scale_m": 0.001
+}

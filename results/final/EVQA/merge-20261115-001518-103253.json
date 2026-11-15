@@ -1,0 +1,23 @@
+{
+ "created_at": "2026-11-14T22:15:18.127708+00:00",
+ "baseline": "7d3231e0f3b31d6fd744bddf2661175e8cdd2b33",
+ "branches": {
+  "final/evfix": "d6b3c396c020dc01da4e9c266df5059f9a413107"
+ },
+ "merges": [
+  {
+   "branch": "final/evfix",
+   "revision": "d6b3c396c020dc01da4e9c266df5059f9a413107",
+   "status": "conflict",
+   "files": [
+    "engine/reasoning.py",
+    "engine/reasoning_parts/confidence.py"
+   ]
+  }
+ ],
+ "complete_merge": false,
+ "audit_report": "run-20261115-001518-103253.json",
+ "all_four_evidence_branches": false,
+ "scratch_revision": "7d3231e0f3b31d6fd744bddf2661175e8cdd2b33",
+ "audit_exit": 1
+}

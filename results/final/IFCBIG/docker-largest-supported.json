@@ -1,0 +1,186 @@
+{
+  "file": "/source/full/junction-dataset/data/ifc_bench/sixty5_electrical.ifc",
+  "size_bytes": 97058912,
+  "end_only": true,
+  "status": "partial",
+  "ingest_s": 168.889,
+  "state": {
+    "status": "partial",
+    "stages": [
+      {
+        "stage": "ifc_index",
+        "ok": true,
+        "s": 168.0,
+        "peak_process_rss_mib": 68.1,
+        "peak_worker_rss_mib": 226.6,
+        "memory_budget_mib": 258.3,
+        "worker_exit_code": 0,
+        "batches": 156
+      },
+      {
+        "stage": "ifc_scene",
+        "ok": false,
+        "error": "An unknown error occurred",
+        "peak_worker_rss_mib": 217.5,
+        "memory_budget_mib": 260.6,
+        "worker_exit_code": 1
+      }
+    ],
+    "detail": "The 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. An unknown error occurred",
+    "mode": "vlm",
+    "started_at": 1794700248.3210442,
+    "step": "ifc_scene",
+    "readable": true,
+    "progress": 0.6666666666666666,
+    "cost_usd": 0.0,
+    "updated": "2026-11-14T23:53:37+0000"
+  },
+  "validation_note": "Only code answers without model calls are verified here. Fake-provider fallbacks are not source observations.",
+  "schema": "IFC2X3",
+  "applications": [
+    "Autodesk Revit 2018 (ENU)"
+  ],
+  "elements": 19876,
+  "kinds": {
+    "cable_tray": 7277,
+    "pipe_fitting": 64,
+    "mep_other": 6089,
+    "proxy": 4063,
+    "pipe": 112,
+    "light": 1490,
+    "terminal": 675,
+    "valve_damper": 105,
+    "site": 1
+  },
+  "rooms_with_area": 0,
+  "answers": [
+    {
+      "question": "How many doors are there?",
+      "answer": {
+        "text_md": "**I cannot verify a door count from this model.** It includes shapes without object types. [1]\n\nExport the model with object classifications, or check the highlighted shapes.\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. An unknown error occurred",
+        "value": null,
+        "unit": null,
+        "confidence": 0.0,
+        "abstained": true
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "checked",
+            "title": "Missing object types",
+            "text": "The marked shapes have no building object type in the source model.",
+            "cite": 1,
+            "ok": false
+          }
+        ],
+        "confidence": {
+          "label": "Estimate",
+          "pct": 0,
+          "reason": "The source does not provide enough object classification to verify this count.",
+          "improve": "Export the model with object classifications, or inspect the highlighted shapes."
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 20
+    },
+    {
+      "question": "How many windows are there?",
+      "answer": {
+        "text_md": "**I cannot verify a window count from this model.** It includes shapes without object types. [1]\n\nExport the model with object classifications, or check the highlighted shapes.\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. An unknown error occurred",
+        "value": null,
+        "unit": null,
+        "confidence": 0.0,
+        "abstained": true
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": {
+        "steps": [
+          {
+            "kind": "checked",
+            "title": "Missing object types",
+            "text": "The marked shapes have no building object type in the source model.",
+            "cite": 1,
+            "ok": false
+          }
+        ],
+        "confidence": {
+          "label": "Estimate",
+          "pct": 0,
+          "reason": "The source does not provide enough object classification to verify this count.",
+          "improve": "Export the model with object classifications, or inspect the highlighted shapes."
+        }
+      },
+      "citations": 1,
+      "cited_item_count": 20
+    },
+    {
+      "question": "What is the total floor area of all rooms?",
+      "answer": {
+        "text_md": "The model has no area data for rooms, so I cannot give a figure.\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. An unknown error occurred",
+        "value": null,
+        "unit": null,
+        "confidence": 0.0,
+        "abstained": true
+      },
+      "cost": {
+        "usd_total": 0,
+        "calls": []
+      },
+      "reasoning": null,
+      "citations": 0,
+      "cited_item_count": 0
+    }
+  ],
+  "container": {
+    "limit_bytes": 536870912,
+    "peak_bytes": 391606272,
+    "events": {
+      "low": 0,
+      "high": 0,
+      "max": 0,
+      "oom": 0,
+      "oom_kill": 0,
+      "oom_group_kill": 0
+    }
+  },
+  "supplementary_answer": {
+    "question": "How many pipes are in the model?",
+    "answer": {
+      "text_md": "There are **112 pipes** in this model. [1]\n\nThe 3D view could not be prepared. Counts and quantities stored in the model are available. Measurements that require geometry may be unavailable. An unknown error occurred",
+      "value": 112,
+      "unit": "count",
+      "confidence": 1.0,
+      "abstained": false
+    },
+    "cost": {
+      "usd_total": 0,
+      "calls": []
+    },
+    "reasoning": {
+      "steps": [
+        {
+          "kind": "found",
+          "title": "Found",
+          "text": "112 pipes on -1 Fundering, 00 begane grond, 02 tweede verdieping in the building model (IFC), each one number…",
+          "cite": 1,
+          "ok": null
+        }
+      ],
+      "confidence": {
+        "label": "Verified",
+        "pct": 97,
+        "reason": "The result comes directly from the building model's own data. Nothing is estimated.",
+        "improve": null
+      }
+    },
+    "citations": 1,
+    "cited_item_count": 112
+  }
+}

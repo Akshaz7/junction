@@ -3,8 +3,10 @@ import { BoxGeometry, Group, Mesh, MeshStandardMaterial } from 'three';
 import { createScene, disposeScene, type SceneManifest } from '../scene';
 import { createEditLayer } from '../edits';
 import { applyCommand, applyState, emptyCommandState, readCommandState, type SceneCommand, type SceneSnapshot } from '../commands';
-import { createLiveHighlightClient } from '../liveHighlight';
+import { createLiveHighlightClient, decodeLiveMessage } from '../liveHighlight';
 import { bindLiveCommands } from '../liveViewerHighlight';
+import { emptyChatEdits, reduceSceneEvent } from '../../lib/scene-edits';
+import { drawingSnapshot, syncSceneSnapshot } from '../../lib/scene-snapshot';
 import type { Viewer } from '../viewer';
 
 /** Chat and Edit panel share one hidden layer: either side can undo the other. */
@@ -24,7 +26,7 @@ function fixture() {
     const before = commands.hidden; commands = applyCommand(commands, cmd);
     layer.noteExternalHide([...commands.hidden].filter((id) => !before.has(id)));
   };
-  return { layer, scene, sent, remote, hidden: () => [...commands.hidden] };
+  return { layer, scene, sent, remote, surface, hidden: () => [...commands.hidden] };
 }
 
 describe('shared edit layer (chat + Edit panel)', () => {
@@ -67,6 +69,89 @@ describe('shared edit layer (chat + Edit panel)', () => {
     expect(layer.state().undoCount).toBe(0);
     expect(layer.reset()).toBeNull();
     layer.dispose(); disposeScene(scene);
+  });
+});
+
+describe('shared moves and materials', () => {
+  it('a chat "put it back" (offset 0) reverts a manual move; Undo then undoes that revert', () => {
+    const { layer, scene } = fixture();
+    const wall = scene.items.get('wall')!;
+    layer.move('wall', wall.position.clone(), 0.5, 0, true);
+    expect(layer.state().moveDelta).toEqual({ wall: [0.5, 0] });
+    layer.applyShared({ moved: {} });                     // chat: back where it was
+    expect(wall.position.length()).toBe(0);
+    expect(layer.state().moveDelta).toEqual({});
+    expect(layer.state().undoCount).toBe(1);               // the manual move entry is stale; only the chat revert is left
+    expect(layer.undo()?.detail).toMatchObject({ external: true });
+    expect(layer.state().moveDelta).toEqual({ wall: [0.5, 0] });
+    layer.dispose(); disposeScene(scene);
+  });
+
+  it('a shared move/material (chat, another client or saved chat state) joins Undo and Reset', () => {
+    const { layer, scene, surface } = fixture();
+    const wall = scene.items.get('wall')! as Mesh;
+    layer.applyShared({ moved: { wall: [0, 1.5] }, materials: { wall: 'Glass', door: 'Bogus' } });
+    expect(layer.state().moveDelta).toEqual({ wall: [0, 1.5] });
+    expect(layer.state().materials).toEqual({ wall: 'Glass' });
+    expect(layer.state().undoCount).toBe(2);
+    layer.undo();                                          // newest first: the material
+    expect(layer.state().materials).toEqual({});
+    expect(wall.material).toBe(surface);
+    layer.applyShared({ materials: { wall: 'Concrete' } });
+    expect(layer.reset()?.item_ids).toEqual(['wall']);
+    expect(layer.state()).toEqual({ undoCount: 0, moved: {}, moveDelta: {}, materials: {} });
+    expect(wall.position.length()).toBe(0);
+    expect(wall.material).toBe(surface);
+    layer.dispose(); disposeScene(scene);
+  });
+
+  it('two manual moves undo one step at a time; Reset goes straight back to the original', () => {
+    const { layer, scene } = fixture();
+    const wall = scene.items.get('wall')!;
+    layer.move('wall', wall.position.clone(), 1, 0, true);
+    layer.move('wall', wall.position.clone(), 1, 0, true);
+    expect(layer.state().moveDelta).toEqual({ wall: [2, 0] });
+    layer.undo();
+    expect(layer.state().moveDelta).toEqual({ wall: [1, 0] });
+    layer.move('wall', wall.position.clone(), 1, 0, true);
+    layer.reset();
+    expect(wall.position.length()).toBe(0);
+    layer.dispose(); disposeScene(scene);
+  });
+});
+
+describe('chat edit layer carries moves and materials', () => {
+  it('folds move/material/reset, survives a snapshot, and the viewer resyncs only when they differ', () => {
+    let edits = reduceSceneEvent(emptyChatEdits(), { type: 'scene.edit', doc_id: 'd', op: 'hide', item_ids: ['a'], edit_id: '1' });
+    expect(edits.docs.d).not.toHaveProperty('moved');      // nothing moved yet: snapshots leave local moves alone
+    expect(drawingSnapshot(edits.docs.d)).not.toHaveProperty('moved');
+    edits = reduceSceneEvent(edits, { type: 'scene.edit', doc_id: 'd', op: 'move', item_ids: ['w'], offset_m: [0.5, 0], edit_id: '2' });
+    edits = reduceSceneEvent(edits, { type: 'scene.edit', doc_id: 'd', op: 'material', item_ids: ['wl'], material: 'Glass', edit_id: '3' });
+    expect(edits.docs.d.moved).toEqual({ w: [0.5, 0] });
+    expect(edits.docs.d.materials).toEqual({ wl: 'Glass' });
+    const viewer = { getCommandState: () => ({ hidden: ['a'], highlighted: {}, isolated: null }), applyState: vi.fn(),
+      getEditState: () => ({ moveDelta: { w: [0.5, 0] }, materials: { wl: 'Glass' } }) };
+    syncSceneSnapshot(viewer, drawingSnapshot(edits.docs.d));
+    expect(viewer.applyState).not.toHaveBeenCalled();     // the echo of a local edit is a no-op
+    edits = reduceSceneEvent(edits, { type: 'scene.edit', doc_id: 'd', op: 'move', item_ids: ['w'], offset_m: [0, 0], edit_id: '4' });
+    expect(edits.docs.d.moved).toEqual({});
+    syncSceneSnapshot(viewer, drawingSnapshot(edits.docs.d));
+    expect(viewer.applyState).toHaveBeenCalledWith(expect.objectContaining({ moved: {} }));
+    edits = reduceSceneEvent(edits, { type: 'scene.edit', doc_id: 'd', op: 'reset', item_ids: [], edit_id: '5' });
+    expect(edits.docs.d.materials).toEqual({});
+    edits = reduceSceneEvent(edits, { type: 'scene.state', doc_id: 'd', hidden: [], highlighted: [], labels: {}, moved: { w: [1, 1] } });
+    expect(edits.docs.d.moved).toEqual({ w: [1, 1] });
+  });
+
+  it('decodes move/material edits and state fields; rejects bad offsets', () => {
+    const move = { type: 'scene.edit', doc_id: 'd', op: 'move', item_ids: ['w'], offset_m: [0.5, -1], edit_id: 'm' };
+    expect(decodeLiveMessage(JSON.stringify(move))).toEqual(move);
+    expect(decodeLiveMessage(JSON.stringify({ ...move, offset_m: [1] }))).toBeNull();
+    expect(decodeLiveMessage(JSON.stringify({ ...move, op: 'material', material: 5 }))).toBeNull();
+    expect(decodeLiveMessage(JSON.stringify({ ...move, op: 'material', material: null }))).not.toBeNull();
+    const state = { type: 'scene.state', doc_id: 'd', hidden: [], highlighted: [], labels: {}, moved: { w: [1, 0] }, materials: { wl: 'Glass' } };
+    expect(decodeLiveMessage(JSON.stringify(state))).toEqual(state);
+    expect(decodeLiveMessage(JSON.stringify({ ...state, moved: { w: ['x', 0] } }))).toBeNull();
   });
 });
 
