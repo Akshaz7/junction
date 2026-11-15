@@ -192,3 +192,17 @@ def test_stale_cached_wall_units_are_refreshed_from_typed_source(tmp_path):
     ref = result['_calc']['rows'][0]['source']
     assert ref['kind'] == 'measurement' and ref['record']['value'] == 18
     assert path.read_bytes() == before
+
+
+@pytest.mark.parametrize('label', ['WC', 'Treppenlauf', 'Aufzug', 'Müll'])
+def test_quoted_room_prefix_selects_the_literal_label(tmp_path, label):
+    from engine.tests.test_acc_ifc import model, room, document
+    f = model()
+    selected = room(f, net=10, name=None)
+    selected.LongName = label
+    other = room(f, net=20, name=None)
+    other.LongName = 'Bad'
+    did = document(tmp_path, f)
+    result = answer(f"What is the net floor area of the room '{label}'?", [did], tmp_path)
+    assert result['answer']['value'] == 10
+    assert result['citations'][0]['item_ids'] == [selected.GlobalId]
