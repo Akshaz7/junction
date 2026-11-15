@@ -50,7 +50,9 @@ def _not_built(what: str, status_code=404):
     return JSONResponse({"status": "not_built", "detail": f"{what} not available"}, status_code=status_code)
 
 
-def _missing_scene(folder):
+def _missing_scene(folder, why: str | None = None):
+    if why:
+        return JSONResponse({"status": "not_built", "detail": f"3D not available for this file: {why}"}, status_code=404)
     state = _read_ingest(folder / "ingest.json") if (folder / "ingest.json").is_file() else {}
     detail = state.get("reason") or state.get("detail")
     if state.get("readable"):
@@ -86,14 +88,25 @@ async def _rebuild_pages(doc_id: str) -> None:
 _REBUILD_LOCK = asyncio.Lock()
 
 
+_SCENE_WHY: dict[str, str] = {}  # last reason a doc's scene.glb could not be rebuilt
+
+
 async def _rebuild_scene(doc_id: str) -> bool:
-    """scene.glb of an upload lost with a cut-short persist: extrude the stored plan map again, in the same isolated
-    subprocess and heavy-job slot an ingest uses (never in the API process)."""
+    """scene.glb of an upload lost with a cut-short persist (or ingested before a pipeline change): extrude the stored
+    plan map again, in the same isolated subprocess and heavy-job slot an ingest uses (never in the API process).
+    On failure the reason is kept in _SCENE_WHY so the 404 can say why."""
+    _SCENE_WHY.pop(doc_id, None)
     if not doc_id.startswith("uploads__"):
+        _SCENE_WHY[doc_id] = "this document has no 3D model stored on the server"
         return False
     d = _doc_dir(doc_id)
     plan = sorted(d.glob("planmap-[0-9]*.json"))
-    if not plan or not (d / "scene.json").is_file():
+    if not (d / "scene.json").is_file():
+        _SCENE_WHY[doc_id] = "no 3D scene was ever built for it"
+        return False
+    if not plan:
+        _SCENE_WHY[doc_id] = ("its plan map was not saved (it was read before the current pipeline), so the 3D model "
+                              "cannot be rebuilt. Upload the file again")
         return False
     page = int(plan[0].stem.split("-")[1])
     code = ("import sys;from pathlib import Path;from server import ingest_job as j;"
@@ -104,16 +117,22 @@ async def _rebuild_scene(doc_id: str) -> bool:
                 return True
             proc = await asyncio.create_subprocess_exec(
                 sys.executable, "-c", code, doc_id, str(d), str(page), cwd=str(config.REPO),
-                stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+                stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.PIPE)
             try:
-                await asyncio.wait_for(proc.wait(), 150)
+                _, err = await asyncio.wait_for(proc.communicate(), 150)
             except TimeoutError:
                 proc.kill()
                 await proc.wait()
+                _SCENE_WHY[doc_id] = "rebuilding the 3D model took longer than 150 seconds"
                 return False
-        return (d / "scene.glb").is_file()
+        if (d / "scene.glb").is_file():
+            return True
+        tail = (err or b"").decode(errors="replace").strip().splitlines()[-1:] or ["the 3D builder produced no geometry"]
+        _SCENE_WHY[doc_id] = f"rebuilding the 3D model failed: {tail[0][:160]}"
+        return False
     except Exception as e:  # noqa: BLE001
         print("scene rebuild failed:", doc_id, repr(e)[:200])
+        _SCENE_WHY[doc_id] = f"rebuilding the 3D model failed: {type(e).__name__}"
         return False
 
 
@@ -204,7 +223,7 @@ async def doc_file(doc_id: str, name: str):
         if name == "scene.glb" and await _rebuild_scene(doc_id) and f.is_file():
             return FileResponse(f, headers={'Cache-Control': 'no-store'})
         if name in {"scene.json", "scene.glb", "scene.usdz"}:
-            return _missing_scene(f.parent)
+            return _missing_scene(f.parent, _SCENE_WHY.get(doc_id) if name == "scene.glb" else None)
         return _not_built(name)
     return FileResponse(f, headers={'Cache-Control': 'no-store'})
 
