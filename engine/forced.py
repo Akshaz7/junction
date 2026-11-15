@@ -8,6 +8,7 @@ responses are test fixtures, never source measurements.
 from __future__ import annotations
 
 import json
+import math
 import re
 import time
 import uuid
@@ -76,6 +77,7 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
     typ = getattr(parsed, "type", None)
     numeric = typ in UNITS
     value, text, usd = None, "", 0.0
+    invalid_numeric = False
     prompt = ("Answer the question about a building drawing or model as best you can from the evidence below. "
               + ("The drawing image is attached to this message: look at it and answer from what you see. Never say that no image was provided. "
                  if img is not None else "")
@@ -107,7 +109,10 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
         if r.provider == "fake":
             j = {}  # A schema-shaped fixture is not a count from the drawing.
         if numeric and isinstance(j.get("value"), (int, float)):
-            n = float(j["value"])
+            if isinstance(j["value"], bool):
+                invalid_numeric = True
+            else:
+                n = float(j["value"])
         elif not numeric and (j.get("answer") or "").strip():
             text = j["answer"].strip()
     except StopIteration:
@@ -115,9 +120,15 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
     except Exception as e:  # noqa: BLE001
         trace.append({"step": "forced", "detail": f"model unavailable ({type(e).__name__})", "ms": 0, "model": None, "cost_usd": 0})
     if numeric:
+        from engine.numeric import whole_count
+        if n is not None and (not math.isfinite(n) or n < 0 or (typ == "count" and not whole_count(n))):
+            invalid_numeric, n = True, None
+        if invalid_numeric:
+            trace.append({"step": "numeric_guard", "detail": "invalid model quantity withheld; object counts must be nonnegative whole numbers",
+                          "ms": 0, "model": None, "cost_usd": 0})
         defaulted = n is None
         n = 0.0 if n is None else max(0.0, n)
-        value = int(round(n)) if typ == "count" else round(n, 2)
+        value = int(n) if typ == "count" else round(n, 2)
         shown = f"{value}" if typ == "count" else f"{value} {UNITS[typ]}"
         if defaulted:
             text = ("I couldn't find this on the drawing, so I won't guess a number. "
@@ -145,7 +156,8 @@ def forced_answer(question: str, doc_ids: list[str], root: Path, parsed=None, tr
             pass
     return {
         "answer_id": uuid.uuid4().hex, "question": question, "doc_ids": list(doc_ids),
-        "answer": {"text_md": text, "value": value, "unit": UNITS.get(typ) if numeric else None, "confidence": 0.2, "abstained": False},
+        "answer": {"text_md": text, "value": value, "unit": UNITS.get(typ) if numeric else None,
+                   "confidence": 0.0 if invalid_numeric else 0.2, "abstained": invalid_numeric},
         "citations": citations, "evidence": {"boxes": [], "scene": {"doc_id": did, "highlight_item_ids": [], "camera_target_item_id": None}},
         "trace": trace, "route": "hybrid",
         "cost": {"usd_total": round(sum(c.get("cost_usd", 0) for c in calls), 6), "calls": calls},

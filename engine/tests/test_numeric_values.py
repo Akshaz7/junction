@@ -337,3 +337,29 @@ def test_reader_can_cite_every_source_item_instead_of_the_aggregate_ref(generate
 @pytest.mark.parametrize('text', ['**Room 42.**', '**See A-42.**', '**Level 42.**'])
 def test_single_identifier_is_not_an_unambiguous_numeric_headline(text):
     assert headline_value(text, [{'value': 42, 'unit': 'count'}], 'count') is None
+
+
+@pytest.mark.parametrize('value', [151.44, -1, True, float('inf'), float('nan')])
+def test_last_model_fallback_never_rounds_an_invalid_count_into_an_answer(generated_plan, monkeypatch, value):
+    from engine.forced import forced_answer
+    from engine.router.parser import parse
+    from types import SimpleNamespace
+    root, did = generated_plan
+    monkeypatch.setattr('engine.models.call', lambda *a, **kw: SimpleNamespace(
+        json={'value': value}, text='', provider='generated-for-demo', model='generated-for-demo', cost_usd=0))
+    out = forced_answer('How many doors?', [did], root, parse('How many doors?'))
+    assert out['answer']['abstained'] and out['answer']['value'] is None
+    assert any(t['step'] == 'numeric_guard' for t in out['trace'])
+
+
+@pytest.mark.parametrize('value', [0, 3])
+def test_last_model_fallback_keeps_valid_whole_counts_including_zero(generated_plan, monkeypatch, value):
+    from engine.forced import forced_answer
+    from engine.router.parser import parse
+    from types import SimpleNamespace
+    root, did = generated_plan
+    monkeypatch.setattr('engine.models.call', lambda *a, **kw: SimpleNamespace(
+        json={'value': value}, text='', provider='generated-for-demo', model='generated-for-demo', cost_usd=0))
+    out = forced_answer('How many doors?', [did], root, parse('How many doors?'))
+    assert out['answer']['value'] == value and type(out['answer']['value']) is int
+    assert out['answer']['unit'] == 'count' and not out['answer']['abstained']
