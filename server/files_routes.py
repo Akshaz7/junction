@@ -61,8 +61,81 @@ def _missing_scene(folder):
 async def page_image(doc_id: str, n: int):
     f = _doc_dir(doc_id) / f"page-{n}.png"
     if not f.is_file():
+        await _rebuild_pages(doc_id)
+    if not f.is_file():
         return _not_built(f"page {n} image")
     return FileResponse(f, media_type="image/png")
+
+
+async def _rebuild_pages(doc_id: str) -> None:
+    """An upload whose page images never reached PostgreSQL (persist cut short by a restart) is re-rendered from its
+    stored original. Rendering is deterministic, so the plan-map boxes still line up with the image."""
+    if not doc_id.startswith("uploads__"):
+        return
+    async with _REBUILD_LOCK:
+        d = _doc_dir(doc_id)
+        if (d / "page-1.png").is_file() or not (d / "doc.json").is_file():
+            return
+        try:
+            await asyncio.to_thread(_rebuild_pages_sync, doc_id)
+        except Exception as e:  # noqa: BLE001 - the viewer shows its own "not available" state
+            print("page rebuild failed:", doc_id, repr(e)[:200])
+
+
+_REBUILD_LOCK = asyncio.Lock()
+
+
+async def _rebuild_scene(doc_id: str) -> bool:
+    """scene.glb of an upload lost with a cut-short persist: extrude the stored plan map again, in the same isolated
+    subprocess and heavy-job slot an ingest uses (never in the API process)."""
+    if not doc_id.startswith("uploads__"):
+        return False
+    d = _doc_dir(doc_id)
+    plan = sorted(d.glob("planmap-[0-9]*.json"))
+    if not plan or not (d / "scene.json").is_file():
+        return False
+    page = int(plan[0].stem.split("-")[1])
+    code = ("import sys;from pathlib import Path;from server import ingest_job as j;"
+            "j._extrude(sys.argv[1], Path(sys.argv[2]), int(sys.argv[3]))")
+    try:
+        async with _INGEST_LOCK:
+            if (d / "scene.glb").is_file():
+                return True
+            proc = await asyncio.create_subprocess_exec(
+                sys.executable, "-c", code, doc_id, str(d), str(page), cwd=str(config.REPO),
+                stdout=asyncio.subprocess.DEVNULL, stderr=asyncio.subprocess.DEVNULL)
+            try:
+                await asyncio.wait_for(proc.wait(), 150)
+            except TimeoutError:
+                proc.kill()
+                await proc.wait()
+                return False
+        return (d / "scene.glb").is_file()
+    except Exception as e:  # noqa: BLE001
+        print("scene rebuild failed:", doc_id, repr(e)[:200])
+        return False
+
+
+def _rebuild_pages_sync(doc_id: str) -> None:
+    from pipeline import pages
+    from . import ingest_job
+    d = _doc_dir(doc_id)
+    doc = json.loads((d / "doc.json").read_text())
+    # Prefer the original upload: the derived normalised.png may be missing too.
+    originals = doc.get("original_files") or doc["files"]
+    if not any((config.REPO / rel).is_file() for rel in originals.values()):
+        raise FileNotFoundError("original upload is not stored")
+    if ingest_job.light_mode():
+        pages.MAX_SIDE = int(os.environ.get("PAGES_MAX_SIDE", "4096"))
+        pages.FAST_TEXT = os.environ.get("INGEST_FAST_TEXT", "1") != "0"
+    src_doc = {**doc, "files": originals}
+    if doc.get("kind") == "raster":
+        (d / "doc.json").write_text(json.dumps(src_doc, indent=1))
+        ingest_job._normalise_raster(doc_id, config.artifacts_dir())
+        src_doc = json.loads((d / "doc.json").read_text())
+    _, res = pages.process((config.REPO, config.artifacts_dir(), src_doc))
+    if not res.startswith("ok"):
+        raise RuntimeError(res)
 
 
 @router.get("/docs/{doc_id}/evidence/{name}")
@@ -123,6 +196,8 @@ async def doc_file(doc_id: str, name: str):
         if name == "elements.json" or re.match(r"^text-\d+\.json$", name):
             # Optional sidecars the viewer probes for every document: an empty payload, not a console-visible 404.
             return JSONResponse({"status": "not_built", "elements": [], "words": []})
+        if name == "scene.glb" and await _rebuild_scene(doc_id) and f.is_file():
+            return FileResponse(f, headers={'Cache-Control': 'no-store'})
         if name in {"scene.json", "scene.glb", "scene.usdz"}:
             return _missing_scene(f.parent)
         return _not_built(name)
