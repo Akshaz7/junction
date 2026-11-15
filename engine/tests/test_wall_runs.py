@@ -8,7 +8,7 @@ def test_intent():
     assert wants_wall_runs("total wall length") == "total"
     assert wants_wall_runs("wall surface area") is None
     assert wants_wall_runs("how many walls are there") is None
-    assert wants_wall_runs("what is the shortest wall") is None
+    assert wants_wall_runs("what is the shortest wall") == "shortest"
 
 
 def _wall(iid, pts):
@@ -82,5 +82,7 @@ def test_ifc_longest_with_ties(monkeypatch):
     r = answer("What is the longest wall?", ["x"], ".")
     assert r["answer"]["value"] == 41.7 and r["answer"]["unit"] == "m" and r["answer"]["abstained"] is False
     assert set(r["evidence"]["scene"]["highlight_item_ids"]) == {"a", "b"} and "2 walls share" in r["answer"]["text_md"]
+    sh = answer("What is the shortest wall?", ["x"], ".")
+    assert sh["answer"]["value"] == 5.0 and sh["evidence"]["scene"]["highlight_item_ids"] == ["c"]
     assert answer("total length of walls", ["x"], ".") is None      # existing quantity handlers own IFC totals
     assert answer("longest exterior wall", ["x"], ".") is None

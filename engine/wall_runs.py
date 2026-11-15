@@ -22,14 +22,14 @@ RE_TOTAL = re.compile(r"\bwall lengths?\b|\blengths? of (?:the |all )?(?:\w+ )?w
 
 
 def wants_wall_runs(question: str) -> str | None:
-    """'longest' | 'total' | None. Every phrasing of a wall-length question lands here, not on a count."""
+    """'longest' | 'shortest' | 'total' | None. Every phrasing of a wall-length question lands here, not on a count."""
     q = (question or "").casefold()
     if not RE_ASK.search(q) or RE_EXCL.search(q):
         return None
     if RE_SUPER_LEN.search(q):
         return "longest"
     if re.search(r"\bshortest\b", q):
-        return None     # the shortest outline edge is a cap or noise, not a wall
+        return "shortest"   # plan maps decline it below (an outline edge is a cap, not a wall); IFC has stored lengths
     if RE_TOTAL.search(q):
         return "total"
     return None
@@ -142,6 +142,8 @@ def answer(question, doc_ids, root, t0=None):
         return None
     if doc.mode == "ifc":
         return _ifc_answer(question, doc, doc_ids, root, t0, mode)
+    if mode == "shortest":
+        return None
     sc = doc.scale or {}
     mpp = sc.get("m_per_px")
     walls = [i for i in doc.items if i.kind == "wall"]
@@ -210,7 +212,7 @@ def _ifc_answer(question, doc, doc_ids, root, t0, mode):
     from engine.solvers.solve import _answer_obj, _evidence, _step, _fmt, resolve_storey
     did = doc_ids[0]
     # Totals and qualified walls (exterior, load-bearing...) belong to the existing quantity handlers.
-    if mode != "longest" or re.search(r"\b(?:exter\w+|inter\w+|outer|inner|load.?bearing|partition|fire|curved|hidden)\b", question, re.I):
+    if mode not in ("longest", "shortest") or re.search(r"\b(?:exter\w+|inter\w+|outer|inner|load.?bearing|partition|fire|curved|hidden)\b", question, re.I):
         return None
     trace = [_step("route", f"wall lengths / {mode} -> stored wall quantities, code, no model")]
     storey = resolve_storey(question, doc.storeys)
@@ -231,20 +233,20 @@ def _ifc_answer(question, doc, doc_ids, root, t0, mode):
         value, hl = round(total, 3), items
         trace.append(_step("sum", f"sum of length_m over {len(walls)} walls = {total:.3f} m"))
     else:
-        top = max(v for _, v in walls)
-        tied = sorted([(i, v) for i, v in walls if v >= top * 0.995], key=lambda iv: (iv[0].storey or "", iv[0].item_id))
+        top = (max if mode == "longest" else min)(v for _, v in walls)
+        tied = sorted([(i, v) for i, v in walls if abs(v - top) <= top * 0.005], key=lambda iv: (iv[0].storey or "", iv[0].item_id))
         hl = [i for i, _ in tied][:12]
         boxes, cites, scene = _evidence(doc, hl)
         first = tied[0][0]
         name = first.label or first.name or first.item_id
-        text = f"The longest wall{where} is **{_fmt(top, 'length')} m**: {name}" + (f" ({first.storey})" if first.storey else "") + "."
+        text = f"The {mode} wall{where} is **{_fmt(top, 'length')} m**: {name}" + (f" ({first.storey})" if first.storey else "") + "."
         if len(tied) > 1:
             levels = list(dict.fromkeys(i.storey for i, _ in tied if i.storey))
             text += (f" {len(tied)} walls share this length" + (f" across {', '.join(levels[:6])}" if levels else "")
                      + "; all are highlighted.")
         text += " " + "".join(f"[{c['n']}]" for c in cites)
         value = round(top, 3)
-        trace.append(_step("longest", f"max length_m over {len(walls)} walls = {top:.3f} m; {len(tied)} within 0.5%"))
+        trace.append(_step(mode, f"{'max' if mode == 'longest' else 'min'} length_m over {len(walls)} walls = {top:.3f} m; {len(tied)} within 0.5%"))
     scene["highlight_item_ids"] = [i.item_id for i in hl]
     scene["camera_target_item_id"] = hl[0].item_id
     scene["item_kinds"] = {i.item_id: "wall" for i in hl}
