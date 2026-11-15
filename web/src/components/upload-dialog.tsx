@@ -5,6 +5,7 @@ import type { Document } from '../lib/types'
 import { findPersistedUpload, friendlyFailure, uploadFile, UploadError, waitForUpload } from '../lib/upload-client'
 import { MAX_UPLOAD_BYTES, UPLOAD_ACCEPT, uploadReducer, validateUpload } from '../lib/upload-state'
 import { Button } from './ui'
+import { ReadOnceChip } from './read-once-chip'
 import './upload-dialog.css'
 
 export type UploadDialogProps = {
@@ -35,11 +36,6 @@ function useElapsedSeconds(active: boolean) {
     return () => window.clearInterval(timer)
   }, [active])
   return seconds
-}
-
-function readCost(document: Document): string {
-  const cost = (document as unknown as { read_cost_usd?: unknown; cost_usd?: unknown }).read_cost_usd ?? (document as unknown as { cost_usd?: unknown }).cost_usd
-  return typeof cost === 'number' && Number.isFinite(cost) ? `Read once for $${cost.toFixed(4)}; questions reuse it.` : ''
 }
 
 function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFile }: UploadDialogProps) {
@@ -177,7 +173,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFil
         <p>{state.status === 'uploading' ? 'Sending your file.' : state.step} <span data-testid="upload-elapsed">· {elapsed}s elapsed</span></p></div>
       <div className="upload-dialog-progress-line"><progress max={1} value={progress ?? undefined} aria-label={state.status === 'uploading' ? 'File uploaded' : 'Drawing processed'} />
         <span>{progress === null ? 'In progress' : `${Math.round(progress * 100)}%`}</span></div>
-      <small>{state.status === 'uploading' ? 'Keep this dialog open until the upload finishes.' : 'You can close this dialog while your drawing is processed. Find it in Data.'}</small>
+      <small>{state.status === 'uploading' ? 'Keep this dialog open until the upload finishes.' : 'You can close this dialog while your drawing is processed. It will appear in Data when processing starts.'}</small>
     </section>}
 
     {state.status === 'failed' && <div className="upload-dialog-error" role="alert"><AlertCircle size={20} aria-hidden="true" /><div><strong>{state.retry === 'poll' ? 'Could not confirm processing' : state.docId ? 'Drawing could not be processed' : 'Drawing could not be uploaded'}</strong><p>{friendlyFailure(state.reason).message}</p>{friendlyFailure(state.reason).raw && <details className="upload-dialog-details"><summary>Details</summary><pre>{friendlyFailure(state.reason).raw}</pre></details>}
@@ -185,7 +181,7 @@ function UploadSession({ onClose, onAsk, onOpen, onReady, onUploaded, initialFil
 
     {state.status === 'ready' && <section className="upload-dialog-ready"><p role="status"><Check size={18} aria-hidden="true" /><strong>{state.processing ? 'Ready to ask · 3D still building' : 'Ready'}</strong></p>
       {state.processing && <p className="upload-dialog-note" data-testid="upload-still-processing">You can ask questions now. The 3D view will appear when it finishes.</p>}
-      {readCost(state.document) && <p className="upload-dialog-note" data-testid="upload-read-cost">{readCost(state.document)}</p>}
+      <p className="upload-dialog-note"><ReadOnceChip docId={state.docId} /></p>
       {state.note && <p className="upload-dialog-note">{state.note}</p>}
       <div className="upload-dialog-actions"><Button onClick={() => { onAsk(state.document); close() }}>{state.processing ? 'Ask about it' : 'Ready — Ask about it'}<ArrowRight size={16} /></Button>
         <Button variant="outline" onClick={() => { onOpen(state.document); close() }}>Open</Button></div>

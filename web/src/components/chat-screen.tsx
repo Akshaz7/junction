@@ -441,7 +441,8 @@ export function ChatScreen({ docs, loadingDocs, demo, contextDocument, hidden, o
         onStatus: (text) => { if (generation.current === version) setStatuses((previous) => previous.at(-1) === text ? previous : [...previous, text]) },
         onDelta: (text) => { if (generation.current === version) setStreamText(text) },
         onTrace: (trace) => { if (generation.current === version) { streamedTraces.push(trace); setTraces([...streamedTraces]); setStatuses((previous) => previous.at(-1) === trace.detail ? previous : [...previous, trace.detail]) } },
-      }), { cancelled: () => generation.current !== version, onWait: () => { setStreamText(''); setStatuses([STILL_READING_STATUS]) } })
+      }), { maxMs: 0, // the server's refusal is honest and final: show it instead of re-posting the same question every 4 s
+        cancelled: () => generation.current !== version, onWait: () => { setStreamText(''); setStatuses([STILL_READING_STATUS]) } })
       if (generation.current !== version) return
       setAnswers((previous) => [...previous, { id: answer.answer_id, question: answer.question, content: '', answer: { ...answer, trace: answer.trace.length ? answer.trace : streamedTraces } }])
     } catch (err) {
