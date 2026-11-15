@@ -97,3 +97,80 @@ def test_zero_count_keeps_numeric_value_and_inventory_evidence(generated_plan):
 ])
 def test_missing_value_requires_one_headline_number_and_typed_computation(text, computed, unit, want):
     assert headline_value(text, computed, unit) == want
+
+
+def reader_result(root, did, tools, headline, question, value=None, unit=None, evidence=None):
+    from engine.reader.agent import _build
+    from engine.reader.tools import Session
+    sess = Session([did], root)
+    for tool, args in tools:
+        sess.run(tool, args)
+    refs = evidence if evidence is not None else [list(sess.ev)[-1]]
+    out = _build(question, [did], sess, {'action': 'final', 'answer': headline, 'value': value,
+                 'unit': unit, 'evidence': refs, 'confidence': 0.8}, [], [], time.perf_counter())
+    return out, sess
+
+
+def test_reader_retains_zero_from_cited_inventory(generated_plan):
+    root, did = generated_plan
+    out, sess = reader_result(root, did, [('planmap', {'kind': 'room', 'name': 'sauna'})],
+                              '**No sauna (0).**', 'How many saunas are there?')
+    assert out['answer']['value'] == 0 and out['answer']['unit'] == 'count'
+    assert not out['answer']['abstained'] and out['citations']
+    assert '0 matching room' in out['citations'][0]['quote']
+    assert out['trace'][-1]['step'] == 'check'
+
+
+def test_reader_restores_area_total_from_structured_tool_result(generated_plan):
+    root, did = generated_plan
+    out, sess = reader_result(root, did, [('planmap', {'kind': 'room'})],
+                              '**The combined area is 12.50 m².**', 'What is the total area of all rooms?')
+    assert out['answer']['value'] == 12.5 and out['answer']['unit'] == 'm²'
+    assert out['citations'][0]['item_ids'] == ['room-a']
+
+
+def test_reader_restores_computed_area_sum_with_source_citations(generated_plan):
+    root, did = generated_plan
+    out, sess = reader_result(root, did, [('planmap', {'kind': 'room'}), ('compute', {'expr': '12.5 + 12.5'})],
+                              '**The combined area is 25.00 m².**', 'What is the combined floor area?')
+    assert out['answer']['value'] == 25 and out['answer']['unit'] == 'm²'
+
+
+def test_reader_normalizes_zero_in_supplied_object_units(generated_plan):
+    root, did = generated_plan
+    out, _ = reader_result(root, did, [('planmap', {'kind': 'room', 'name': 'sauna'})],
+                           '**No sauna (0).**', 'How many saunas?', value=0, unit='saunas')
+    assert out['answer']['value'] == 0 and out['answer']['unit'] == 'count'
+
+
+@pytest.mark.parametrize('value,unit', [(151.44, 'count'), (12.5, 'm²'), (12, 'm²')])
+def test_reader_rejects_area_or_fraction_as_object_count(generated_plan, value, unit):
+    root, did = generated_plan
+    out, _ = reader_result(root, did, [('planmap', {'kind': 'room'})],
+                           f'**{value} fixtures.**', 'How many plumbing fixtures?', value=value, unit=unit)
+    assert out['answer']['abstained'] and out['answer']['value'] is None
+    assert str(value) not in out['answer']['text_md']
+
+
+def test_reader_does_not_promote_unrelated_transcript_numbers(generated_plan):
+    root, did = generated_plan
+    out, sess = reader_result(root, did, [('planmap', {'kind': 'room'})],
+                              '**There are 12.5 doors.**', 'How many doors?')
+    assert out['answer']['value'] is None
+    out, sess = reader_result(root, did, [('planmap', {'kind': 'room'})],
+                              '**There are 1 saunas.**', 'How many saunas?')
+    assert out['answer']['value'] is None
+
+
+def test_reader_cannot_recover_arithmetic_area_as_integral_count(generated_plan):
+    root, did = generated_plan
+    out, _ = reader_result(root, did, [('planmap', {'kind': 'room'}), ('compute', {'expr': '12.5 * 2'})],
+                           '**There are 25 doors.**', 'How many doors?')
+    assert out['answer']['value'] is None
+
+
+def test_reader_recovery_requires_citation_to_the_computation_source(generated_plan):
+    root, did = generated_plan
+    out, _ = reader_result(root, did, [('planmap', {'kind': 'room'})],
+                           '**12.5 m².**', 'What is the total floor area?', evidence=['e99'])
+    assert out['answer']['abstained'] and out['answer']['value'] is None

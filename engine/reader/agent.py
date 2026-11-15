@@ -169,6 +169,12 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
     notes = []
     if bad:
         notes.append(f"{len(bad)} cited id(s) did not exist and were dropped")
+    from engine.reader.numeric import recover_value
+    value, unit, numeric_notes, invalid_count = recover_value(question, text, value, unit, sess, refs)
+    notes.extend(numeric_notes)
+    if invalid_count:
+        forced_abstain = forced_abstain or "no verified whole-number count"
+        text = "I could not verify a whole-number count for the requested items from the tool results."
     # numeric grounding: a returned value must appear in some observation (or be a compute result)
     if isinstance(value, (int, float)) and not isinstance(value, bool):
         seen = set().union(*[_numbers(t) for t in sess.transcript]) if sess.transcript else set()

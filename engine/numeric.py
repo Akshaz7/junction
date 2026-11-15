@@ -62,14 +62,16 @@ def guard_count(res: dict, question: str, doc_ids: list[str], root, hidden=None)
         if not isinstance(value, dict):
             ans["value"] = int(value)
         return res
-    from engine.solvers.solve import _abstain, _step, solve, SolverUnsupported
+    from engine.solvers.solve import _abstain, _step, solve
     import time
+    if hidden and not isinstance(hidden, dict):
+        hidden = {iid: iid for iid in hidden}
     trace = list(res.get("trace") or [])
     trace.append(_step("numeric_guard", "count question received a non-count quantity; retried the count solver"))
     for did in doc_ids:
         try:
             candidate = solve(question, did, parsed=parse(question), root=root, hidden=hidden)
-        except (SolverUnsupported, ValueError, TypeError):
+        except Exception:  # a failed retry must preserve the engine's never-raise contract
             continue
         a = candidate["answer"]
         v = a.get("value")

@@ -55,6 +55,7 @@ class Session:
         self.tables: dict[str, tuple[str, int, Table]] = {}
         self.views = 0
         self.transcript: list[str] = []            # every observation, for number grounding
+        self.numeric_results: list[dict] = []     # typed, computed results; never scraped from answer prose
         self._planmaps: dict[str, Doc | None] = {}
         for i, d in enumerate(self.doc_ids, 1):
             self.docs[f"d{i}"] = {"id": d, **self._meta(d)}
@@ -375,6 +376,9 @@ class Session:
             res += f", area {geom.polygon_area(pts) * mpp * mpp:.2f} m2"
         xs, ys = [p[0] for p in pts], [p[1] for p in pts]
         ref = self.reg("region", did, pg, [min(xs), min(ys), max(xs), max(ys)], f"measured {res}")
+        self.numeric_results.append({"value": length, "unit": "m", "refs": [ref]})
+        if closed and len(pts) >= 3:
+            self.numeric_results.append({"value": geom.polygon_area(pts) * mpp * mpp, "unit": "m2", "refs": [ref]})
         return f"{ref} {res} (scale {mpp:.6f} m/px from {src})"
 
     def t_planmap(self, doc: str = "", kind: str = "", name: str = "", page=None, limit: int = 40) -> str:
@@ -403,6 +407,17 @@ class Session:
             out.append(f"{ref} p{i.page} {i.item_id}: " + " ".join(str(b) for b in bits if b))
         if len(items) > int(limit):
             out.append(f"[{len(items) - int(limit)} more not listed; totals above cover all]")
+        # An inventory citation verifies the full selection, including zero matches
+        # and results larger than the displayed sample. Preserve the typed totals.
+        ref = self.reg("region", did, int(page or 1), None,
+                       f"Checked stored drawing detections: {len(items)} matching {kind or 'items'}"
+                       + (f' named "{name}"' if name else "") + ". Undetected objects may still be present.",
+                       item_ids=[i.item_id for i in items])
+        out.insert(0, f"{ref} (inventory; cites all {len(items)} matching items)")
+        facts = {"refs": [ref], "kind": kind, "name": name}
+        self.numeric_results.append({**facts, "value": len(items), "unit": "count"})
+        self.numeric_results.extend({**facts, "value": v, "unit": "m2" if k == "area_m2" else "m"}
+                                    for k, v in tot.items() if n_with[k])
         return "\n".join(out)
 
     def t_ifc(self, doc: str = "", kind: str = "", ifc_class: str = "", storey: str = "", name: str = "", external: bool | None = None,
@@ -442,6 +457,11 @@ class Session:
         quote = f"{len(items)} matching {noun}{scope} in {d.title or 'the selected model'}"
         ref = self.reg("element", did, 1, None, quote, item_ids=ids)
         out.insert(0, f"{ref} (cites all {len(ids)} matching elements)")
+        facts = {"refs": [ref], "kind": kind, "name": name}
+        self.numeric_results.append({**facts, "value": len(items), "unit": "count"})
+        self.numeric_results.extend({**facts, "value": v,
+                                     "unit": "m3" if k == "volume_m3" else "m2" if k in ("area_m2", "net_floor_area_m2") else "m"}
+                                    for k, v in tot.items() if have[k])
         for i in items[:int(limit)]:
             q = " ".join(f"{k}={_fmt(v)}" for k, v in i.q.items() if k in keys)
             pr = " ".join(f"{k}={v}" for k, v in i.props.items() if k in ("is_external", "fire_rating", "material") and v not in (None, ""))
@@ -452,6 +472,7 @@ class Session:
 
     def t_compute(self, expr: str) -> str:
         v = safe_eval(str(expr))
+        self.numeric_results.append({"value": v, "unit": None, "refs": list(self.ev), "compute": True})
         return f"{expr} = {_fmt(round(v, 6))}"
 
 
