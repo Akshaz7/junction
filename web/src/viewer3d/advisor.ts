@@ -12,6 +12,8 @@ export interface AdvisorCard {
   title: string;
   body: string;
   item_ids: string[];
+  /** How many elements the check covered; item_ids is capped, so this can be larger. */
+  item_total?: number;
   /** violation (red), suggestion (amber), info (grey); older cards only have `kind`. */
   severity?: AdvisorSeverity;
   /** Rule ids the check ran against. */
