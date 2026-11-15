@@ -14,6 +14,10 @@ RUN uv pip install --system --no-cache pillow numpy pypdfium2 pdfminer.six ezdxf
 RUN uv pip uninstall --system opencv-python || true; uv pip install --system --no-cache --reinstall opencv-python-headless
 # IFC uploads: ifcopenshell (LGPL) geometry -> GLB (pipeline/ifc_scene.convert_py), pygltflib for node boxes, usd-core for the AR USDZ.
 RUN uv pip install --system --no-cache ifcopenshell==0.9.0.post1 pygltflib==1.16.5 usd-core
+# Detector client (off unless PDF_DETECT=1): `modal` lives in its own venv so its grpc/protobuf pins never touch the API stack.
+# MODAL_TOKEN_ID / MODAL_TOKEN_SECRET come from the Aiven env (scripts/aiven_env.py); the app "junction-det" is deployed by scripts/detector_up.sh.
+RUN uv venv /opt/det && uv pip install --python /opt/det/bin/python --no-cache modal
+ENV PDF_DETECT_PY=/opt/det/bin/python
 COPY server ./server
 COPY engine ./engine
 COPY pipeline ./pipeline

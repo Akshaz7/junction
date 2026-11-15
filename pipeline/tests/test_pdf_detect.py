@@ -37,3 +37,49 @@ def test_call_failure_never_breaks(monkeypatch):
     pm = _pm()
     summ = pdf_detect.apply(pm, "x.pdf", 0, 1.0, 0.01)
     assert "modal down" in summ["error"] and all("props" not in i for i in pm["items"])
+
+
+def test_timeout_env(monkeypatch):
+    monkeypatch.delenv("PDF_DETECT_TIMEOUT_S", raising=False)
+    assert pdf_detect._timeout_s() == 30.0
+    monkeypatch.setenv("PDF_DETECT_TIMEOUT_S", "12.5")
+    assert pdf_detect._timeout_s() == 12.5
+    monkeypatch.setenv("PDF_DETECT_TIMEOUT_S", "junk")
+    assert pdf_detect._timeout_s() == 30.0
+
+
+def test_call_passes_timeout_to_subprocess(monkeypatch):
+    seen = {}
+
+    def fake_run(cmd, **kw):
+        seen["timeout"] = kw["timeout"]
+
+        class R:
+            returncode, stdout, stderr = 0, '{"items": []}\n', ""
+        return R()
+    monkeypatch.setenv("PDF_DETECT_PY", "python3")
+    monkeypatch.setenv("PDF_DETECT_TIMEOUT_S", "7")
+    monkeypatch.setattr(pdf_detect.subprocess, "run", fake_run)
+    pdf_detect._call("x.pdf", 0, None)
+    assert seen["timeout"] == 7.0
+
+
+def test_timeout_and_no_app_deployed_are_recorded_not_raised(monkeypatch):
+    """PDF_DETECT=1 with no Modal app (client exits non-zero) or a hung call: apply() records pm['detector']['error']."""
+    import subprocess
+    monkeypatch.setenv("PDF_DETECT_PY", "python3")
+
+    def no_app(cmd, **kw):
+        class R:
+            returncode, stdout, stderr = 1, "", "modal.exception.NotFoundError: App 'junction-det' not found"
+        return R()
+    monkeypatch.setattr(pdf_detect.subprocess, "run", no_app)
+    pm = _pm()
+    assert "not found" in pdf_detect.apply(pm, "x.pdf", 0, 1.0, 0.01)["error"] and pm["detector"]["error"]
+
+    def hang(cmd, **kw):
+        raise subprocess.TimeoutExpired(cmd, kw["timeout"])
+    monkeypatch.setattr(pdf_detect.subprocess, "run", hang)
+    pm = _pm()
+    assert "TimeoutExpired" in pdf_detect.apply(pm, "x.pdf", 0, 1.0, 0.01)["error"]
+    assert all("props" not in i for i in pm["items"])
