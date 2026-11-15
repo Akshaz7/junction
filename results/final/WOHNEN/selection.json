@@ -1,0 +1,17 @@
+{
+  "swiss_development_docs": [
+    "swiss_dwellings__site362-bldg792-floor3467",
+    "swiss_dwellings__site871-bldg1835-floor8194",
+    "swiss_dwellings__site10965-bldg15906-floor41165",
+    "swiss_dwellings__site632-bldg1359-floor5915",
+    "swiss_dwellings__site1189-bldg3154-floor14132",
+    "swiss_dwellings__site716-bldg2397-floor11177",
+    "swiss_dwellings__site970-bldg2036-floor16468",
+    "swiss_dwellings__site390-bldg946-floor14426",
+    "swiss_dwellings__site712-bldg1527-floor12005",
+    "swiss_dwellings__site122-bldg9-floor554"
+  ],
+  "reserved_unseen_doc": "swiss_dwellings__site674-bldg1435-floor6271",
+  "forbidden_docs_excluded": 54,
+  "note": "data/sets/heldout_docs.txt marks question-bearing docs as training exclusions; no training performed. Final-common development exclusion list used."
+}

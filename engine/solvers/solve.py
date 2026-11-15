@@ -587,7 +587,25 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
     subject = None
     sub_name = None
     weak = []
-    if kind == "room" and doc.mode == "ifc":
+    from .filters import explicit_room_label, exact_room_label
+    label_target = explicit_room_label(question) if kind == "room" else None
+    if label_target is not None:
+        sel = [i for i in items if exact_room_label(i, label_target)]
+        if doc.mode == 'planmap' and p.type == 'count' and not hidden:
+            # Explicit source labels survive failed polygon attribution. Never add
+            # containing rooms: one label can lie inside several nested outlines.
+            labels = [i for i in doc.items if i.kind == 'text' and i.source == 'dxf'
+                      and i.conf >= MIN_CONF and (not page or i.page == page)
+                      and i.props.get('dxf_layer') == 'ROOM_TEXT' and exact_room_label(i, label_target)]
+            if len(labels) > len(sel):
+                sel = labels
+                trace.append(_step('filter', 'counted exact DXF ROOM_TEXT labels; room polygon attribution is incomplete'))
+        if not sel and doc.mode == 'planmap' and not any(i.label for i in items):
+            return _abstain(question, doc_id, 'The room names on this plan have not been read, so I cannot pick out that room.', trace, route, t0)
+        items = sel
+        subject = f'rooms labelled “{label_target}”'
+        trace.append(_step('filter', f'exact room label “{label_target}”: {len(items)} matched; unit tags and compound names excluded'))
+    elif kind == "room" and doc.mode == "ifc":
         from .filters import room_filter, missing_room_text
         selected = room_filter(question, items)
         if selected:
@@ -595,18 +613,18 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             if not items:
                 return _abstain(question, doc_id, missing_room_text(subject, [i for i in doc.items if i.kind == "room"]), trace, route, t0)
             trace.append(_step("filter", f"room {subject}: {len(items)} matched"))
-    quoted = _quoted(question)
+    quoted = [] if label_target is not None else _quoted(question)
     # a quoted name that is the model's / sheet's title or a storey is the scope, not an element label
     _scope_names = {str(x).casefold().strip() for x in [doc.title, doc.meta.get("project"), doc.meta.get("building"),
                     *[st_["name"] for st_ in doc.storeys]] if x}
     _scope_names |= {t.split(" - Floor plan")[0].strip().casefold() for t in [doc.title] if t}
     quoted = [t for t in quoted if t.casefold().strip() not in _scope_names and not (doc.title and t.casefold().strip() in doc.title.casefold() and len(t) > 6)]
-    if kind == "room" and doc.mode == "planmap" and re.search(r"\bnumbered\b.*\b(?:indoor|interior)\b|\b(?:indoor|interior)\b.*\bnumbered\b", question, re.I):
+    if kind == "room" and label_target is None and doc.mode == "planmap" and re.search(r"\bnumbered\b.*\b(?:indoor|interior)\b|\b(?:indoor|interior)\b.*\bnumbered\b", question, re.I):
         out = re.compile(r"balcon|balkon|terras|loggia|veranda|garden|outdoor", re.I)
         items = [i for i in items if i.props.get("number") and not out.search(i.label or "")]
         subject = "numbered indoor rooms"
         trace.append(_step("filter", f"numbered indoor rooms: {len(items)}"))
-    if kind == "room" and doc.mode == "planmap" and not quoted and not _room_id(question) and p.type in ("count", "area"):
+    if kind == "room" and label_target is None and doc.mode == "planmap" and not quoted and not _room_id(question) and p.type in ("count", "area"):
         sub = room_subtype(question)
         if sub:
             name, types = sub
@@ -713,7 +731,8 @@ def solve(question: str, doc_id: str, parsed: Parsed | None = None, root: Path |
             conf = min(conf, 0.5)
         else:
             verb = "is" if n == 1 else "are"
-            text = f"There {verb} **{n} {_plural(kind, n)}** {where}. {marks}"
+            label_note = f' labelled **“{label_target}”**' if label_target is not None else ''
+            text = f"There {verb} **{n} {_plural(kind, n)}**{label_note} {where}. {marks}"
         from pipeline.sheet_views import count_note
         text += count_note(doc, items, kind, page)
         if weak:
