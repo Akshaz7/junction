@@ -45,6 +45,8 @@ def comparisons(b):
         if e['kind']!='same_as':
             continue
         a,z=b.nodes[e['from']],b.nodes[e['to']]
+        if not a.get('source') or not z.get('source'):
+            continue
         derived = any(b.combined.infos[n['source']['doc_id']].derived for n in (a,z))
         if not derived and a['kind']=='room' and z['kind']=='room':
             _compare(b,a['id'],z['id'],'area_m2',a['props'].get('area_m2'),z['props'].get('area_m2'),

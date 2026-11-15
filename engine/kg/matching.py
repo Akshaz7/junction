@@ -20,6 +20,41 @@ def confidence(method, residual_m=None, evidence=None):
     except (ImportError, TypeError, ValueError):
         return {'guid': 1., 'tag_text': .85, 'label_text': .7, 'position': .55}.get(method, .5)
 
+_LEVEL_ALIASES = {
+    'ground': ('erdgeschoss', 'eg', 'ground floor', 'ground', 'ground level', 'level 0', 'floor 0', 'floor 1', 'level 1', 'rez de chaussee', 'begane grond', 'maaiveld', 'plan terre', 'kerrosta 1', '0', '00', 'l0', 'gf'),
+    'first': ('1 obergeschoss', '1 og', '1og', 'obergeschoss', 'first floor', '1st floor', 'floor 2', 'level 2', '1 verdieping', 'eerste verdieping', 'l1', '1'),
+    'second': ('2 obergeschoss', '2 og', '2og', 'second floor', '2nd floor', 'floor 3', 'level 3', '2 verdieping', 'tweede verdieping', 'l2', '2'),
+    'basement': ('keller', 'kellergeschoss', 'ug', 'untergeschoss', 'basement', 'souterrain', 'kelder', 'cellar', 'level -1', 'b1'),
+    'roof': ('dachgeschoss', 'dg', 'dach', 'roof', 'attic', 'dak', 'zolder', 'roof level'),
+}
+
+
+def level_key(name):
+    """Canonical storey identity across languages and numbering schemes (Erdgeschoss = Ground floor = Floor 1)."""
+    import re
+    t = re.sub(r'[^a-z0-9\- ]+', ' ', str(name or '').casefold().replace('ü', 'u').replace('ö', 'o').replace('ä', 'a').replace('ß', 'ss').replace('.', ' '))
+    t = ' '.join(t.split())
+    if not t:
+        return ''
+    for key, names in _LEVEL_ALIASES.items():
+        if t in names:
+            return key
+    return t
+
+
+def same_level(node, info, row):
+    """A node is on the row's storey by its own level, or by its single-storey drawing's declared level."""
+    own = level_key(node['level'])
+    want = level_key(row.name)
+    if own:
+        return own == want
+    return bool(info.level) and level_key(info.level) == want
+
+
+def _single_level_doc(info):
+    doc = info.doc
+    return bool(info.level) and doc is not None and len({level_key(s['name']) for s in doc.storeys} | {level_key(it.storey) for it in doc.items if it.storey}) <= 3 and info.role != 'model'
+
 
 def _key(n, field):
     if field == 'guid':
@@ -178,8 +213,8 @@ def match_documents(b):
                 if parent in row.docs and did not in docs:
                     docs.append(did)
         for da,dz in combinations(docs,2):
-            a=[n for n in by_doc[da] if b.combined.infos[da].doc.mode=='planmap' or b.combined.infos[da].derived or norm(b.nodes[n]['level'])==norm(row.name) or (not b.nodes[n]['level'] and not row.key)]
-            z=[n for n in by_doc[dz] if b.combined.infos[dz].doc.mode=='planmap' or b.combined.infos[dz].derived or norm(b.nodes[n]['level'])==norm(row.name) or (not b.nodes[n]['level'] and not row.key)]
+            a=[n for n in by_doc[da] if b.combined.infos[da].doc.mode=='planmap' or b.combined.infos[da].derived or norm(b.nodes[n]['level'])==norm(row.name) or (_single_level_doc(b.combined.infos[da]) and same_level(b.nodes[n],b.combined.infos[da],row)) or (not b.nodes[n]['level'] and not row.key)]
+            z=[n for n in by_doc[dz] if b.combined.infos[dz].doc.mode=='planmap' or b.combined.infos[dz].derived or norm(b.nodes[n]['level'])==norm(row.name) or (_single_level_doc(b.combined.infos[dz]) and same_level(b.nodes[n],b.combined.infos[dz],row)) or (not b.nodes[n]['level'] and not row.key)]
             key=(da,dz,row.group,row.key)
             if key in tested or not a or not z:
                 continue
@@ -198,3 +233,44 @@ def match_documents(b):
             if da!=dz:
                 b.counterpart_docs.update((da,dz))
                 b.edge('same_as',a,z,'guid',confidence('guid'),{'guid':guid,'sources':[b.nodes[a]['source'],b.nodes[z]['source']]})
+
+
+def link_levels(b):
+    """Same storey across documents (by canonical name): lets any item's neighbourhood reach the other files' items on that level."""
+    by_key = defaultdict(list)
+    for (did, _), nid in b.level_nodes.items():
+        k = level_key(b.nodes[nid]['label'])
+        if k:
+            by_key[k].append((did, nid))
+    for items in by_key.values():
+        for (da, a), (dz, z) in combinations(sorted(items), 2):
+            if da != dz:
+                b.edge('same_level', a, z, 'level_name', .7, {'property': 'level_name', 'sources': [{'doc_id': da}, {'doc_id': dz}]})
+
+
+def link_rooms_by_name(b):
+    """Rooms with the same unique name on the same storey in different files are the same room.
+
+    Independent of the quantity rows: a one-storey drawing and a model rarely share a combine row, yet the name and storey are explicit.
+    """
+    groups = defaultdict(lambda: defaultdict(list))
+    for nid in b.items:
+        n = b.nodes[nid]
+        if n['kind'] != 'room':
+            continue
+        label = norm(n['label'])
+        if not label or label == 'room':
+            continue
+        info = b.combined.infos.get(n['source']['doc_id'])
+        lvl = level_key(n['level']) or (level_key(info.level) if info is not None else '')
+        groups[(lvl, label)][n['source']['doc_id']].append(nid)
+    have = {frozenset((e['from'], e['to'])) for e in b.edges.values() if e['kind'] == 'same_as'}
+    for (lvl, label), per_doc in groups.items():
+        if not lvl or len(per_doc) < 2 or any(len(v) != 1 for v in per_doc.values()):
+            continue
+        for (da, (x,)), (dz, (y,)) in combinations(sorted(per_doc.items()), 2):
+            if frozenset((x, y)) in have:
+                continue
+            b.edge('same_as', x, y, 'label_text', confidence('label_text'),
+                   {'property': 'label', 'value': label, 'level': lvl, 'sources': [b.nodes[x]['source'], b.nodes[y]['source']]})
+            b.counterpart_docs.update((da, dz))

@@ -170,3 +170,23 @@ def test_optional_vector_alignment_converts_points_to_metres(tmp_path,monkeypatc
     assert fit['residual']==pytest.approx(.02)
     assert fit['T']==[[1,0,1],[0,1,2],[0,0,1]]
     assert fit['matches']==4
+
+
+def test_same_building_levels_and_rooms_link_across_files(tmp_path):
+    """Erdgeschoss = Ground floor = Floor 1: a German model and an English one-storey drawing link by level and room name."""
+    for did, storey, title in (('model', 'Erdgeschoss', 'FZK-Haus'), ('sheet', 'Floor 1', 'FZK ground floor plan')):
+        write(tmp_path/did/'doc.json', {'doc_id': did, 'kind': 'ifc', 'title': title})
+        els = [{'item_id': f'{did}-{i}', 'kind': 'room', 'name': n, 'storey': {'name': storey}, 'props': {}, 'quantities': {}}
+               for i, n in enumerate(('Kueche', 'Bad', 'Flur'))]
+        els.append({'item_id': f'{did}-d', 'kind': 'door', 'name': 'Tuer', 'storey': {'name': storey}, 'props': {}, 'quantities': {}})
+        write(tmp_path/did/'elements.json', {'storeys': [{'name': storey, 'elevation_m': 0}], 'elements': els})
+    g = build({'id': 'fzk', 'docs': [{'doc_id': 'model', 'role': 'model'}, {'doc_id': 'sheet', 'role': 'plan', 'level': 'Ground floor'}]}, tmp_path)
+    valid(g)
+    assert any(e['kind'] == 'same_level' for e in g['edges'])
+    rooms = [e for e in g['edges'] if e['kind'] == 'same_as' and g_kind(g, e['from']) == 'room']
+    assert len(rooms) == 3
+    assert g['stats']['linked_pct'] and g['stats']['linked_pct'] > 0
+
+
+def g_kind(g, nid):
+    return next(n['kind'] for n in g['nodes'] if n['id'] == nid)

@@ -262,7 +262,11 @@ def build_uncached(project, root):
     from .matching import match_documents
     enrich_ifc(b)
     match_documents(b)
+    from .matching import link_rooms_by_name
+    link_rooms_by_name(b)
     comparisons(b)
+    from .matching import link_levels
+    link_levels(b)
     references(b)
     revisions_and_issues(b)
     graph = b.graph()

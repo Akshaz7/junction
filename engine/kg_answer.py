@@ -17,6 +17,7 @@ from engine.kg_impact import confidence, impact, index, number, paths
 AGREEMENT = re.compile(r"\b(?:dis)?agree(?:s|ment)?\b|\b(?:cross[- ]?check|mismatch\w*|discrepanc\w*|consistent|match(?:es)?)\b|\bcompare\b.*\b(?:across|between)\b.*\b(?:files|drawings|documents|plan|model)\b", re.I)
 APPEARANCE = re.compile(r"\bwhere else\b|\b(?:other|which) (?:files|sheets|drawings|documents)\b.*\b(?:show|appear|contain|refer)\w*", re.I)
 CONNECTION = re.compile(r"\b(?:what|which|how)\b.*\b(?:connected|connections?|linked)\b", re.I)
+FILE_LINKS = re.compile(r"\b(?:how|where|which|what)\b.*\b(?:link\w*|connect\w*|relat\w*|appear\w*|show\w*|in)\b.*\b(?:all |its |the |other |which |those |these )?(?:files?|documents?|drawings?|sheets?|models?)\b|\bwhich (?:files?|documents?|drawings?|sheets?|models?)\b", re.I)
 IMPACT = re.compile(r"\bif\b.*\b(?:ceiling|wall|door|window|duct|pipe)\b.*\b(?:drop\w*|lower\w*|rais\w*|mov\w*|remov\w*|delet\w*)\b", re.I)
 KIND_WORDS = {"door": r"doors?", "window": r"windows?", "room": r"rooms?|spaces?",
               "wall": r"walls?", "duct": r"ducts?", "pipe": r"pipes?", "terminal": r"terminals?",
@@ -552,12 +553,81 @@ def _impact(q, project, graph, t0):
                     "distinct_items": [e["node"]["id"] for e in distinct]}, len(distinct), "count")
 
 
+def _file_links(q, project, graph, t0, kind=None):
+    """How one item links to the project's other files: its node, level, and every cross-file edge, naming the files."""
+    matches = _candidates(q, graph, kind)
+    if not matches:
+        return None
+    nodes = {n["id"]: n for n in graph.get("nodes", [])}
+    titles = {d: _label(n) for n in nodes.values() if n.get("kind") == "doc" for d in n.get("doc_ids", [])}
+    edges = graph.get("edges", [])
+    by_node = {}
+    for e in edges:
+        by_node.setdefault(e["from"], []).append(e)
+        by_node.setdefault(e["to"], []).append(e)
+    rows, linked_files, shown = [], set(), []
+    for m in sorted(matches, key=lambda n: n["id"]):
+        mdocs = set(m.get("doc_ids") or [])
+        file = ", ".join(titles.get(d, d) for d in sorted(mdocs))
+        found = False
+        for e in by_node.get(m["id"], []):
+            other = nodes.get(e["to"] if e["from"] == m["id"] else e["from"])
+            if other is None or e.get("kind") not in {"same_as", "references"}:
+                continue
+            odocs = set(other.get("doc_ids") or []) - mdocs
+            if not odocs:
+                continue
+            found = True
+            linked_files |= odocs
+            shown.append(other)
+            rows.append((file, _label(m), m.get("level") or "Not stated",
+                         f"{e['kind'].replace('_', ' ')} ({e.get('method', 'rule').replace('_', ' ')}) -> "
+                         f"{_label(other)} in {', '.join(titles.get(d, d) for d in sorted(odocs))}"))
+        if not found:
+            rows.append((file, _label(m), m.get("level") or "Not stated", "no recorded link to another file"))
+    # No identity link: say which other files hold items on the same storey.
+    same_level = []
+    if not linked_files:
+        from engine.kg.matching import level_key
+        mdocs = {d for m in matches for d in m.get("doc_ids") or []}
+        wanted = {level_key(m.get("level")) for m in matches if m.get("level")}
+        counts = {}
+        for n in nodes.values():
+            d = (n.get("doc_ids") or [None])[0]
+            if d is None or d in mdocs or n.get("kind") in {"project", "doc", "level", "sheet_ref", "type", "material", "system", "issue", "change"}:
+                continue
+            if level_key(n.get("level")) in wanted and wanted != {""}:
+                counts.setdefault(d, Counter())[n["kind"]] += 1
+        for d, c in sorted(counts.items()):
+            same_level.append(f"{titles.get(d, d)} holds " + ", ".join(f"{v} {k}{'s' if v != 1 else ''}" for k, v in sorted(c.items())) + " on the same level")
+    label = _label(matches[0])
+    if linked_files:
+        files = linked_files | {d for m in matches for d in m.get("doc_ids") or []}
+        headline = f"{label} is tied together across {len(files)} files: " + ", ".join(sorted(titles.get(d, d) for d in files)) + "."
+    else:
+        headline = f"No recorded link ties {label} to another file."
+    bullets = []
+    if same_level:
+        bullets.append("Other files with items on the same level (no identity link): " + "; ".join(same_level[:4]) + ".")
+    elif not linked_files:
+        bullets.append("No other file has items on that level, so there is nothing to link it to.")
+    bullets.append("Links are same_as (same item), references (a sheet mentions it) and level matches; missing links may hide others.")
+    table = ["| File | Item | Level | Link |", "|---|---|---|---|"] + ["| " + " | ".join(str(c).replace("|", " ") for c in r) + " |" for r in rows[:40]]
+    result = _result(q, project, graph, t0, headline, bullets, [*matches, *shown], [],
+                     {"shape": "file_links", "origin": matches[0]["id"], "linked_docs": sorted(linked_files),
+                      "same_level": same_level, "items": [{"id": n["id"]} for n in shown]},
+                     len(linked_files), "count", supported=bool(linked_files or same_level))
+    result["answer"]["text_md"] += "\n\n" + "\n".join(table)
+    return result
+
+
 def answer(question: str, project: dict, root: Path, t0=None, *, graph=None):
     """Route only graph-specific questions; builds are code-only and optional."""
     q = question or ""
     route = _impact if IMPACT.search(q) else (_agree if AGREEMENT.search(q) else None)
     appearances = bool(APPEARANCE.search(q))
-    if route is None and not appearances and not CONNECTION.search(q):
+    file_links = route is None and not appearances and bool(FILE_LINKS.search(q)) and bool(re.search(r"\blinks?\b|\bconnect\w*|\bwhich (?:files?|documents?|drawings?|sheets?|models?)\b|\ball (?:its )?files\b", q, re.I))
+    if route is None and not appearances and not file_links and not CONNECTION.search(q):
         return None
     t0 = time.perf_counter() if t0 is None else t0
     if graph is None:
@@ -568,4 +638,10 @@ def answer(question: str, project: dict, root: Path, t0=None, *, graph=None):
             return _missing(q, project, {}, t0, "The project links are unavailable. Check the source documents directly.")
     if not isinstance(graph, dict):
         return _missing(q, project, {}, t0, "The project graph is still being built. Try again once its links are ready.")
+    if file_links and not CONNECTION.search(q):
+        named = [(m.start(), k) for k, rx in KIND_WORDS.items() if (m := re.search(rf"\b(?:{rx})\b", q, re.I))]
+        res = _file_links(q, project, graph, t0, min(named)[1] if named else None)
+        if res is not None:
+            return res
+        return None   # not an identifiable item: leave the question to the normal engine
     return route(q, project, graph, t0) if route else _related(q, project, graph, t0, appearances)
