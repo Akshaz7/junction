@@ -53,6 +53,38 @@ def _calibrated(source, unit, label, checked):
             "scope": "Observed audit accuracy; not an individual-answer guarantee"}
 
 
+SCOPE_NOTE = "Exact for what the model contains; elements missing from the model cannot be counted."
+VERIFIED_MODEL = "Verified (counted from the model)"
+VERIFIED_CAD = "Verified (counted from the drawing's CAD geometry)"
+
+
+def _enumerated(ctx, source):
+    """A code-only count that lists the source's own elements one by one (IFC index, DXF or vector-PDF plan map)."""
+    if ctx.get('unit') != 'count' or ctx.get('route') not in ('index', 'planmap') or ctx.get('models_used'):
+        return None
+    res = ctx.get('res') or {}
+    if (res.get('answer') or {}).get('abstained') or any(c.get('cost_usd') for c in (res.get('cost') or {}).get('calls') or []):
+        return None
+    try:
+        from engine.reasoning_parts.counts import facts
+        f = facts(res, ctx.get('question', ''))
+    except Exception:  # noqa: BLE001
+        return None
+    if not f or f['problems'] or not f['total'] or f.get('reread'):
+        return None
+    if ctx.get('is_ifc'):
+        return VERIFIED_MODEL
+    try:
+        source = geometry_source(ctx.get('root'), res.get('doc_ids') or []) or source
+    except Exception:  # noqa: BLE001
+        pass
+    if source in ('cad', 'pdf_vector') or ctx.get('from_cad'):
+        srcs = {getattr(it, 'source', None) for it in ctx.get('cited') or []}
+        if srcs and srcs <= {'dxf', 'pdf_vector'}:
+            return VERIFIED_CAD
+    return None
+
+
 def run(ctx: dict) -> dict:
     steps, checked = ctx['steps'], ctx.get('checked')
     exact = ctx.get('quantified_exact') is True
@@ -72,8 +104,13 @@ def run(ctx: dict) -> dict:
     if inferred_cad:
         exact, checked = False, None
     label = "Verified" if exact else "Cross-checked" if checked is True else "Estimate"
+    enumerated = None if inferred_cad or exact else _enumerated(ctx, source)
+    if enumerated:
+        label = enumerated
     if inferred_cad:
         reason = "The fixtures were identified from the shapes of the CAD symbols, not from a named block or layer."
+    elif enumerated:
+        reason = SCOPE_NOTE if enumerated == VERIFIED_MODEL else SCOPE_NOTE.replace("the model contains", "the CAD geometry contains").replace("the model", "it")
     elif exact:
         reason = "The cited source quantities reproduce the answer; the source's completeness is not verified."
     elif checked is True:
@@ -83,10 +120,16 @@ def run(ctx: dict) -> dict:
     else:
         reason = "The source or calculation has not been independently verified."
     calibration = _calibrated(source, ctx.get('unit'), label, checked)
+    suppress = bool(enumerated)
+    if calibration and enumerated:
+        calibration = None   # an exact enumeration is not a cohort estimate: no percentage, no audit sentence
     if calibration:
         reason += f" Audit accuracy: {calibration['correct']} of {calibration['n']} comparable answers."
         if calibration['n'] < 30:
-            reason += " This is a small sample."
+            reason += " This is a small sample, so the accuracy percentage is unknown and none is shown."
+            suppress = True
+    elif enumerated:
+        pass
     else:
         reason += " No measured accuracy is available for this answer type."
     improve = None
@@ -104,7 +147,7 @@ def run(ctx: dict) -> dict:
         reason += f" Independent methods agreed within 5% on {observed['within_5pct']} of {observed['n']} measured comparisons; this is agreement, not answer accuracy."
         if observed.get('documents') is not None:
             reason += f" These comparisons cover {observed['documents']} source documents; measurements in one document can share errors."
-    result = {"label": label, "pct": calibration['pct'] if calibration else None, "reason": reason,
+    result = {"label": label, "pct": calibration['pct'] if calibration and calibration['n'] >= 30 else None, "pct_suppressed": suppress, "reason": reason,
               "improve": improve, "calibration": calibration, "agreement": agreement, "_steps": steps}
     return factors(result, ctx.get('res') or {'answer': ctx.get('ans', {})}, ctx.get('question', ''), source=source, allow_route_score=False)
 
@@ -143,7 +186,10 @@ def factors(card, res, question, *, source=None, allow_route_score=True):
     if allow_route_score and not calibration:
         from engine.scan_uncertainty import historical
         reference = historical(res, question)
-    if calibration and _finite(calibration.get('pct')):
+    if card.get('pct_suppressed'):
+        base, pct, kind = 0, None, 'unavailable'
+        label, note = 'No percentage shown', 'The comparable cohort is too small or the count is an exact enumeration; no percentage is claimed.'
+    elif calibration and _finite(calibration.get('pct')):
         base = calibration['pct']
         pct = current if _finite(current) else base
         kind = 'observed_audit_accuracy'

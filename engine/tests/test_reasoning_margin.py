@@ -202,8 +202,10 @@ def test_real_artifact_budgets(doc_id, question, exact):
         # Reproducing source arithmetic is distinct from independently checking
         # the quantity. These real indices may lack a complete second reading.
         if not out['calc']['checks']:
-            assert out['confidence']['label'] == 'Estimate'
+            # An exact count of the model's own elements is labelled as such; other exact quantities stay Estimate.
+            expected = 'Verified (counted from the model)' if response['answer'].get('unit') == 'count' else 'Estimate'
+            assert out['confidence']['label'] == expected
     else:
         assert out['margin']['value'] is None
-        assert out['confidence']['label'] != 'Verified'
+        assert not out['confidence']['label'].startswith('Verified')
     json.dumps(out, allow_nan=False)
