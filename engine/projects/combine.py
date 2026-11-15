@@ -117,6 +117,31 @@ def load_infos(docs: list, root: Path) -> dict:
 
 
 # ------------------------------------------------------------------------------------------------ counting
+_ARCH_T = re.compile(r"(?<![a-z0-9])(?:ark|arch\w*|arkkitehti\w*|a[-_ ]?\d{2,3})(?![a-z])|floor[ _-]?plan|grundriss|pohjakuva", re.I)
+_MEP_T = re.compile(r"ventilation|hvac|l\d{4,6}\b|plumbing|sanitary|electrical|sprinkler|heating|piping|duct|\b(?:lvi|iv|mep|rak|vvs)\b|\b(?:sähkö|ilmanvaihto)\w*", re.I)
+_MEP_KINDS = ("duct", "terminal", "diffuser", "pipe", "valve", "cable")
+
+
+def discipline_of(title: str | None) -> str | None:
+    """'arch' / 'mep' / None from the sheet title alone (ARK, A-xxx, floor plan; ventilation, HVAC, L3xxxx, plumbing, electrical ...)."""
+    t = (title or "").replace("_", " ")
+    mep, arch = bool(_MEP_T.search(t)), bool(_ARCH_T.search(t))
+    if mep and not arch:
+        return "mep"
+    if arch and not mep:
+        return "arch"
+    return None
+
+
+def _discipline_rank(info, kind: str) -> int:
+    """0 = the sheet whose discipline owns this kind (doors, windows, rooms: architecture; ducts, pipes ...: MEP), 1 = unknown, 2 = other discipline."""
+    d = discipline_of(info.title or info.doc_id)
+    if d is None:
+        return 1
+    owner = "mep" if kind in _MEP_KINDS else "arch"
+    return 0 if d == owner else 2
+
+
 def _items(doc, kind: str) -> list:
     from engine.analytics import _of_kind
     return _of_kind(doc, kind)
@@ -292,9 +317,9 @@ def combine(docs: list, root: Path | str) -> Combined:
                 doc = info.doc
                 if stats[k]["n"] == 0 and not _has_kind(doc, k):
                     continue
-                cand.append((0 if info.role == "model" else 1, -stats[k]["n"], did))
+                cand.append((0 if info.role == "model" else 1, _discipline_rank(info, k), -stats[k]["n"], did))
             if cand:
-                r.chosen[k] = min(cand)[2]
+                r.chosen[k] = min(cand)[3]
     return Combined(infos, groups, rows, unplaced, multi)
 
 
