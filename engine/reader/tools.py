@@ -58,6 +58,8 @@ class Session:
         self.transcript: list[str] = []            # every observation, for number grounding
         self.audit: list[dict] = []
         self.calculations: list[dict] = []
+        self.numeric_results: list[dict] = []     # typed, computed results; never scraped from answer prose
+        self.numeric_inputs: set[float] = set()   # actual structured quantities available for arithmetic
         self._planmaps: dict[str, Doc | None] = {}
         for i, d in enumerate(self.doc_ids, 1):
             self.docs[f"d{i}"] = {"id": d, **self._meta(d)}
@@ -410,6 +412,11 @@ class Session:
         from engine.reader.calc_trace import measurement
         self.calculations.extend(measurement(did, pg, pts, closed, mpp, src, ref,
                                              ratio=ratio, dpi=scale_dpi, supplied=m_per_px is not None, root=self.root))
+        self.numeric_results.append({"value": length, "unit": "m", "refs": [ref]})
+        self.numeric_inputs.add(length)
+        if closed and len(pts) >= 3:
+            self.numeric_results.append({"value": geom.polygon_area(pts) * mpp * mpp, "unit": "m2", "refs": [ref]})
+            self.numeric_inputs.add(geom.polygon_area(pts) * mpp * mpp)
         return f"{ref} {res} (scale {mpp:.6f} m/px from {src})"
 
     def t_planmap(self, doc: str = "", kind: str = "", name: str = "", page=None, limit: int = 40) -> str:
@@ -438,6 +445,18 @@ class Session:
             out.append(f"{ref} p{i.page} {i.item_id}: " + " ".join(str(b) for b in bits if b))
         if len(items) > int(limit):
             out.append(f"[{len(items) - int(limit)} more not listed; totals above cover all]")
+        # An inventory citation verifies the full selection, including zero matches
+        # and results larger than the displayed sample. Preserve the typed totals.
+        ref = self.reg("region", did, int(page or 1), None,
+                       f"Checked stored drawing detections: {len(items)} matching {kind or 'items'}"
+                       + (f' named "{name}"' if name else "") + ". Undetected objects may still be present.",
+                       item_ids=[i.item_id for i in items])
+        out.insert(0, f"{ref} (inventory; cites all {len(items)} matching items)")
+        facts = {"refs": [ref], "kind": kind, "name": name, "doc_id": did, "item_ids": [i.item_id for i in items]}
+        self.numeric_inputs.update(v for i in items for v in i.q.values() if isinstance(v, (int, float)) and not isinstance(v, bool))
+        self.numeric_results.append({**facts, "value": len(items), "unit": "count"})
+        self.numeric_results.extend({**facts, "value": v, "unit": "m2" if k == "area_m2" else "m"}
+                                    for k, v in tot.items() if n_with[k])
         return "\n".join(out)
 
     def t_ifc(self, doc: str = "", kind: str = "", ifc_class: str = "", storey: str = "", name: str = "", external: bool | None = None,
@@ -477,6 +496,12 @@ class Session:
         quote = f"{len(items)} matching {noun}{scope} in {d.title or 'the selected model'}"
         ref = self.reg("element", did, 1, None, quote, item_ids=ids)
         out.insert(0, f"{ref} (cites all {len(ids)} matching elements)")
+        facts = {"refs": [ref], "kind": kind, "name": name, "doc_id": did, "item_ids": ids}
+        self.numeric_inputs.update(v for i in items for v in i.q.values() if isinstance(v, (int, float)) and not isinstance(v, bool))
+        self.numeric_results.append({**facts, "value": len(items), "unit": "count"})
+        self.numeric_results.extend({**facts, "value": v,
+                                     "unit": "m3" if k == "volume_m3" else "m2" if k in ("area_m2", "net_floor_area_m2") else "m"}
+                                    for k, v in tot.items() if have[k])
         for i in items[:int(limit)]:
             q = " ".join(f"{k}={_fmt(v)}" for k, v in i.q.items() if k in keys)
             pr = " ".join(f"{k}={v}" for k, v in i.props.items() if k in ("is_external", "fire_rating", "material") and v not in (None, ""))
@@ -489,6 +514,12 @@ class Session:
         v = safe_eval(str(expr))
         self.calculations.append({'tool': 'compute', 'expr': str(expr), 'value': v,
                                   'note': 'The planner supplied this expression. Exact arithmetic does not verify that its operands match the drawing.'})
+        clean = re.sub(r"(?<=\d),(?=\d{3}\b)", "", str(expr))
+        literals = [n.value for n in ast.walk(ast.parse(clean, mode="eval")) if isinstance(n, ast.Constant)]
+        grounded = bool(literals) and all(n in self.numeric_inputs for n in literals)
+        self.numeric_results.append({"value": v, "unit": None, "refs": list(self.ev), "compute": True, "grounded": grounded})
+        if grounded:
+            self.numeric_inputs.add(v)
         return f"{expr} = {_fmt(round(v, 6))}"
 
 

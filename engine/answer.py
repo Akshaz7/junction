@@ -349,6 +349,8 @@ def _answer_with_evidence(question: str, doc_ids: list[str], on_event: Callable 
     res = validate_result(res, question)
     from engine.solvers.printed import cite_sheet_numbers
     res = cite_sheet_numbers(res, question, _root())
+    from engine.numeric import guard_answer_value
+    res = guard_answer_value(res, question, doc_ids, _root(), hidden=(scene_state or {}).get("hidden"))
     try:   # E-61: implausible raster areas and sparse uploaded plans (engine/rastersanity.py)
         if len(doc_ids) == 1:
             from engine import rastersanity
