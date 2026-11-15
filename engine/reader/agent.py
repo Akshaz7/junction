@@ -241,6 +241,16 @@ def _build(question, doc_ids, sess: Session, fin: dict, trace, calls, t0, forced
     return seed(res, res['_reader_evidence'])
 
 
+def _plain_step(tool, args, obs) -> str:
+    """A thinking-row label a person can read: never the raw tool arguments as JSON."""
+    first = obs.splitlines()[0][:100] if obs else ""
+    if isinstance(args, dict) and args:
+        what = " ".join(str(args[k]) for k in ("kind", "name", "label", "id", "text", "query") if args.get(k))
+        if what:
+            return f"Looked up {what} on the plan" + (f" ({first})" if first else "")
+    return f"{tool}" + (f": {first}" if first else "")
+
+
 def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: list | None = None, calls: list | None = None,
                 t0: float | None = None, max_steps: int | None = None) -> dict:
     from engine import models as M
@@ -316,7 +326,7 @@ def read_answer(question: str, doc_ids: list[str], root, on_event=None, trace: l
         tool, args = act.get("tool"), act.get("args") or {}
         obs = observe(str(tool), args if isinstance(args, dict) else {})
         last_obs = obs
-        add({"step": "read", "detail": f"{tool} {json.dumps(args)[:120]} -> {obs.splitlines()[0][:100] if obs else ''}", "ms": ms, "model": r.model, "cost_usd": r.cost_usd})
+        add({"step": "read", "detail": _plain_step(tool, args, obs), "ms": ms, "model": r.model, "cost_usd": r.cost_usd})
         msgs += [{"role": "assistant", "content": json.dumps(act)[:600]}, {"role": "user", "content": f"Observation:\n{obs}"}]
     # steps exhausted: force a final answer
     msgs.append({"role": "user", "content": "Out of steps. Reply now with the final JSON using only what you have."})
