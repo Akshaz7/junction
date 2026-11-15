@@ -131,5 +131,8 @@ def run(ctx: dict) -> None:
         cn = first_cite.get(cited[0].item_id) or (cites[0].get("n") if cites else None)
         steps.append({"kind": "found", "title": "Found", "text": _clip(_found_text(ctx), MAX), "cite": cn, "ok": None})
     elif cites:
-        steps.append({"kind": "read", "title": "Read", "text": _clip(_read_text(ctx), MAX), "cite": cites[0].get("n"), "ok": None})
+        if cites[0].get("inventory_check"):
+            steps.append({"kind": "found", "title": "Inventory checked", "text": cites[0]["quote"], "cite": cites[0].get("n"), "ok": None})
+        else:
+            steps.append({"kind": "read", "title": "Read", "text": _clip(_read_text(ctx), MAX), "cite": cites[0].get("n"), "ok": None})
     ctx["steps"] = steps

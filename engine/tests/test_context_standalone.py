@@ -60,4 +60,4 @@ def test_two_kind_count_names_the_storey():
     if not Path("artifacts/ifc_bench__ac20-arc").is_dir():
         return
     a = answer("How many doors and windows are on the ground floor?", ["ifc_bench__ac20-arc"])
-    assert "on **Erdgeschoss** (ground floor)" in a["answer"]["text_md"] and "in this model" not in a["answer"]["text_md"]
+    assert "on Erdgeschoss (ground floor)" in a["answer"]["text_md"].replace("**", "") and "in this model" not in a["answer"]["text_md"]

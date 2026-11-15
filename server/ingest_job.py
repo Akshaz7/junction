@@ -172,6 +172,10 @@ def _vlm_pages(doc_id: str, ddir: Path, st: "Status", cost: dict):
     return sorted(found)
 
 
+def _pdf_vector_on() -> bool:
+    return os.environ.get("PDF_VECTOR", "1") != "0"
+
+
 def _dxf_planmap_usable(ddir: Path) -> bool:
     f = ddir / "planmap-1.json"
     if not f.is_file():
@@ -181,7 +185,45 @@ def _dxf_planmap_usable(ddir: Path) -> bool:
     return n >= 3  # counts remain usable without units; physical sizes remain unknown
 
 
-def _extrude(doc_id: str, ddir: Path, page: int):
+MAX_PDF_PLAN_PAGES = 4
+
+
+def _pdf_vector_pages(doc_id: str, ddir: Path, st: "Status", pdf: Path) -> list[int]:
+    """Vector CAD PDF: exact plan maps from the page's drawing operators (pipeline.pdf_planmap), gated per page, at most
+    MAX_PDF_PLAN_PAGES plan pages. Returns the plan pages; [] (and no plan-map files left behind) means use the VLM path."""
+    from pipeline import pdf_planmap
+    meta = json.loads((ddir / "pages.json").read_text())
+    cap = int(os.environ.get("MAX_PDF_PLAN_PAGES", str(MAX_PDF_PLAN_PAGES)))
+    budget = float(os.environ.get("PDF_VECTOR_BUDGET_S", "90"))
+    found, notes = [], []
+
+    def run_all():
+        t0 = time.time()
+        for p in meta["pages"]:
+            n = p["page"]
+            if len(found) >= cap or time.time() - t0 > budget:
+                break
+            try:
+                if pdf_planmap.process(doc_id, ddir, pdf, n - 1) is not None:
+                    found.append(n)
+            except Exception as e:  # noqa: BLE001  one odd page never costs the others
+                notes.append(f"p{n}: {e!r}"[:120])
+                (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+    ok = st.stage("planmap_pdf_vector", run_all)
+    if not ok:  # never fail the upload over the vector reader: the VLM path runs next
+        notes.append(st.stages[-1].pop("error", ""))
+        st.stages[-1]["ok"] = True
+    if notes:
+        st.stages[-1]["note"] = "; ".join(notes)[:300]
+    if not ok or not found:
+        for n in found:
+            (ddir / f"planmap-{n}.json").unlink(missing_ok=True)
+        return []
+    st.stages[-1]["note"] = (st.stages[-1].get("note", "") + f" vector plan pages {found}").strip()
+    return found
+
+
+def _extrude(doc_id: str, ddir: Path, page: int, raster_walls: bool = True):
     from pipeline import extrude
     try:
         from pipeline.scale_regions import annotate_document
@@ -197,11 +239,83 @@ def _extrude(doc_id: str, ddir: Path, page: int):
     # Explicit CAD walls already have geometry. Reconstructing their thin preview
     # strokes as raster walls adds spurious surfaces and can exhaust memory.
     cad_walls = any(i["kind"] == "wall" and i.get("source") == "dxf" for i in pm["items"])
-    try:  # falls back to plan-map walls when cv2 or wall fills are missing
-        extrude.process(doc_id, ddir, page, raster_walls=not cad_walls)
-    except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
-        print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
-        extrude.process(doc_id, ddir, page)
+    use_raster = raster_walls and not cad_walls
+    keep = None
+    if not raster_walls:  # vector PDF: a room known only by its label (no outline) gets no label-sized floor slab
+        f = ddir / f"planmap-{page}.json"
+        keep = f.read_text()
+        pm = json.loads(keep)
+        pm["items"] = [i for i in pm["items"] if not (i["kind"] == "room" and not i.get("polygon_px"))]
+        f.write_text(json.dumps(pm))
+    try:
+        try:  # falls back to plan-map walls when cv2 or wall fills are missing
+            extrude.process(doc_id, ddir, page, raster_walls=use_raster)
+        except Exception as ex:  # noqa: BLE001 - a raster-wall surprise must never cost the upload its 3D
+            print("raster-wall extrude failed, using plan-map walls:", repr(ex)[:160])
+            extrude.process(doc_id, ddir, page)
+    finally:
+        if keep is not None:  # the chat solvers keep every room, label-only ones included
+            (ddir / f"planmap-{page}.json").write_text(keep)
+
+
+def _pdf_via_ifc_on() -> bool:
+    return os.environ.get("PDF_VIA_IFC", "1") != "0"
+
+
+def _copy_quality(ddir: Path, page: int):
+    """Copy the plan map's quality block (pipeline.pdf_quality: score, ci95, summary) into scene.json so the 3D/AR
+    clients see it. Best effort: never fails the ingest."""
+    try:
+        q = json.loads((ddir / f"planmap-{page}.json").read_text()).get("quality")
+        sj = ddir / "scene.json"
+        if q and sj.is_file():
+            sj.write_text(json.dumps({**json.loads(sj.read_text()), "quality": q}, indent=1))
+    except Exception as e:  # noqa: BLE001
+        print("quality copy skipped:", repr(e)[:200], file=sys.stderr)
+
+
+def _pdf_via_ifc(doc_id: str, ddir: Path, doc: dict, page: int):
+    """Vector PDF plan map -> IFC4 (pipeline.pdf_to_ifc) -> the IFC scene path (ifc_scene: scene.glb, scene.json,
+    elements.json), so a PDF looks like an IFC upload in 3D/AR. The page image and planmap-<n>.json stay the PDF's own
+    (ifc_plans is not run: it would replace them); plan-map ids are relinked to the IFC GlobalIds. Any failure leaves
+    no IFC files behind and raises, so the caller extrudes the plan map instead."""
+    from pipeline import ifc_scene, pdf_to_ifc
+    f = ddir / f"planmap-{page}.json"
+    keep = f.read_text()
+    try:
+        ifc = pdf_to_ifc.build(json.loads(keep), ddir / "model.ifc", storey_name="Floor 1", doc_id=doc_id)
+        ifc_scene.process(Path(ifc), doc, ddir)
+        pdf_to_ifc.link_planmap(f, doc_id)
+        _copy_quality(ddir, page)
+        mark_ifc_from_pdf(ddir, True)
+    except Exception:
+        f.write_text(keep)
+        for name in ("model.ifc", "elements.json", "scene.glb", "scene.json"):
+            (ddir / name).unlink(missing_ok=True)
+        mark_ifc_from_pdf(ddir, False)
+        raise
+
+
+def mark_ifc_from_pdf(ddir: Path, on: bool):
+    """doc.json metadata for a PDF converted through pdf_to_ifc, so it is listed and treated like an IFC upload
+    (Data page formats, engine.library IFC listing, mistakes/mep IFC property readers via files['ifc'], the 'file type'
+    answer) while kind stays "pdf": the web viewer keeps the 2D PDF page and its planmap-<n>.json for citations.
+    Engine IFC mode itself comes from elements.json (engine.solvers.data.load_doc). on=False removes the marks."""
+    dj = ddir / "doc.json"
+    d = json.loads(dj.read_text())
+    formats = [f for f in (d.get("formats") or [d.get("kind") or "pdf"]) if f != "ifc"]
+    files = {k: v for k, v in (d.get("files") or {}).items() if k != "ifc"}
+    d.pop("ifc_from", None)
+    if on and (ddir / "model.ifc").is_file():
+        formats.append("ifc")   # after "pdf": the type tag (formats[0]) and kind stay PDF
+        m = Path(os.path.abspath(ddir / "model.ifc"))
+        try:   # same style as files['pdf']: "artifacts/<doc_id>/model.ifc", relative to the repo
+            files["ifc"] = str(m.relative_to(os.path.abspath(REPO)))
+        except ValueError:      # artifacts outside the repo (ARTIFACTS_DIR): the readers also try absolute paths
+            files["ifc"] = str(m)
+        d["ifc_from"] = "pdf"   # derived model (pipeline.pdf_to_ifc), not an uploaded IFC
+    d["formats"], d["files"] = formats, files
+    dj.write_text(json.dumps(d, indent=1))
 
 
 ASSUMED_M_PER_PX = 0.02
@@ -355,6 +469,7 @@ def _run(doc_id: str, st: Status) -> str:
     st.cost = cost
     ok = True
     plan_pages: list[int] = []
+    vector = False
     if kind == "ifc":
         ifc_path = REPO / doc["files"]["ifc"]
         cap = float(os.environ.get("INGEST_IFC_MAX_MB", "15" if light else "400"))
@@ -425,20 +540,50 @@ def _run(doc_id: str, st: Status) -> str:
                     raise RuntimeError((r.stdout + r.stderr)[-300:])
             ok = st.stage("planmap", vision)
             plan_pages = [1] if ok else []
+        elif ok and kind == "pdf" and _pdf_vector_on():
+            try:
+                plan_pages = _pdf_vector_pages(doc_id, ddir, st, REPO / doc["files"]["pdf"])
+            except Exception as e:  # noqa: BLE001  anything odd: today's path
+                print("pdf vector plan map skipped:", repr(e)[:200], file=sys.stderr)
+                plan_pages = []
+            vector = bool(plan_pages)
+            if not plan_pages:
+                plan_pages = _vlm_pages(doc_id, ddir, st, cost)
         elif ok and kind in ("raster", "pdf", "svg"):
             plan_pages = _vlm_pages(doc_id, ddir, st, cost)
         elif ok:
             st.write("partial", f"{kind}: page image only, no plan map for this format")
             return "partial"
         if plan_pages:
-            ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0]))
-            ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
-        elif ok and all(s["ok"] for s in st.stages):
-            st.cost = cost
-            st.write("ready", "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene")
-            return "ready"
-        elif ok:
-            ok = False
+            if vector:  # walls come from the PDF's own geometry: no raster wall read
+                ok = False
+                if _pdf_via_ifc_on():
+                    ok = st.stage("ifc_from_pdf", lambda: _pdf_via_ifc(doc_id, ddir, doc, plan_pages[0]))
+                    if not ok:  # IFC route failed: extrude the plan map directly
+                        st.stages[-1].update(ok=True, note="fell back to extrude: " + st.stages[-1].pop("error", "")[:200])
+                if not ok:
+                    ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0], raster_walls=False))
+                    if ok:
+                        _copy_quality(ddir, plan_pages[0])
+                if not ok:  # vector plan map would not extrude: today's path (VLM plan map, raster walls)
+                    st.stages[-1].update(stage="extrude_pdf_vector", ok=True, note=st.stages[-1].pop("error", "")[:200])
+                    for f in ddir.glob("planmap-[0-9]*.json"):
+                        f.unlink()
+                    plan_pages = _vlm_pages(doc_id, ddir, st, cost)
+                    ok = True
+                    if plan_pages:
+                        ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0]))
+            else:
+                ok = st.stage("extrude", lambda: _extrude(doc_id, ddir, plan_pages[0]))
+            if plan_pages:
+                ok = ok and st.stage("usdz", lambda: _usdz(doc_id, ddir))
+        if not plan_pages:
+            if ok and all(s["ok"] for s in st.stages):
+                st.cost = cost
+                st.write("ready", "no drawing pages found: page images and text are indexed, there is no plan map or 3D scene")
+                return "ready"
+            elif ok:
+                ok = False
     ok = ok and all(s["ok"] for s in st.stages)
     # Optional geometry/reader failure must not hide a successfully rendered
     # drawing or an IFC index. The detail still explains exactly what failed.

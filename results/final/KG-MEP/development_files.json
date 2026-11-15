@@ -1,0 +1,125 @@
+[
+  {
+    "doc_id": "ifc_models__bsc-clinic-clinic-hvac",
+    "seconds": 2.122,
+    "stats": {
+      "nodes": 4004,
+      "edges": 20100,
+      "by_kind": {
+        "project": 1,
+        "doc": 1,
+        "level": 4,
+        "fixture": 127,
+        "type": 30,
+        "pipe": 77,
+        "duct": 3061,
+        "terminal": 440,
+        "room": 263
+      },
+      "edges_by_kind": {
+        "contains": 4266,
+        "on_level": 3967,
+        "has_type": 3704,
+        "in_room": 4278,
+        "serves": 440,
+        "connects": 3445
+      },
+      "linked_pct": null,
+      "agree_pct": null,
+      "issues": 0,
+      "counterpart_items": 0,
+      "linked_items": 0
+    },
+    "mep": {
+      "documents": {
+        "ifc_models__bsc-clinic-clinic-hvac": {
+          "schema": "IFC2X3",
+          "services": 3578,
+          "rooms": 263
+        }
+      },
+      "notes": []
+    }
+  },
+  {
+    "doc_id": "ifc_models__bsc-clinic-clinic-plumbing",
+    "seconds": 3.948,
+    "stats": {
+      "nodes": 6629,
+      "edges": 25883,
+      "by_kind": {
+        "project": 1,
+        "doc": 1,
+        "level": 3,
+        "fixture": 377,
+        "type": 35,
+        "material": 1,
+        "pipe": 6211
+      },
+      "edges_by_kind": {
+        "contains": 6628,
+        "on_level": 6587,
+        "has_type": 6587,
+        "made_of": 3,
+        "connects": 6078
+      },
+      "linked_pct": null,
+      "agree_pct": null,
+      "issues": 0,
+      "counterpart_items": 0,
+      "linked_items": 0
+    },
+    "mep": {
+      "documents": {
+        "ifc_models__bsc-clinic-clinic-plumbing": {
+          "schema": "IFC2X3",
+          "services": 6330,
+          "rooms": 0
+        }
+      },
+      "notes": []
+    }
+  },
+  {
+    "doc_id": "ifc_bench__digital-hub-ventilation",
+    "seconds": 1.267,
+    "stats": {
+      "nodes": 1351,
+      "edges": 7819,
+      "by_kind": {
+        "project": 1,
+        "doc": 1,
+        "level": 3,
+        "fixture": 28,
+        "type": 29,
+        "material": 2,
+        "duct": 1135,
+        "terminal": 148,
+        "system": 4
+      },
+      "edges_by_kind": {
+        "contains": 1352,
+        "on_level": 1310,
+        "has_type": 1310,
+        "made_of": 1310,
+        "part_of_system": 1283,
+        "connects": 1254
+      },
+      "linked_pct": null,
+      "agree_pct": null,
+      "issues": 0,
+      "counterpart_items": 0,
+      "linked_items": 0
+    },
+    "mep": {
+      "documents": {
+        "ifc_bench__digital-hub-ventilation": {
+          "schema": "IFC4",
+          "services": 1283,
+          "rooms": 0
+        }
+      },
+      "notes": []
+    }
+  }
+]

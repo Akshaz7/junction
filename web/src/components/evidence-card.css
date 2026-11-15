@@ -16,3 +16,10 @@
 .evidence-pill.is-estimate { color: var(--warning); }
 .evidence-reason, .evidence-improve { font-size: var(--text-body-sm); color: var(--muted-foreground); }
 .evidence-improve { margin: 6px 0 0; }
+
+.evidence-path { margin-top: 12px; display: grid; gap: 6px; }
+.evidence-path h4 { margin: 0; color: var(--muted-foreground); font-weight: 500; }
+.evidence-path ol { margin: 0; padding: 0; list-style: none; display: grid; gap: 4px; }
+.evidence-path li { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px; }
+.evidence-path li em { font-style: normal; color: var(--muted-foreground); }
+.evidence-path a { justify-self: start; color: var(--foreground); text-decoration: underline; text-underline-offset: 3px; }

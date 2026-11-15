@@ -119,3 +119,6 @@ async def health():
             "image": image_info(), **file_counts(), "servable_docs": servable_docs,
             "uptime_s": max(0.0, time.monotonic() - app.state.started_at),
             "models_ok": models_ok, "caps_loaded": bool(caps())}
+
+from .kg_routes import router as kg_router  # noqa: E402
+app.include_router(kg_router)

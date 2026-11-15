@@ -10,6 +10,7 @@ nothing is reported as "not recorded", never guessed.  Nothing here knows a file
 from __future__ import annotations
 
 import json
+import os
 import re
 import sys
 import time
@@ -521,12 +522,17 @@ _CACHE: dict = {}
 
 
 def _artifacts_dir() -> Path | None:
+    if os.environ.get("ARTIFACTS_DIR"):
+        return Path(os.environ["ARTIFACTS_DIR"])
     arts = getattr(sys.modules.get("engine.solvers.solve"), "ARTIFACTS", None)
     return Path(arts) if arts else ROOT / "artifacts"
 
 
 def _find_ifc(doc_id: str) -> Path | None:
     d = _artifacts_dir()
+    uploaded = d / doc_id / "source.ifc"
+    if uploaded.is_file():
+        return uploaded
     try:
         files = json.loads((d / doc_id / "doc.json").read_text()).get("files", {})
     except (OSError, ValueError):
@@ -534,7 +540,8 @@ def _find_ifc(doc_id: str) -> Path | None:
     p = files.get("ifc")
     if not p:
         return None
-    for cand in (ROOT / p, Path(p), *ROOT.glob(f"data/*/*/{p}"), *ROOT.glob(f"data/*/{p}")):
+    dataset = Path(os.environ["DATASET_ROOT"]) if os.environ.get("DATASET_ROOT") else ROOT / "data/full/junction-dataset"
+    for cand in (dataset / p, ROOT / p, Path(p), *ROOT.glob(f"data/*/*/{p}"), *ROOT.glob(f"data/*/{p}")):
         try:
             if cand.exists():
                 return cand
@@ -545,9 +552,9 @@ def _find_ifc(doc_id: str) -> Path | None:
 
 def load_index(doc) -> dict | None:
     """artifacts/<doc>/mep.json; built on first use when the IFC is available and small enough to read in a few seconds."""
-    key = doc.doc_id
     d = _artifacts_dir()
-    f = d / key / "mep.json" if d else None
+    key = (str(d.resolve()), doc.doc_id)
+    f = d / doc.doc_id / "mep.json" if d else None
     try:
         if f and f.exists():
             st = f.stat().st_mtime
@@ -560,11 +567,11 @@ def load_index(doc) -> dict | None:
                 return res
     except (OSError, ValueError):
         pass
-    ifc = _find_ifc(key)
+    ifc = _find_ifc(doc.doc_id)
     if ifc is None or ifc.stat().st_size > 60e6:
         return None
     try:
-        res = write(key, ifc, d / key)
+        res = write(doc.doc_id, ifc, d / doc.doc_id)
     except Exception:  # noqa: BLE001  a broken IFC must never take the answer down
         return None
     _CACHE[key] = (f.stat().st_mtime, res)
@@ -634,10 +641,28 @@ OVERVIEW_Q = re.compile(r"\bwhat\b.*\b(?:in|are in|is in) (?:this|the) (?:buildi
 
 def _subjects(ql: str) -> list[str]:
     out = []
+    # A light fitting is a light, not every fitting in the model. Consume
+    # compound nouns before their generic "pipe" / "fitting" components.
+    for key, rx in (("light", r"\blight fittings?\b"),
+                    ("pipe_fitting", r"\bpipe fittings?\b"),
+                    ("duct_fitting", r"\bduct fittings?\b"),
+                    ("cable_fitting", r"\bcable (?:tray )?fittings?\b")):
+        if re.search(rx, ql):
+            out.append(key)
+            ql = re.sub(rx, "", ql)
     for key, rx in SUBJECTS:
         if re.search(rx, ql) and key not in out:
             out.append(key)
     return out
+
+
+def _length_requested(question: str) -> bool:
+    # "How many metres" counts units of length; "how many segments" counts
+    # objects. A storey or type name containing "m" cannot change that operation.
+    units = r"(?:m|metres?|meters?|feet|foot|ft|inches?|in)"
+    unit_count = re.compile(r"\b(?:how many|number of)\s+(?:(?:linear|running)\s+)?" + units + r"\b", re.I)
+    remainder = unit_count.sub("", question)
+    return bool((LENGTH_Q.search(question) or unit_count.search(question)) and not COUNT_Q.search(remainder))
 
 
 def _kinds_of(subj: list[str]) -> set[str]:
@@ -700,9 +725,10 @@ def _finish(c: _Ctx, text: str, value, unit: str, ids: list[str], steps: list[st
             checked: str | None = None, cap_pct: int | None = None, cap_reason: str | None = None, improve: str | None = None) -> dict:
     from engine.solvers.solve import _answer_obj, _evidence, _step
     uids = [i for i in dict.fromkeys(ids) if i in c.by_id]
-    items = [c.by_id[i] for i in uids[:3000]]
+    items = [c.by_id[i] for i in uids]
     _b, cites, _s = _evidence(c.doc, items)
-    scene = {"doc_id": c.doc.doc_id, "highlight_item_ids": [i.item_id for i in items], "camera_target_item_id": items[0].item_id if items else None}
+    # Citation provenance covers the whole total; rendering can cap highlights.
+    scene = {"doc_id": c.doc.doc_id, "highlight_item_ids": uids[:3000], "camera_target_item_id": uids[0] if uids else None}
     trace = [_step("route", "building services / structure -> element index read from the IFC, code, no model")] + [_step("filter", s) for s in steps]
     marks = "".join(f"[{x['n']}]" for x in cites)
     tail = " Shown in 3D: the same items glow in the 3D view." if items and not any(x.get("bbox_px") for x in cites) else ""
@@ -1206,7 +1232,7 @@ def answer(question: str, doc, t0) -> dict | None:
     only_groups = [s for s in subj]
     if SIZES_Q.search(ql) and (subj and set(subj) <= {"pipe", "duct", "cable_tray", "conduit"}):
         return _sizes_answer(c, subj, trade)
-    if LENGTH_Q.search(ql) and (set(subj) & {"pipe", "duct", "cable_tray", "conduit"}) and not COUNT_Q.search(ql.replace("how many metres", "").replace("how many meters", "")):
+    if _length_requested(ql) and (set(subj) & {"pipe", "duct", "cable_tray", "conduit"}):
         return _length_answer(c, subj, trade)
     if LENGTH_Q.search(ql) and not subj and re.search(r"\bpip|\bduct|\bcabl", ql) is None and not generic:
         return None

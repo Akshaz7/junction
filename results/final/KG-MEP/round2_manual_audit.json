@@ -1,0 +1,89 @@
+{
+  "source_report": "round2.json",
+  "inspection": "Worker visually inspected the ten paired PDF crops; no model/provider calls.",
+  "selection": "All three terminal candidates and seven evenly spaced duct candidates; includes unlinked candidates.",
+  "samples": [
+    {
+      "sample": 1,
+      "service_correct": true,
+      "room_assignment": "B321 correspondence supported by printed room number and visible meeting-room context; architectural boundary remains unverified.",
+      "note": "Square diffuser symbol visible; upper of two linked terminal candidates."
+    },
+    {
+      "sample": 2,
+      "service_correct": true,
+      "room_assignment": "B321 correspondence supported by printed room number and visible meeting-room context; architectural boundary remains unverified.",
+      "note": "Square diffuser symbol visible with nearby +115 l/s text."
+    },
+    {
+      "sample": 3,
+      "service_correct": true,
+      "room_assignment": "No graph assignment; source crop places circular exhaust symbol near the B321 room label.",
+      "note": "Round P2-315 symbol with -115 l/s visible; conservative boundary matching misses this candidate."
+    },
+    {
+      "sample": 4,
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Long narrow SP-200/+60 l/s symbol; treating it as a duct is a wrong-kind detection."
+    },
+    {
+      "sample": 5,
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Candidate follows diagonal leaders from a note row through the drawing, not a duct centreline."
+    },
+    {
+      "sample": 6,
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Candidate lies inside a P1-125/-20 l/s callout table, not a duct."
+    },
+    {
+      "sample": 7,
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Diagonal annotation leaders mistaken for a run."
+    },
+    {
+      "sample": 8,
+      "service_correct": true,
+      "room_assignment": "Unlinked.",
+      "note": "Centreline lies inside a drawn duct with elbow/fitting; room identity is not established."
+    },
+    {
+      "sample": 9,
+      "service_correct": false,
+      "room_assignment": "Unlinked.",
+      "note": "Centreline passes across the IV-KONE equipment face, not a duct run."
+    },
+    {
+      "sample": 10,
+      "service_correct": null,
+      "room_assignment": "Unlinked.",
+      "note": "Dense equipment/duct junction: crop does not establish an entire duct run."
+    }
+  ],
+  "summary": {
+    "visually_checked": 10,
+    "plausible_service_detections": 4,
+    "wrong_kind_or_false_detections": 5,
+    "uncertain": 1,
+    "linked_terminals_checked": 2,
+    "linked_terminal_room_contexts_supported": 2,
+    "scope": "Diagnostic sample only. Not random, not a population precision estimate, and not a calibration training set."
+  },
+  "calibration": {
+    "room_identity": "Use existing non-heldout KG-EVAL position table; confidence uses max of room-anchor error and measured alignment residual. No table fit on judges files.",
+    "service_geometry": "Keep 0.5 estimates: independent room-boundary/service-symbol gold is unavailable; a good registration residual cannot establish detector precision.",
+    "registration": "Fitted residual and leave-one-inlier-out errors are measured separately in round2.json; they measure alignment consistency only."
+  },
+  "performance_note": "One concurrent validation attempt exhausted the configured 20-second enrichment budget before counterpart alignment. It returned an explicit note and no service links; a final rerun is recorded separately.",
+  "crops_local_directory": "/tmp/kg-mep-round2-final",
+  "source_drawings_committed": false,
+  "needs_awais": [
+    "pdf_mep.ducts must distinguish leaders, callout tables, equipment outlines and long narrow terminal symbols from ducts.",
+    "pdf_rooms.rooms merges several named spaces; individual architectural room boundaries are not independently verified."
+  ],
+  "needs_core": "schema.kind_of maps text/dimension to fixture; room_services now excludes these, but graph/UI source-kind classification still needs a core fix."
+}

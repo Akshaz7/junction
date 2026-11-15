@@ -1,4 +1,6 @@
 import { apiFetch } from './api'
+import type { KgGraph, KgNodeDetail, KgStats } from './kg'
+import { mockCluster, mockGraph, mockNode } from './kg-mock'
 
 export const projectRoles = ['model', 'plan', 'section', 'elevation', 'detail', 'schedule', 'scan', 'photo', 'spec', 'revision', 'other'] as const
 export type ProjectRole = typeof projectRoles[number]
@@ -39,6 +41,19 @@ const realApi = {
   upload: (id: string, file: File) => { const body = new FormData(); body.append('file', file); return request<{ doc_id: string; project: Project }>(`${path(id)}/upload`, { method: 'POST', body }) },
   overview: (id: string) => request<ProjectOverview>(`${path(id)}/overview`),
   chats: async (id: string) => (await request<{ chats: ProjectChat[] }>('/chats')).chats.filter((chat) => chat.project_id === id),
+  /** Knowledge graph. depth "cluster" is the overview; "full" has every item. A 202 answer is a partial graph still being built. */
+  graph: async (id: string, options: { depth?: 'cluster' | 'full'; level?: string; kinds?: string[]; docId?: string } = {}): Promise<KgGraph> => {
+    const query = new URLSearchParams({ depth: options.depth ?? 'cluster', ...(options.level ? { level: options.level } : {}), ...(options.kinds?.length ? { kinds: options.kinds.join(',') } : {}), ...(options.docId ? { doc_id: options.docId } : {}) })
+    const response = await apiFetch(`/api${path(id)}/graph?${query}`)
+    if (!response.ok) {
+      const body = await response.json().catch(() => null)
+      throw new Error(typeof body?.detail === 'string' ? body.detail : `The graph could not be loaded (${response.status}). Please try again.`)
+    }
+    const graph = await response.json() as KgGraph
+    return response.status === 202 ? { ...graph, partial: true } : graph
+  },
+  graphNode: (id: string, nodeId: string) => request<KgNodeDetail>(`${path(id)}/graph/node/${encodeURIComponent(nodeId)}`),
+  graphStats: (id: string) => request<KgStats>(`${path(id)}/graph/stats`),
 }
 // Explicit opt-in only. An unavailable server never silently becomes sample data.
 // This adapter starts empty; all content comes from what the user adds.
@@ -58,6 +73,9 @@ function mockApi(): typeof realApi {
     upload: async () => { throw new Error('Uploads need a connected workspace. This screen is generated for demo.') },
     overview: async (id) => ({ project_id: id, totals: { storeys: null, rooms: null, doors: null, windows: null, floor_area_m2: null }, levels: [], agreements: [], mistakes: [], coverage: [] }),
     chats: async () => [],
+    graph: async (id, options = {}) => { const full = mockGraph(id); return options.depth === 'full' ? full : mockCluster(full) },
+    graphNode: async (id, nodeId) => mockNode(mockGraph(id), nodeId),
+    graphStats: async (id) => mockGraph(id).stats,
   }
   // Resolved lazily after the adapter has been constructed.
 }

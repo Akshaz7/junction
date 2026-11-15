@@ -1,0 +1,241 @@
+[
+  {
+    "project": {
+      "id": "kg-answer-ifc_bench__fzk-house-arc",
+      "docs": [
+        {
+          "doc_id": "ifc_bench__fzk-house-arc"
+        },
+        {
+          "doc_id": "ifc_models__kit-fzk-haus-ac20-fzk-haus"
+        }
+      ]
+    },
+    "source_schema": "IFC4",
+    "nodes": 235,
+    "edges": 1030,
+    "build_s": 0.369,
+    "passed": 10,
+    "total": 10,
+    "questions": [
+      {
+        "question": "What is connected to door Innentuer-1?",
+        "pass": true,
+        "error": null,
+        "shape": "connections",
+        "value": 6,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 6
+      },
+      {
+        "question": "If door Innentuer-1 is removed, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 3,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 7
+      },
+      {
+        "question": "Where else does door Innentuer-1 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 1,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 1
+      },
+      {
+        "question": "What is connected to door Innentuer-2?",
+        "pass": true,
+        "error": null,
+        "shape": "connections",
+        "value": 6,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 6
+      },
+      {
+        "question": "If door Innentuer-2 is removed, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 3,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 7
+      },
+      {
+        "question": "Where else does door Innentuer-2 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 1,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 1
+      },
+      {
+        "question": "What is connected to door Innentuer-3?",
+        "pass": true,
+        "error": null,
+        "shape": "connections",
+        "value": 6,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 6
+      },
+      {
+        "question": "If door Innentuer-3 is removed, what is affected?",
+        "pass": true,
+        "error": null,
+        "shape": "impact",
+        "value": 3,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 7
+      },
+      {
+        "question": "Where else does door Innentuer-3 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "appearances",
+        "value": 1,
+        "confidence": 0.9997,
+        "citations": 2,
+        "graph_path_edges": 1
+      },
+      {
+        "question": "Do the drawings agree on doors on the ground floor?",
+        "pass": true,
+        "error": null,
+        "shape": "agreement",
+        "value": 100.0,
+        "confidence": 1.0,
+        "citations": 2,
+        "graph_path_edges": 1
+      }
+    ]
+  },
+  {
+    "project": {
+      "id": "kg-answer-dxf",
+      "docs": [
+        {
+          "doc_id": "swiss_dwellings__site1060-bldg2175-floor9833"
+        }
+      ]
+    },
+    "source_schema": null,
+    "nodes": 256,
+    "edges": 675,
+    "build_s": 0.026,
+    "passed": 5,
+    "total": 10,
+    "questions": [
+      {
+        "question": "What is connected to room 3.01?",
+        "pass": false,
+        "error": "['text-1', 'text-2']",
+        "shape": "connections",
+        "value": 4,
+        "confidence": 0.5,
+        "citations": 1,
+        "graph_path_edges": 4
+      },
+      {
+        "question": "Where else does room 3.01 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "What is connected to room 3.02?",
+        "pass": false,
+        "error": "['text-3', 'text-4']",
+        "shape": "connections",
+        "value": 4,
+        "confidence": 0.5,
+        "citations": 1,
+        "graph_path_edges": 4
+      },
+      {
+        "question": "Where else does room 3.02 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "What is connected to room 3.03?",
+        "pass": false,
+        "error": "['text-5', 'text-6']",
+        "shape": "connections",
+        "value": 2,
+        "confidence": 0.5,
+        "citations": 1,
+        "graph_path_edges": 2
+      },
+      {
+        "question": "Where else does room 3.03 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "What is connected to room 3.04?",
+        "pass": false,
+        "error": "['text-7', 'text-8']",
+        "shape": "connections",
+        "value": 3,
+        "confidence": 0.5,
+        "citations": 1,
+        "graph_path_edges": 3
+      },
+      {
+        "question": "Where else does room 3.04 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      },
+      {
+        "question": "What is connected to room 3.05?",
+        "pass": false,
+        "error": "['text-10', 'text-11', 'text-9']",
+        "shape": "connections",
+        "value": 6,
+        "confidence": 0.5,
+        "citations": 1,
+        "graph_path_edges": 6
+      },
+      {
+        "question": "Where else does room 3.05 appear?",
+        "pass": true,
+        "error": null,
+        "shape": "missing",
+        "value": null,
+        "confidence": 0.0,
+        "citations": 1,
+        "graph_path_edges": 0
+      }
+    ]
+  }
+]

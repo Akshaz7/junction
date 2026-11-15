@@ -338,8 +338,10 @@ def answer(question: str, doc_ids: list[str], on_event: Callable | None = None, 
         res["answer"]["text_md"] = re.sub(r"(?m)^(?!- |\* |\||#)(\S[^\n]*)\n(- )", r"\1\n\n\2", _t)
     except Exception:  # noqa: BLE001
         pass
-    from engine.plainwords import apply as _plain_display
+    from engine.plainwords import apply as _plain_display, headline as _headline
     res = _plain_display(res)
+    if doc_ids:
+        res["answer"]["text_md"] = _headline(res["answer"].get("text_md") or "")
     res["question"] = original   # the user's own words are what is stored and shown; the resolved question stays in the trace
     if step is not None:
         res["trace"] = [step, *(res.get("trace") or [])]
@@ -488,6 +490,13 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
             res["trace"] = trace
             return res
 
+        from engine.wallarea import answer as wallarea_answer
+        if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
+            for s_ in res["trace"]:
+                add(s_)
+            res["trace"] = trace
+            return res
+
         if not os.environ.get("MISTAKES_OFF"):    # F-MISTAKES: "are there any mistakes?" is answered by code checks
             from engine import mistakes
             if (res := mistakes.answer(question, doc_ids, root, t0, list(trace))) is not None:
@@ -495,8 +504,8 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
-        from engine.wallarea import answer as wallarea_answer
-        if (res := wallarea_answer(question, doc_ids, root, t0, hidden=set((scene_state or {}).get("hidden") or []))) is not None:
+        from engine import props  # F-PROPS: exact properties before broad counts and the reader
+        if parse_scene(question) is None and not re.search(r"\b(?:remove|demolish|prop(?:ping)?|knock down|next to|beside)\b", question, re.I) and (res := props.answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden"))) is not None:
             for s_ in res["trace"]:
                 add(s_)
             res["trace"] = trace
@@ -510,12 +519,6 @@ def _answer_core(question: str, doc_ids: list[str], on_event: Callable | None = 
                     add(s_)
                 res["trace"] = trace
                 return res
-        from engine import props  # F-PROPS: exact properties before broad counts and the reader
-        if parse_scene(question) is None and (res := props.answer(question, doc_ids, root, t0, hidden=(scene_state or {}).get("hidden"))) is not None:
-            for s_ in res["trace"]:
-                add(s_)
-            res["trace"] = trace
-            return res
 
         if not os.environ.get("COMPLEX_Q_OFF"):    # E-59: multi-condition questions, every condition applied or named
             from engine import complex_q

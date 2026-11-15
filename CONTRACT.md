@@ -1,4 +1,4 @@
-# CONTRACT — version 3.5
+# CONTRACT — version 3.6
 
 Only the LEAD edits this file. Each change bumps the version and adds one line to DECISIONS.md.
 
@@ -32,12 +32,12 @@ All workers build against this contract. If something is unclear, the lead decid
 {
   "doc_id": "cubicasa5k__colorful-11397", "page": 1,
   "image": {"w": 1200, "h": 900},
-  "scale": {"m_per_px": 0.0123, "method": "dimension|scalebar|dxf-units|ifc|door-prior|none", "confidence": 0.0},
+  "scale": {"m_per_px": 0.0123, "method": "dimension|scalebar|dxf-units|dxf_units_fit|printed|scale bar|printed areas fit|dimensions|door guess|ifc|door-prior|none", "confidence": 0.0},
   "items": [
     {"item_id": "window-007", "kind": "window", "label": null,
      "bbox_px": [410, 88, 470, 102], "polygon_px": null,
      "props": {"width_m": 1.2}, "conf": 0.93,
-     "source": "seg|det|vlm|dxf|ifc|ocr|rule"}
+     "source": "seg|det|vlm|dxf|ifc|ocr|rule|pdf_vector"}
   ],
   "provenance": {"models": {}, "created": "", "ms": 0}
 }
